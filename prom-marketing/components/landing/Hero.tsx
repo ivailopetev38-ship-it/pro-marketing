@@ -24,7 +24,7 @@ export function Hero() {
           AI · Automation · Growth
         </span>
 
-        <h1 className="max-w-3xl font-display text-[clamp(48px,8vw,120px)] font-bold leading-[0.95] tracking-tight">
+        <h1 className="max-w-3xl font-display text-[clamp(34px,7vw,96px)] font-bold leading-[1.02] tracking-tight [overflow-wrap:break-word] [hyphens:auto]" lang="bg">
           <TextScramble text="Автоматизирай" />{" "}
           <HolographicText>бизнеса си</HolographicText>{" "}
           с AI агенти.
