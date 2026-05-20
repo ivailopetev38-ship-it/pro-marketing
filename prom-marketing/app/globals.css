@@ -80,6 +80,12 @@
   body.custom-cursor-active * {
     cursor: none !important;
   }
+
+  *:focus-visible {
+    outline: 2px solid var(--color-accent-cyan);
+    outline-offset: 3px;
+    border-radius: 2px;
+  }
 }
 
 @layer utilities {

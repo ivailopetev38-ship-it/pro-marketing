@@ -39,7 +39,11 @@ export function LoginForm({ initialError }: { initialError?: string }) {
         </div>
       )}
       <form onSubmit={onMagic} className="space-y-3">
+        <label htmlFor="admin-email" className="sr-only">
+          Имейл
+        </label>
         <input
+          id="admin-email"
           type="email"
           required
           autoComplete="email"
