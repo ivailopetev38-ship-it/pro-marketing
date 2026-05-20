@@ -26,6 +26,10 @@ export interface BookingRow {
   duration_minutes: number;
   status: string;
   created_at: string;
+  business: string | null;
+  automation_goal: string | null;
+  services_interested: string[] | null;
+  timeline: string | null;
 }
 
 export function BookingsTable({ rows }: { rows: BookingRow[] }) {
@@ -38,7 +42,9 @@ export function BookingsTable({ rows }: { rows: BookingRow[] }) {
     return rows.filter((r) =>
       r.attendee_name.toLowerCase().includes(q) ||
       r.attendee_email.toLowerCase().includes(q) ||
-      (r.attendee_phone ?? "").toLowerCase().includes(q)
+      (r.attendee_phone ?? "").toLowerCase().includes(q) ||
+      (r.business ?? "").toLowerCase().includes(q) ||
+      (r.automation_goal ?? "").toLowerCase().includes(q)
     );
   }, [rows, filter]);
 
@@ -55,11 +61,37 @@ export function BookingsTable({ rows }: { rows: BookingRow[] }) {
     },
     { accessorKey: "attendee_phone", header: "Телефон", cell: (info) => info.getValue() ?? "—" },
     {
+      accessorKey: "business",
+      header: "Бизнес",
+      cell: (info) => info.getValue<string | null>() ?? "—",
+    },
+    {
+      accessorKey: "services_interested",
+      header: "Интерес",
+      cell: (info) => {
+        const v = info.getValue<string[] | null>();
+        if (!v || v.length === 0) return "—";
+        return (
+          <div className="flex flex-wrap gap-1">
+            {v.map((s) => (
+              <span key={s} className="rounded-full bg-[var(--color-accent-cyan)]/10 px-2 py-0.5 text-[10px] text-[var(--color-accent-cyan)]">
+                {s}
+              </span>
+            ))}
+          </div>
+        );
+      },
+    },
+    {
+      accessorKey: "timeline",
+      header: "Кога",
+      cell: (info) => info.getValue<string | null>() ?? "—",
+    },
+    {
       accessorKey: "scheduled_at",
       header: "Час",
       cell: (info) => format(new Date(info.getValue<string>()), "d MMM yyyy, HH:mm", { locale: bg }),
     },
-    { accessorKey: "duration_minutes", header: "Мин", cell: (info) => `${info.getValue()}m` },
     {
       accessorKey: "status",
       header: "Статус",
@@ -83,12 +115,23 @@ export function BookingsTable({ rows }: { rows: BookingRow[] }) {
   });
 
   const exportCSV = () => {
-    const header = ["Име", "Имейл", "Телефон", "Час", "Минути", "Статус"];
+    const header = ["Име", "Имейл", "Телефон", "Бизнес", "Цел / Болка", "Услуги", "Кога", "Час", "Минути", "Статус"];
     const lines = [header.join(",")].concat(
       filtered.map((r) =>
-        [r.attendee_name, r.attendee_email, r.attendee_phone ?? "",
-         r.scheduled_at, r.duration_minutes, r.status]
-          .map((v) => `"${String(v).replace(/"/g, '""')}"`).join(",")
+        [
+          r.attendee_name,
+          r.attendee_email,
+          r.attendee_phone ?? "",
+          r.business ?? "",
+          r.automation_goal ?? "",
+          (r.services_interested ?? []).join("; "),
+          r.timeline ?? "",
+          r.scheduled_at,
+          r.duration_minutes,
+          r.status,
+        ]
+          .map((v) => `"${String(v).replace(/"/g, '""')}"`)
+          .join(",")
       )
     );
     const blob = new Blob(["﻿" + lines.join("\n")], { type: "text/csv;charset=utf-8" });
@@ -137,7 +180,7 @@ export function BookingsTable({ rows }: { rows: BookingRow[] }) {
             ))}
             {table.getRowModel().rows.length === 0 && (
               <TableRow>
-                <TableCell colSpan={5} className="py-8 text-center text-[var(--color-text-tertiary)]">
+                <TableCell colSpan={8} className="py-8 text-center text-[var(--color-text-tertiary)]">
                   Няма заявки
                 </TableCell>
               </TableRow>

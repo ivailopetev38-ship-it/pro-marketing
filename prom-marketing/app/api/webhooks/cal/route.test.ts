@@ -81,4 +81,51 @@ describe("POST /api/webhooks/cal", () => {
     const res = await POST(makeRequest(body, null));
     expect(res.status).toBe(401);
   });
+
+  it("extracts custom booking question answers into typed columns", async () => {
+    const payload = {
+      triggerEvent: "BOOKING_CREATED",
+      payload: {
+        uid: "qa-789",
+        startTime: "2026-06-02T10:00:00.000Z",
+        endTime: "2026-06-02T10:30:00.000Z",
+        attendees: [{ name: "Мария", email: "maria@example.com" }],
+        responses: {
+          phone: "+359888000000",
+          business: "Онлайн магазин за козметика",
+          automation_goal: "Искам да автоматизирам отговорите в Messenger",
+          services_interested: ["AI чат агенти за поддръжка и продажби", "Email / SMS автоматизация"],
+          timeline: "До 1 месец",
+        },
+      },
+    };
+    const body = JSON.stringify(payload);
+    const res = await POST(makeRequest(body, sign(body)));
+    expect(res.status).toBe(200);
+    const arg = upsertMock.mock.calls[0][0];
+    expect(arg.business).toBe("Онлайн магазин за козметика");
+    expect(arg.automation_goal).toBe("Искам да автоматизирам отговорите в Messenger");
+    expect(arg.services_interested).toEqual([
+      "AI чат агенти за поддръжка и продажби",
+      "Email / SMS автоматизация",
+    ]);
+    expect(arg.timeline).toBe("До 1 месец");
+  });
+
+  it("skips unknown trigger events with 200 (no upsert)", async () => {
+    const payload = {
+      triggerEvent: "MEETING_ENDED",
+      payload: {
+        uid: "ignore-1",
+        startTime: "2026-06-01T10:00:00.000Z",
+        endTime: "2026-06-01T10:30:00.000Z",
+        attendees: [{ name: "x", email: "x@example.com" }],
+      },
+    };
+    const body = JSON.stringify(payload);
+    const res = await POST(makeRequest(body, sign(body)));
+    expect(res.status).toBe(200);
+    expect(upsertMock).not.toHaveBeenCalled();
+    expect(insertMock).toHaveBeenCalledOnce();
+  });
 });

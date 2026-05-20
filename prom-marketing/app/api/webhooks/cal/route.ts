@@ -2,8 +2,11 @@ import { NextResponse } from "next/server";
 import {
   calBookingSchema,
   extractPhone,
+  extractString,
+  extractStringArray,
   statusFromTrigger,
   durationMinutes,
+  isKnownTrigger,
 } from "@/lib/cal/types";
 import { verifyCalSignature } from "@/lib/cal/verify-webhook";
 import { createServiceClient } from "@/lib/supabase/service";
@@ -51,6 +54,17 @@ export async function POST(request: Request) {
 
   const { triggerEvent, payload } = parsed.data;
 
+  // Trigger events Cal.com sends that we don't act on (e.g. MEETING_ENDED,
+  // BOOKING_REQUESTED, BOOKING_PAID...). Log and 200 so Cal doesn't retry.
+  if (!isKnownTrigger(triggerEvent)) {
+    await supabase.from("cal_webhook_log").insert({
+      event_type: triggerEvent,
+      payload: parsed.data,
+      signature_valid: true,
+    });
+    return NextResponse.json({ ok: true, skipped: true });
+  }
+
   const row = {
     cal_booking_id: payload.uid,
     attendee_name: payload.attendees[0]?.name ?? "Unknown",
@@ -59,6 +73,11 @@ export async function POST(request: Request) {
     scheduled_at: new Date(payload.startTime).toISOString(),
     duration_minutes: durationMinutes(payload.startTime, payload.endTime),
     status: statusFromTrigger(triggerEvent),
+    // Custom booking questions → typed columns for stats
+    business: extractString(payload, "business"),
+    automation_goal: extractString(payload, "automation_goal"),
+    services_interested: extractStringArray(payload, "services_interested"),
+    timeline: extractString(payload, "timeline"),
     raw_payload: parsed.data,
     updated_at: new Date().toISOString(),
   };
