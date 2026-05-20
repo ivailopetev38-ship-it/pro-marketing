@@ -28,6 +28,8 @@ next-env.d.ts
 .idea/
 .DS_Store
 Thumbs.db
+.claude/
+*.skill
 
 # logs
 npm-debug.log*
