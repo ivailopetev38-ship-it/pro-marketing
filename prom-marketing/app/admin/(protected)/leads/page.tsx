@@ -3,6 +3,7 @@ import { format } from "date-fns";
 import { bg } from "date-fns/locale";
 import { LeadsActions } from "@/components/admin/LeadsActions";
 import { LeadSourcesForm } from "@/components/admin/LeadSourcesForm";
+import { LeadCsvUpload } from "@/components/admin/LeadCsvUpload";
 
 export const dynamic = "force-dynamic";
 
@@ -105,6 +106,9 @@ export default async function LeadsPage() {
         </div>
         <div className="mt-6 border-t border-[var(--color-border-default)] pt-6">
           <LeadSourcesForm />
+        </div>
+        <div className="mt-6 border-t border-[var(--color-border-default)] pt-6">
+          <LeadCsvUpload />
         </div>
       </section>
 
