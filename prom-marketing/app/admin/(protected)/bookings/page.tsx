@@ -1,10 +1,10 @@
-import { createClient } from "@/lib/supabase/server";
+import { createServiceClient } from "@/lib/supabase/service";
 import { BookingsTable, type BookingRow } from "@/components/admin/BookingsTable";
 
 export const dynamic = "force-dynamic";
 
 export default async function BookingsPage() {
-  const supabase = await createClient();
+  const supabase = createServiceClient();
   const { data } = await supabase
     .from("bookings")
     .select("id, cal_booking_id, attendee_name, attendee_email, attendee_phone, scheduled_at, duration_minutes, status, created_at, business, automation_goal, services_interested, timeline")

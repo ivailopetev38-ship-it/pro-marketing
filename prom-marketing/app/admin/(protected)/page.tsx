@@ -1,4 +1,4 @@
-import { createClient } from "@/lib/supabase/server";
+import { createServiceClient } from "@/lib/supabase/service";
 import { StatsCards } from "@/components/admin/StatsCards";
 import { format } from "date-fns";
 import { bg } from "date-fns/locale";
@@ -17,7 +17,7 @@ interface BookingPreview {
 }
 
 export default async function AdminDashboard() {
-  const supabase = await createClient();
+  const supabase = createServiceClient();
   const now = new Date();
   const weekAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
   const monthAgo = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);

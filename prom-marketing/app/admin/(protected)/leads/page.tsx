@@ -1,4 +1,4 @@
-import { createClient } from "@/lib/supabase/server";
+import { createServiceClient } from "@/lib/supabase/service";
 import { format } from "date-fns";
 import { bg } from "date-fns/locale";
 import { LeadsActions } from "@/components/admin/LeadsActions";
@@ -31,7 +31,7 @@ interface SourceRow {
 }
 
 export default async function LeadsPage() {
-  const supabase = await createClient();
+  const supabase = createServiceClient();
   const [{ data: leads }, { data: sources }] = await Promise.all([
     supabase
       .from("meta_leads")

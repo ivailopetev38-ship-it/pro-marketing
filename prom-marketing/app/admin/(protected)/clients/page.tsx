@@ -1,17 +1,49 @@
+import Link from "next/link";
 import { createServiceClient } from "@/lib/supabase/service";
 import { ClientsTable } from "@/components/admin/clients/ClientsTable";
 import type { ContactRow } from "@/lib/contacts/types";
 
 export const dynamic = "force-dynamic";
 
-export default async function ClientsPage() {
+export default async function ClientsPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ view?: string }>;
+}) {
+  const { view } = await searchParams;
+  const showAll = view === "all";
+
   // Preview mode: use service client so we don't depend on auth/RLS.
   const supabase = createServiceClient();
-  const { data, error } = await supabase
-    .from("contacts")
-    .select("*")
-    .order("updated_at", { ascending: false })
-    .limit(500);
+
+  let rows: ContactRow[] = [];
+  let error: { message: string } | null = null;
+
+  if (showAll) {
+    const { data, error: e } = await supabase
+      .from("contacts")
+      .select("*")
+      .order("updated_at", { ascending: false })
+      .limit(500);
+    rows = (data ?? []) as ContactRow[];
+    error = e;
+  } else {
+    // Default view: only contacts to whom we've actually sent an email.
+    const { data: emailed } = await supabase
+      .from("contact_activities")
+      .select("contact_id")
+      .eq("activity_type", "email_sent");
+    const ids = Array.from(new Set((emailed ?? []).map((r) => r.contact_id)));
+    if (ids.length > 0) {
+      const { data, error: e } = await supabase
+        .from("contacts")
+        .select("*")
+        .in("id", ids)
+        .order("updated_at", { ascending: false });
+      rows = (data ?? []) as ContactRow[];
+      error = e;
+    }
+  }
 
   return (
     <div className="px-4 py-8 md:px-10 md:py-12">
@@ -24,8 +56,34 @@ export default async function ClientsPage() {
             Клиенти
           </h1>
           <p className="mt-2 text-sm text-[var(--color-text-secondary)]">
-            Всички контакти от Meta лийдове, Cal.com срещи и ръчно добавени. Обновява се live.
+            {showAll
+              ? "Всички контакти от Meta лийдове, Cal.com срещи и ръчно добавени."
+              : "Само клиентите, на които сме изпратили имейл."}
           </p>
+        </div>
+        <div className="flex gap-2 text-xs">
+          <Link
+            href="/admin/clients"
+            className="rounded-full border px-4 py-2 transition-colors"
+            style={{
+              borderColor: showAll ? "var(--color-border-default)" : "var(--color-accent-cyan)",
+              background: showAll ? "transparent" : "rgba(0,212,255,0.1)",
+              color: showAll ? "var(--color-text-secondary)" : "var(--color-accent-cyan)",
+            }}
+          >
+            ✉️ С изпратени имейли
+          </Link>
+          <Link
+            href="/admin/clients?view=all"
+            className="rounded-full border px-4 py-2 transition-colors"
+            style={{
+              borderColor: showAll ? "var(--color-accent-cyan)" : "var(--color-border-default)",
+              background: showAll ? "rgba(0,212,255,0.1)" : "transparent",
+              color: showAll ? "var(--color-accent-cyan)" : "var(--color-text-secondary)",
+            }}
+          >
+            Всички контакти
+          </Link>
         </div>
       </header>
 
@@ -35,7 +93,7 @@ export default async function ClientsPage() {
         </div>
       )}
 
-      <ClientsTable initialRows={(data ?? []) as ContactRow[]} />
+      <ClientsTable initialRows={rows} />
     </div>
   );
 }
