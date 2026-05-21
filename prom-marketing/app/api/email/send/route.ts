@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
+import { timingSafeEqual } from "node:crypto";
 import { createClient } from "@/lib/supabase/server";
 import { sendEmail } from "@/lib/email/resend";
 
@@ -12,6 +13,7 @@ const bodySchema = z.object({
   html: z.string().min(1).max(60_000).optional(),
   text: z.string().min(1).max(60_000).optional(),
   replyTo: z.email().optional(),
+  from: z.email().optional(),
 });
 
 async function requireAdmin() {
@@ -28,8 +30,27 @@ async function requireAdmin() {
   return user;
 }
 
+function checkBearer(request: Request): { email: string } | null {
+  const expected = process.env.INTERNAL_SEND_TOKEN;
+  if (!expected) return null;
+  const header = request.headers.get("authorization") ?? "";
+  const prefix = "Bearer ";
+  if (!header.startsWith(prefix)) return null;
+  const provided = header.slice(prefix.length);
+  const a = Buffer.from(provided);
+  const b = Buffer.from(expected);
+  if (a.length !== b.length) return null;
+  if (!timingSafeEqual(a, b)) return null;
+  const adminEmail = (process.env.ALLOWED_ADMIN_EMAILS ?? "")
+    .split(",")
+    .map((s) => s.trim())
+    .filter(Boolean)[0];
+  return { email: adminEmail || "ivailopetev38@gmail.com" };
+}
+
 export async function POST(request: Request) {
-  const user = await requireAdmin();
+  const bearer = checkBearer(request);
+  const user = bearer ?? (await requireAdmin());
   if (!user || !user.email) {
     return NextResponse.json({ error: "Forbidden" }, { status: 403 });
   }
