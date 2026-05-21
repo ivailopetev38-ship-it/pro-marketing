@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Unbounded, Inter_Tight, JetBrains_Mono } from "next/font/google";
+import { MetaPixel } from "@/components/effects/MetaPixel";
 import "./globals.css";
 
 const unbounded = Unbounded({
@@ -49,6 +50,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         >
           Прескочи към съдържанието
         </a>
+        <MetaPixel />
         {children}
       </body>
     </html>

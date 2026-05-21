@@ -14,6 +14,11 @@ vi.mock("@/lib/supabase/service", () => ({
   }),
 }));
 
+vi.mock("@/lib/meta/conversions-api", () => ({
+  isCapiConfigured: () => false,
+  sendCapiEvent: vi.fn().mockResolvedValue({ ok: true }),
+}));
+
 process.env.CAL_WEBHOOK_SECRET = "test-secret-123";
 
 import { POST } from "./route";

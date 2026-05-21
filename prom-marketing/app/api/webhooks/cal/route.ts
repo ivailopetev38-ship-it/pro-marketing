@@ -10,6 +10,7 @@ import {
 } from "@/lib/cal/types";
 import { verifyCalSignature } from "@/lib/cal/verify-webhook";
 import { createServiceClient } from "@/lib/supabase/service";
+import { sendCapiEvent, isCapiConfigured } from "@/lib/meta/conversions-api";
 
 export const dynamic = "force-dynamic";
 
@@ -101,6 +102,30 @@ export async function POST(request: Request) {
     payload: parsed.data,
     signature_valid: true,
   });
+
+  // Mirror the conversion to Meta's Conversions API for accurate ad attribution.
+  // Only fire on the first creation, not on reschedules/cancellations.
+  if (triggerEvent === "BOOKING_CREATED" && isCapiConfigured()) {
+    const [firstName, ...rest] = (row.attendee_name ?? "").split(/\s+/);
+    void sendCapiEvent({
+      event_name: "CompleteRegistration",
+      event_id: `cal_${row.cal_booking_id}`,
+      event_source_url: `${process.env.NEXT_PUBLIC_SITE_URL ?? ""}/`,
+      action_source: "website",
+      user_data: {
+        email: row.attendee_email,
+        phone: row.attendee_phone,
+        firstName,
+        lastName: rest.join(" ") || null,
+        external_id: row.cal_booking_id,
+      },
+      custom_data: {
+        content_name: "Cal.com consultation",
+        content_category: "lead",
+        status: row.status,
+      },
+    });
+  }
 
   return NextResponse.json({ ok: true });
 }

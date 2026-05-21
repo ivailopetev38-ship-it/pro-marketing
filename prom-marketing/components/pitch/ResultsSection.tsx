@@ -9,7 +9,7 @@ const METRICS = [
   { value: 70, suffix: "%", label: "по-малко време на повтарящи се задачи", color: "#ec4899" },
   { value: 3, suffix: "x", label: "по-бърз отговор на нови лийдове", color: "#06b6d4" },
   { value: 60, suffix: "%", label: "по-ниска цена на придобит клиент", color: "#7c3aed" },
-  { value: 4, suffix: " седмици", label: "до стартиране на първия модул", color: "#ec4899" },
+  { value: 1, suffix: " месец", label: "до стартиране на първия модул", color: "#ec4899" },
 ];
 
 export function ResultsSection() {

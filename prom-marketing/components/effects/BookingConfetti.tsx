@@ -2,12 +2,13 @@
 import { useEffect } from "react";
 import confetti from "canvas-confetti";
 import { useReducedMotion } from "@/hooks/use-reduced-motion";
+import { track } from "@/lib/meta/pixel-client";
 
 export function BookingConfetti() {
   const reduced = useReducedMotion();
   useEffect(() => {
-    if (reduced) return;
     const fire = () => {
+      if (reduced) return;
       const opts = {
         spread: 80,
         ticks: 200,
@@ -21,6 +22,10 @@ export function BookingConfetti() {
     const onMessage = (e: MessageEvent) => {
       const data = e.data as { type?: string };
       if (data?.type === "bookingSuccessful" || data?.type === "calcom:booking_successful") {
+        // Always send the conversion event — confetti is the cherry on top.
+        track("CompleteRegistration", {
+          params: { content_name: "Cal.com booking confirmed", status: "confirmed" },
+        });
         fire();
       }
     };
