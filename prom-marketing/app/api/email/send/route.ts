@@ -7,6 +7,12 @@ import { sendEmail } from "@/lib/email/resend";
 export const dynamic = "force-dynamic";
 export const maxDuration = 30;
 
+const attachmentSchema = z.object({
+  filename: z.string().min(1).max(200),
+  content: z.string().min(1).max(15_000_000), // ~10MB base64
+  contentType: z.string().min(1).max(100).optional(),
+});
+
 const bodySchema = z.object({
   to: z.union([z.email(), z.array(z.email()).min(1).max(20)]),
   subject: z.string().min(1).max(200),
@@ -14,6 +20,7 @@ const bodySchema = z.object({
   text: z.string().min(1).max(60_000).optional(),
   replyTo: z.email().optional(),
   from: z.email().optional(),
+  attachments: z.array(attachmentSchema).max(10).optional(),
 });
 
 async function requireAdmin() {
@@ -79,6 +86,7 @@ export async function POST(request: Request) {
     html: parsed.data.html ?? "",
     text: parsed.data.text,
     replyTo,
+    attachments: parsed.data.attachments,
   });
 
   return NextResponse.json({

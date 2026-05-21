@@ -11,6 +11,15 @@ function getClient(): Resend {
   return cached;
 }
 
+export interface SendAttachment {
+  /** Filename to display in the email client. */
+  filename: string;
+  /** Base64-encoded file contents. */
+  content: string;
+  /** MIME type. Defaults to application/octet-stream. */
+  contentType?: string;
+}
+
 export interface SendArgs {
   to: string | string[];
   subject: string;
@@ -18,6 +27,7 @@ export interface SendArgs {
   text?: string;
   /** Where replies land. Defaults to EMAIL_REPLY_TO env or the From address. */
   replyTo?: string;
+  attachments?: SendAttachment[];
 }
 
 export async function sendEmail(args: SendArgs): Promise<{ id: string | null; error: string | null }> {
@@ -32,6 +42,15 @@ export async function sendEmail(args: SendArgs): Promise<{ id: string | null; er
       html: args.html,
       text: args.text,
       ...(replyTo ? { replyTo } : {}),
+      ...(args.attachments && args.attachments.length > 0
+        ? {
+            attachments: args.attachments.map((a) => ({
+              filename: a.filename,
+              content: a.content,
+              contentType: a.contentType,
+            })),
+          }
+        : {}),
     });
     if (error) {
       return { id: null, error: error.message ?? String(error) };
