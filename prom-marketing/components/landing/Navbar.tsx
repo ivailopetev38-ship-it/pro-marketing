@@ -1,6 +1,6 @@
 "use client";
 import { useEffect, useState } from "react";
-import { Menu, X } from "lucide-react";
+import { Menu, X, Phone } from "lucide-react";
 import { Logo } from "./Logo";
 import { openBookingPopup } from "@/lib/cal/embed";
 import { cn } from "@/lib/utils";
@@ -66,6 +66,21 @@ export function Navbar() {
           ))}
         </ul>
         <div className="flex items-center gap-2">
+          <a
+            href="tel:+359877399963"
+            aria-label="Обади се: 0877 399 963"
+            className="hidden md:inline-flex items-center gap-2 rounded-full border border-[var(--color-border-default)] px-3 py-2 text-sm text-[var(--color-text-secondary)] transition-colors hover:border-[var(--color-accent-cyan)] hover:text-[var(--color-accent-cyan)]"
+          >
+            <Phone className="h-3.5 w-3.5" />
+            <span className="font-mono">0877 399 963</span>
+          </a>
+          <a
+            href="tel:+359877399963"
+            aria-label="Обади се"
+            className="md:hidden inline-flex h-10 w-10 items-center justify-center rounded-full border border-[var(--color-border-default)] text-[var(--color-accent-cyan)] transition-colors hover:bg-white/5"
+          >
+            <Phone className="h-4 w-4" />
+          </a>
           <button
             type="button"
             onClick={() => void openBookingPopup()}
@@ -119,7 +134,7 @@ export function Navbar() {
               </li>
             ))}
           </ul>
-          <div className="mt-auto">
+          <div className="mt-auto space-y-3">
             <button
               type="button"
               onClick={handleBooking}
@@ -128,6 +143,14 @@ export function Navbar() {
               Запази среща
               <span aria-hidden>→</span>
             </button>
+            <a
+              href="tel:+359877399963"
+              onClick={() => setOpen(false)}
+              className="inline-flex w-full items-center justify-center gap-2 rounded-full border border-[var(--color-border-bright)] px-5 py-3 text-base font-medium text-[var(--color-text-primary)] hover:bg-white/5"
+            >
+              <Phone className="h-4 w-4" />
+              <span className="font-mono">0877 399 963</span>
+            </a>
           </div>
         </div>
       )}

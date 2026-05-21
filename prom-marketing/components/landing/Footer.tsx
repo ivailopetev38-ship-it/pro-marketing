@@ -27,6 +27,14 @@ export function Footer() {
             Контакти
           </h4>
           <ul className="space-y-2 text-sm">
+            <li>
+              <a
+                className="font-mono text-[var(--color-accent-cyan)] hover:text-[var(--color-text-primary)]"
+                href="tel:+359877399963"
+              >
+                +359 877 399 963
+              </a>
+            </li>
             <li><a className="text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)]" href="mailto:hello@promarketing.bg">hello@promarketing.bg</a></li>
             <li className="text-[var(--color-text-secondary)]">София, България</li>
           </ul>
