@@ -16,10 +16,13 @@ export interface SendArgs {
   subject: string;
   html: string;
   text?: string;
+  /** Where replies land. Defaults to EMAIL_REPLY_TO env or the From address. */
+  replyTo?: string;
 }
 
 export async function sendEmail(args: SendArgs): Promise<{ id: string | null; error: string | null }> {
   const from = process.env.EMAIL_FROM ?? "ProMarketing <onboarding@resend.dev>";
+  const replyTo = args.replyTo ?? process.env.EMAIL_REPLY_TO;
   try {
     const client = getClient();
     const { data, error } = await client.emails.send({
@@ -28,6 +31,7 @@ export async function sendEmail(args: SendArgs): Promise<{ id: string | null; er
       subject: args.subject,
       html: args.html,
       text: args.text,
+      ...(replyTo ? { replyTo } : {}),
     });
     if (error) {
       return { id: null, error: error.message ?? String(error) };

@@ -41,7 +41,7 @@ export function OfertaTimeline() {
         </h2>
 
         <p className="mt-10 max-w-2xl text-lg leading-relaxed text-[var(--color-text-secondary)] md:text-xl">
-          Без забавяния. Без „ще се обадим следваща седмица". Точен график със седмични прегледи и ясни milestones.
+          {`Без забавяния. Без „ще се обадим следваща седмица". Точен график със седмични прегледи и ясни milestones.`}
         </p>
 
         <ol className="mt-20 space-y-12 md:space-y-0">
