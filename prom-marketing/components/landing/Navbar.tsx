@@ -4,6 +4,7 @@ import { Menu, X, Phone } from "lucide-react";
 import { Logo } from "./Logo";
 import { openBookingPopup } from "@/lib/cal/embed";
 import { cn } from "@/lib/utils";
+import { track } from "@/lib/analytics/track";
 
 const NAV = [
   { href: "#services", label: "Услуги" },
@@ -35,6 +36,7 @@ export function Navbar() {
 
   const handleBooking = () => {
     setOpen(false);
+    track("cta_clicked", { location: "mobile_menu", target: "booking" });
     void openBookingPopup();
   };
 
@@ -84,6 +86,7 @@ export function Navbar() {
           </a>
           <a
             href="#kontakti"
+            onClick={() => track("cta_clicked", { location: "navbar", target: "contact_form" })}
             className="hidden md:inline-flex items-center gap-2 rounded-full border px-4 py-2 text-sm font-semibold transition-all hover:scale-[1.03]"
             style={{
               borderColor: "var(--color-accent-cyan)",
@@ -95,7 +98,10 @@ export function Navbar() {
           </a>
           <button
             type="button"
-            onClick={() => void openBookingPopup()}
+            onClick={() => {
+              track("cta_clicked", { location: "navbar", target: "booking" });
+              void openBookingPopup();
+            }}
             className="relative inline-flex items-center gap-2 rounded-full bg-[var(--color-accent-cyan)] px-4 py-2 text-sm font-semibold text-[var(--color-bg-void)] transition-transform hover:scale-[1.03]"
           >
             Запази среща

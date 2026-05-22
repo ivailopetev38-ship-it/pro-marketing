@@ -1,6 +1,7 @@
 "use client";
 import { useState } from "react";
 import { Phone, Mail, User, MessageSquare, Send, Loader2, Check } from "lucide-react";
+import { track } from "@/lib/analytics/track";
 
 type Status = "idle" | "submitting" | "success" | "error";
 
@@ -13,6 +14,7 @@ export function QuickLeadForm() {
     e.preventDefault();
     setStatus("submitting");
     setError(null);
+    track("lead_form_submit_attempted", { has_message: form.message.length > 0 });
     try {
       const res = await fetch("/api/leads/submit", {
         method: "POST",
@@ -22,13 +24,16 @@ export function QuickLeadForm() {
       const json = await res.json();
       if (res.ok && json.ok) {
         setStatus("success");
+        track("lead_form_submitted", { source: "homepage_quick_form" });
         setForm({ full_name: "", email: "", phone: "", message: "" });
       } else {
         setStatus("error");
+        track("lead_form_submit_failed", { status: res.status, error: json?.error });
         setError(json?.details || json?.error || "Грешка при изпращане");
       }
-    } catch {
+    } catch (e) {
       setStatus("error");
+      track("lead_form_submit_failed", { error: String(e) });
       setError("Грешка при изпращане. Опитай отново.");
     }
   }

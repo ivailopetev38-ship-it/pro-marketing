@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Unbounded, Inter_Tight, JetBrains_Mono } from "next/font/google";
 import { MetaPixel } from "@/components/effects/MetaPixel";
+import { PostHogProvider } from "@/components/analytics/PostHogProvider";
 import "./globals.css";
 
 const unbounded = Unbounded({
@@ -51,7 +52,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           Прескочи към съдържанието
         </a>
         <MetaPixel />
-        {children}
+        <PostHogProvider>{children}</PostHogProvider>
       </body>
     </html>
   );

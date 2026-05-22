@@ -6,6 +6,7 @@ import { HolographicText } from "@/components/effects/HolographicText";
 import { MagneticButton } from "@/components/effects/MagneticButton";
 import { HeroOrb } from "./HeroOrb";
 import { openBookingPopup } from "@/lib/cal/embed";
+import { track } from "@/lib/analytics/track";
 
 export function Hero() {
   return (
@@ -40,7 +41,10 @@ export function Hero() {
           <MagneticButton>
             <button
               type="button"
-              onClick={() => void openBookingPopup()}
+              onClick={() => {
+                track("cta_clicked", { location: "hero", target: "booking" });
+                void openBookingPopup();
+              }}
               className="group relative inline-flex items-center gap-3 overflow-hidden rounded-full bg-[var(--color-accent-cyan)] px-7 py-4 text-base font-semibold text-[var(--color-bg-void)] shadow-[0_0_40px_rgba(6,182,212,0.35)] transition-shadow hover:shadow-[0_0_60px_rgba(6,182,212,0.55)]"
             >
               <span>Запази безплатна консултация</span>
@@ -49,6 +53,7 @@ export function Hero() {
           </MagneticButton>
           <a
             href="#kontakti"
+            onClick={() => track("cta_clicked", { location: "hero", target: "contact_form" })}
             className="group inline-flex items-center gap-2 rounded-full border-2 px-6 py-3.5 text-base font-semibold transition-all hover:scale-[1.03]"
             style={{
               borderColor: "var(--color-accent-cyan)",
