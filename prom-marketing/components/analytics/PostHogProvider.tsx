@@ -19,6 +19,9 @@ function initPostHog() {
     autocapture: true,
     session_recording: { maskAllInputs: true },
   });
+  // Expose the singleton so lib/analytics/track.ts can reach the same
+  // instance regardless of how the bundler splits chunks.
+  (window as Window & { posthog?: typeof posthog }).posthog = posthog;
   initialized = true;
 }
 
