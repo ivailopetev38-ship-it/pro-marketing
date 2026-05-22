@@ -68,10 +68,18 @@ export async function POST(request: Request) {
     }
 
     if (existing) {
-      // Maybe upgrade name if missing
-      if (!existing.full_name && name) {
-        await sb.from("contacts").update({ full_name: name }).eq("id", existing.id);
-        updated.push(email || phone);
+      // Re-fetch full row so we know what's missing
+      const { data: full } = await sb
+        .from("contacts")
+        .select("full_name, phone")
+        .eq("id", existing.id)
+        .single();
+      const patch: { full_name?: string; phone?: string } = {};
+      if (full && !full.full_name && name) patch.full_name = name;
+      if (full && !full.phone && phone) patch.phone = phone;
+      if (Object.keys(patch).length > 0) {
+        await sb.from("contacts").update(patch).eq("id", existing.id);
+        updated.push(`${email || phone} (${Object.keys(patch).join(", ")})`);
       } else {
         skipped.push(email || phone);
       }
