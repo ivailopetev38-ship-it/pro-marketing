@@ -8,8 +8,8 @@ interface PainPoint {
   task: string;
   detail: string;
   hoursPerMonth: number;
-  rateBgnPerHour: number;
-  aiCostBgn: number;
+  rateEurPerHour: number;
+  aiCostEur: number;
 }
 
 const PAINS: PainPoint[] = [
@@ -18,75 +18,74 @@ const PAINS: PainPoint[] = [
     task: "Отговори в Messenger / Viber / Instagram",
     detail: "На едни и същи въпроси по 50 пъти на ден",
     hoursPerMonth: 88,
-    rateBgnPerHour: 18,
-    aiCostBgn: 200,
+    rateEurPerHour: 9,
+    aiCostEur: 100,
   },
   {
     icon: "📱",
     task: "Постове и reels всеки ден",
     detail: "Текст, визия, hashtags, calendar — ръчно",
     hoursPerMonth: 66,
-    rateBgnPerHour: 22,
-    aiCostBgn: 300,
+    rateEurPerHour: 11,
+    aiCostEur: 150,
   },
   {
     icon: "✉️",
     task: "Follow-up имейли до лийдове",
     detail: '"Кога ще се чуем", "имаш ли време", "напомням"',
     hoursPerMonth: 33,
-    rateBgnPerHour: 25,
-    aiCostBgn: 100,
+    rateEurPerHour: 13,
+    aiCostEur: 50,
   },
   {
     icon: "📅",
     task: "Запис на срещи и потвърждения",
     detail: "Обаждания за час, преразпределения, no-show управление",
     hoursPerMonth: 44,
-    rateBgnPerHour: 18,
-    aiCostBgn: 150,
+    rateEurPerHour: 9,
+    aiCostEur: 75,
   },
   {
     icon: "🎯",
     task: "Сортиране на лийдове по приоритет",
     detail: "Кой е готов да купи, кой губи времето ти",
     hoursPerMonth: 44,
-    rateBgnPerHour: 25,
-    aiCostBgn: 200,
+    rateEurPerHour: 13,
+    aiCostEur: 100,
   },
   {
     icon: "⭐",
     task: "Отговор на ревюта и коментари",
     detail: "Google, Booking, TripAdvisor, Facebook — всеки иска отговор",
     hoursPerMonth: 15,
-    rateBgnPerHour: 22,
-    aiCostBgn: 80,
+    rateEurPerHour: 11,
+    aiCostEur: 40,
   },
   {
     icon: "📊",
     task: "Седмични отчети и анализи",
     detail: "Excel формули, графики, summary за директора",
     hoursPerMonth: 16,
-    rateBgnPerHour: 30,
-    aiCostBgn: 50,
+    rateEurPerHour: 15,
+    aiCostEur: 25,
   },
   {
     icon: "🧾",
     task: "Фактуриране и счетоводна административа",
     detail: "Издаване, изпращане, проследяване на плащания",
     hoursPerMonth: 44,
-    rateBgnPerHour: 22,
-    aiCostBgn: 150,
+    rateEurPerHour: 11,
+    aiCostEur: 75,
   },
 ];
 
-function fmtBgn(n: number) {
-  return n.toLocaleString("bg-BG") + " лв";
+function fmtEur(n: number) {
+  return n.toLocaleString("bg-BG") + " €";
 }
 
 export function PainPoints() {
-  // Animated total savings counter
-  const totalManual = PAINS.reduce((s, p) => s + p.hoursPerMonth * p.rateBgnPerHour, 0);
-  const totalAi = PAINS.reduce((s, p) => s + p.aiCostBgn, 0);
+  const totalManual = PAINS.reduce((s, p) => s + p.hoursPerMonth * p.rateEurPerHour, 0);
+  const totalAi = PAINS.reduce((s, p) => s + p.aiCostEur, 0);
   const totalSavings = totalManual - totalAi;
 
   const [displayed, setDisplayed] = useState(0);
@@ -97,20 +96,16 @@ export function PainPoints() {
     const duration = 1800;
     const animate = (now: number) => {
       const t = Math.min(1, (now - start) / duration);
-      // ease-out cubic
       const eased = 1 - Math.pow(1 - t, 3);
       setDisplayed(Math.floor(totalSavings * eased));
       if (t < 1) raf = requestAnimationFrame(animate);
     };
-    // Only animate once on first scroll into view — using IO would be better
-    // but simple timer works for the initial impression
     raf = requestAnimationFrame(animate);
     return () => cancelAnimationFrame(raf);
   }, [totalSavings]);
 
   return (
     <section className="relative overflow-hidden py-32">
-      {/* Dual-tint background — red on left, green on right */}
       <div
         aria-hidden
         className="pointer-events-none absolute inset-0"
@@ -134,24 +129,22 @@ export function PainPoints() {
               <span style={{ color: "#ef4444" }}>заплати</span> за рутина.
             </h2>
             <p className="mt-5 text-base text-[var(--color-text-secondary)] md:text-lg">
-              Един човек на 2000 лв/месец прави работа, която AI агент върши за{" "}
-              <span className="font-semibold text-[var(--color-text-primary)]">200 лв/месец</span>.
+              Един човек на 1 000 €/месец прави работа, която AI агент върши за{" "}
+              <span className="font-semibold text-[var(--color-text-primary)]">100 €/месец</span>.
               Без отпуски, без болнични, без забавяне. Виж конкретно:
             </p>
           </div>
         </SectionReveal>
 
-        {/* Cards grid */}
         <div className="grid grid-cols-1 gap-5 md:grid-cols-2">
           {PAINS.map((p, i) => {
-            const manualCost = p.hoursPerMonth * p.rateBgnPerHour;
-            const savings = manualCost - p.aiCostBgn;
+            const manualCost = p.hoursPerMonth * p.rateEurPerHour;
+            const savings = manualCost - p.aiCostEur;
             const savingsPct = Math.round((savings / manualCost) * 100);
             return (
               <SectionReveal key={p.task} delay={i * 60}>
                 <TiltCard className="h-full rounded-2xl">
                   <div className="glass relative h-full overflow-hidden rounded-2xl p-6 md:p-7">
-                    {/* Savings ribbon */}
                     <div
                       className="absolute right-0 top-0 px-4 py-1.5 text-[11px] font-bold uppercase tracking-wider"
                       style={{
@@ -173,7 +166,6 @@ export function PainPoints() {
                       </div>
                     </div>
 
-                    {/* Cost comparison */}
                     <div className="mt-6 grid grid-cols-2 gap-3">
                       <div
                         className="rounded-lg border p-3"
@@ -192,10 +184,10 @@ export function PainPoints() {
                           className="mt-1 font-display text-2xl font-extrabold line-through decoration-2"
                           style={{ color: "#ef4444", textDecorationColor: "rgba(239,68,68,0.6)" }}
                         >
-                          {fmtBgn(manualCost)}
+                          {fmtEur(manualCost)}
                         </p>
                         <p className="mt-0.5 text-[10px] text-[var(--color-text-tertiary)]">
-                          {p.hoursPerMonth}ч × {p.rateBgnPerHour} лв
+                          {p.hoursPerMonth}ч × {p.rateEurPerHour} €
                         </p>
                       </div>
                       <div
@@ -215,7 +207,7 @@ export function PainPoints() {
                           className="mt-1 font-display text-2xl font-extrabold"
                           style={{ color: "#22c55e" }}
                         >
-                          {fmtBgn(p.aiCostBgn)}
+                          {fmtEur(p.aiCostEur)}
                         </p>
                         <p className="mt-0.5 text-[10px] text-[var(--color-text-tertiary)]">
                           24/7, без почивка
@@ -231,7 +223,7 @@ export function PainPoints() {
                         className="font-display text-lg font-bold"
                         style={{ color: "#22c55e" }}
                       >
-                        +{fmtBgn(savings)} / месец
+                        +{fmtEur(savings)} / месец
                       </span>
                     </div>
                   </div>
@@ -241,7 +233,6 @@ export function PainPoints() {
           })}
         </div>
 
-        {/* Total savings hero */}
         <SectionReveal delay={200}>
           <div
             className="mt-12 overflow-hidden rounded-3xl border p-8 md:p-12"
@@ -264,27 +255,27 @@ export function PainPoints() {
                   className="mt-3 font-display text-5xl font-extrabold leading-none tracking-tight md:text-7xl"
                   style={{ color: "#22c55e" }}
                 >
-                  {fmtBgn(displayed)}
+                  {fmtEur(displayed)}
                 </p>
                 <p className="mt-3 text-sm text-[var(--color-text-secondary)] md:text-base">
                   Ако имаш дори половината от тези процеси —{" "}
                   <span className="font-bold text-[var(--color-text-primary)]">
-                    {fmtBgn(Math.floor(totalSavings / 2))}
+                    {fmtEur(Math.floor(totalSavings / 2))}
                   </span>{" "}
                   всеки месец остават в джоба ти, не на ведомостта.
                 </p>
               </div>
 
               <div className="grid grid-cols-3 gap-4 text-center md:gap-6">
-                <Stat label="Ръчно/мес" value={fmtBgn(totalManual)} color="#ef4444" />
-                <Stat label="С AI/мес" value={fmtBgn(totalAi)} color="#22c55e" />
+                <Stat label="Ръчно/мес" value={fmtEur(totalManual)} color="#ef4444" />
+                <Stat label="С AI/мес" value={fmtEur(totalAi)} color="#22c55e" />
                 <Stat label="Часа спестени" value={`${PAINS.reduce((s, p) => s + p.hoursPerMonth, 0)}ч`} color="var(--color-accent-cyan)" />
               </div>
             </div>
 
             <p className="mt-8 text-center text-xs text-[var(--color-text-tertiary)]">
-              * Калкулации на база средни ставки в България (15–30 лв/час за административна работа) +{" "}
-              30% overhead за осигуровки/болнични/отпуски.
+              * Калкулации на база средни ставки в България след въвеждане на еврото
+              (8–15 €/час за административна работа) + 30% overhead за осигуровки/болнични/отпуски.
             </p>
           </div>
         </SectionReveal>
