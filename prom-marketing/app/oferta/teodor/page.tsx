@@ -75,7 +75,7 @@ const MODULES = [
 const PROCESS = [
   { step: "1", title: "Разговор", body: "30 минути — обсъждаме процесите, болезнените места, какво искате да отпадне." },
   { step: "2", title: "Демо", body: "Подготвям конкретно демо на dashboard-а с примерни данни от вашия бранш." },
-  { step: "3", title: "Изграждане", body: "30 дни до пълно стартиране. Работим с екипа ви, не само на хартия." },
+  { step: "3", title: "Изграждане", body: "От 30 до 60 дни до пълно стартиране — според големината на проекта. Работим с екипа ви, не само на хартия." },
   { step: "4", title: "Инсталация", body: "1-3 работни дни на място при вас. Настройка с реалните ви данни и тренинг." },
   { step: "5", title: "Поддръжка", body: "30 дни безплатна поддръжка, корекции, оптимизация. После — по договорка." },
 ];
@@ -285,7 +285,7 @@ export default function TeodorOfertaPage() {
               „ПроМаркетинг" ЕООД · Ивайло Петев — управител
             </p>
             <p className="mt-2 font-[family-name:var(--font-mono)] text-xs text-[var(--color-text-tertiary)]">
-              ivailo@promarketing.pw · promarketing.pw
+              ivailopetev38@gmail.com · promarketing.pw
             </p>
           </div>
         </div>

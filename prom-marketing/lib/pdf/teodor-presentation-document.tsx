@@ -232,7 +232,7 @@ const MODULES = [
 const PROCESS = [
   { step: "1", title: "Разговор", body: "30 минути — обсъждаме процесите, болезнените места, какво искате да отпадне." },
   { step: "2", title: "Демо", body: "Подготвям конкретно демо на dashboard-а с примерни данни от вашия бранш." },
-  { step: "3", title: "Изграждане", body: "30 дни до пълно стартиране. Работим с екипа ви." },
+  { step: "3", title: "Изграждане", body: "От 30 до 60 дни до пълно стартиране — според големината на проекта. Работим с екипа ви." },
   { step: "4", title: "Инсталация", body: "1-3 работни дни на място при вас. Тренинг + настройка с реалните ви данни." },
   { step: "5", title: "Поддръжка", body: "30 дни безплатна поддръжка, корекции, оптимизация. После — по договорка." },
 ];
@@ -322,7 +322,7 @@ export function TeodorPresentationDocument() {
             <View style={s.footerCol}>
               <Text style={s.footerBold}>„ПроМаркетинг" ЕООД</Text>
               <Text>Ивайло Петев · управител</Text>
-              <Text>ivailo@promarketing.pw</Text>
+              <Text>ivailopetev38@gmail.com</Text>
               <Text>+359 877 399 963</Text>
             </View>
             <View style={[s.footerCol, { textAlign: "right" }]}>
