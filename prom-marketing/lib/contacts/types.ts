@@ -32,19 +32,37 @@ export const STAGE_COLOR: Record<ContactStage, string> = {
 
 export const ACTIVITY_LABEL: Record<string, string> = {
   meta_lead: "Meta lead",
+  website_form: "Форма от сайта",
   booking: "Cal.com среща",
   email_sent: "Изпратен имейл",
+  email_received: "Получен имейл",
   call: "Телефонен разговор",
+  meeting: "Среща на живо",
   note: "Бележка",
+  offer_sent: "Изпратена оферта",
+  contract_sent: "Изпратен договор",
+  contract_signed: "Подписан договор",
+  payment_received: "Получено плащане",
+  work_started: "Старт на работа",
+  work_completed: "Завършена работа",
   stage_change: "Промяна на статус",
 };
 
 export const ACTIVITY_ICON: Record<string, string> = {
   meta_lead: "📥",
+  website_form: "🌐",
   booking: "📅",
   email_sent: "✉️",
+  email_received: "📨",
   call: "📞",
+  meeting: "🤝",
   note: "📝",
+  offer_sent: "💎",
+  contract_sent: "📜",
+  contract_signed: "✍️",
+  payment_received: "💰",
+  work_started: "🚀",
+  work_completed: "✅",
   stage_change: "🔄",
 };
 

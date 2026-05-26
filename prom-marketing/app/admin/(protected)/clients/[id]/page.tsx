@@ -18,7 +18,7 @@ export default async function ClientDetailPage({ params }: { params: Promise<{ i
       .select("*")
       .eq("contact_id", id)
       .order("occurred_at", { ascending: false })
-      .limit(200),
+      .limit(1000),
   ]);
 
   if (!contact) notFound();
