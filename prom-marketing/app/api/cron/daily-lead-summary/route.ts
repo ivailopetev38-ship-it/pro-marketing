@@ -25,8 +25,11 @@ export const maxDuration = 60;
  */
 export async function GET(request: Request) {
   const authHeader = request.headers.get("authorization");
-  const expected = process.env.CRON_SECRET;
-  if (expected && authHeader !== `Bearer ${expected}`) {
+  const cronSecret = process.env.CRON_SECRET;
+  const internalToken = process.env.INTERNAL_SEND_TOKEN;
+  const isVercelCron = cronSecret && authHeader === `Bearer ${cronSecret}`;
+  const isManualTest = internalToken && authHeader === `Bearer ${internalToken}`;
+  if (cronSecret && !isVercelCron && !isManualTest) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
