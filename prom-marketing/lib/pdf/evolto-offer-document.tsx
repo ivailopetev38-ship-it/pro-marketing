@@ -337,7 +337,7 @@ export function EvoltoOfferDocument() {
             <Text style={s.bullet}>▸</Text>
             <Text style={s.bulletText}>
               <Text style={{ fontWeight: 700 }}>Поддръжка след инсталация:</Text> 30 календарни дни
-              безплатен саппорт — въпроси, отговори, оптимизация и корекции на дефекти.
+              безплатна поддръжка — въпроси, отговори, оптимизация и корекции на дефекти.
             </Text>
           </View>
 
@@ -373,7 +373,7 @@ export function EvoltoOfferDocument() {
             <Text style={s.bullet}>−</Text>
             <Text style={s.bulletText}>
               Месечни абонаменти за инфраструктура (Cloud, AI API кредити, Telegram бот hosting).
-              Тези разходи се поемат директно от Възложителя и се прогнозират на разговор.
+              Тези разходи се поемат директно от Възложителя и се уточняват при провеждане на разговор.
             </Text>
           </View>
           <View style={s.bulletRow}>
@@ -397,9 +397,9 @@ export function EvoltoOfferDocument() {
               <Text>+359 877 399 963</Text>
             </View>
             <View style={[s.footerCol, { textAlign: "right" }]}>
-              <Text>Валидност на офертата: 21 дни</Text>
+              <Text>Валидност на офертата: 21 дни,</Text>
+              <Text>считано от датата на изпращането й</Text>
               <Text>promarketing.pw/oferta/evolto</Text>
-              <Text>Подробна онлайн презентация ↗</Text>
             </View>
           </View>
         </View>
