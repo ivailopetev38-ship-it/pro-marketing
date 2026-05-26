@@ -34,8 +34,7 @@ export function EvoltoDigitalOffer() {
             <ul className="space-y-5 text-sm text-[var(--color-text-secondary)] md:text-base">
               <Feature title="🎯 Персонализирана" body="Изчисления според покрив, kW, годишно потребление и финансиране. Имена и снимки на клиента." />
               <Feature title="📊 Live ROI калкулатор" body="Клиентът вижда колко спестява, кога инвестицията се изплаща, прогноза за 25 години." />
-              <Feature title="📲 Уникален линк + PDF" body="evolto.app/o/abc123 — интерактивен линк с live данни и tracking. Плюс автоматичен PDF за разпечатване / архив. Изпращат се заедно през email/Viber." />
-              <Feature title="👁 Read receipts" body="Виждаш кога клиентът е отворил офертата, колко време е стоял, на коя секция." />
+              <Feature title="📲 Уникален линк + PDF" body="evolto.app/o/abc123 — интерактивен линк с live данни. Плюс автоматичен PDF за разпечатване / архив. Изпращат се заедно през email/Viber." />
               <Feature title="✅ One-click accept" body={`Бутон „Приемам офертата" → автоматично пуска договор за подпис.`} />
             </ul>
           </div>

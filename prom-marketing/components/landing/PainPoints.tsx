@@ -7,9 +7,8 @@ interface PainPoint {
   icon: string;
   task: string;
   detail: string;
-  hoursPerMonth: number;
-  rateEurPerHour: number;
-  aiCostEur: number;
+  hoursManual: number;       // часове на месец на ръка
+  hoursWithAi: number;       // часове на месец надзор + поправки
 }
 
 const PAINS: PainPoint[] = [
@@ -17,77 +16,66 @@ const PAINS: PainPoint[] = [
     icon: "💬",
     task: "Отговори в Messenger / Viber / Instagram",
     detail: "На едни и същи въпроси по 50 пъти на ден",
-    hoursPerMonth: 88,
-    rateEurPerHour: 9,
-    aiCostEur: 100,
+    hoursManual: 88,
+    hoursWithAi: 6,
   },
   {
     icon: "📱",
     task: "Постове и reels всеки ден",
     detail: "Текст, визия, hashtags, calendar — ръчно",
-    hoursPerMonth: 66,
-    rateEurPerHour: 11,
-    aiCostEur: 150,
+    hoursManual: 66,
+    hoursWithAi: 8,
   },
   {
     icon: "✉️",
     task: "Follow-up имейли до лийдове",
     detail: '"Кога ще се чуем", "имаш ли време", "напомням"',
-    hoursPerMonth: 33,
-    rateEurPerHour: 13,
-    aiCostEur: 50,
+    hoursManual: 33,
+    hoursWithAi: 2,
   },
   {
     icon: "📅",
     task: "Запис на срещи и потвърждения",
-    detail: "Обаждания за час, преразпределения, no-show управление",
-    hoursPerMonth: 44,
-    rateEurPerHour: 9,
-    aiCostEur: 75,
+    detail: "Обаждания за час, преразпределения, no-show",
+    hoursManual: 44,
+    hoursWithAi: 3,
   },
   {
     icon: "🎯",
     task: "Сортиране на лийдове по приоритет",
     detail: "Кой е готов да купи, кой губи времето ти",
-    hoursPerMonth: 44,
-    rateEurPerHour: 13,
-    aiCostEur: 100,
+    hoursManual: 44,
+    hoursWithAi: 4,
   },
   {
     icon: "⭐",
     task: "Отговор на ревюта и коментари",
-    detail: "Google, Booking, TripAdvisor, Facebook — всеки иска отговор",
-    hoursPerMonth: 15,
-    rateEurPerHour: 11,
-    aiCostEur: 40,
+    detail: "Google, Booking, TripAdvisor, Facebook",
+    hoursManual: 15,
+    hoursWithAi: 2,
   },
   {
     icon: "📊",
     task: "Седмични отчети и анализи",
     detail: "Excel формули, графики, summary за директора",
-    hoursPerMonth: 16,
-    rateEurPerHour: 15,
-    aiCostEur: 25,
+    hoursManual: 16,
+    hoursWithAi: 1,
   },
   {
     icon: "🧾",
     task: "Фактуриране и счетоводна административа",
     detail: "Издаване, изпращане, проследяване на плащания",
-    hoursPerMonth: 44,
-    rateEurPerHour: 11,
-    aiCostEur: 75,
+    hoursManual: 44,
+    hoursWithAi: 4,
   },
 ];
 
-function fmtEur(n: number) {
-  return n.toLocaleString("bg-BG") + " €";
-}
+const totalManual = PAINS.reduce((s, p) => s + p.hoursManual, 0);
+const totalWithAi = PAINS.reduce((s, p) => s + p.hoursWithAi, 0);
+const totalSaved = totalManual - totalWithAi;
+const avgPercent = Math.round((totalSaved / totalManual) * 100);
 
 export function PainPoints() {
-  const totalManual = PAINS.reduce((s, p) => s + p.hoursPerMonth * p.rateEurPerHour, 0);
-  const totalAi = PAINS.reduce((s, p) => s + p.aiCostEur, 0);
-  const totalSavings = totalManual - totalAi;
-
   const [displayed, setDisplayed] = useState(0);
 
   useEffect(() => {
@@ -97,12 +85,12 @@ export function PainPoints() {
     const animate = (now: number) => {
       const t = Math.min(1, (now - start) / duration);
       const eased = 1 - Math.pow(1 - t, 3);
-      setDisplayed(Math.floor(totalSavings * eased));
+      setDisplayed(Math.floor(totalSaved * eased));
       if (t < 1) raf = requestAnimationFrame(animate);
     };
     raf = requestAnimationFrame(animate);
     return () => cancelAnimationFrame(raf);
-  }, [totalSavings]);
+  }, []);
 
   return (
     <section className="relative overflow-hidden py-32">
@@ -118,29 +106,33 @@ export function PainPoints() {
       <div className="relative mx-auto max-w-6xl px-6">
         <SectionReveal>
           <div className="mb-12 max-w-3xl">
-            <p className="mb-3 font-mono text-xs uppercase tracking-[0.2em]" style={{ color: "#ef4444" }}>
-              {"// колко плащаш за рутина"}
+            <p
+              className="mb-3 font-mono text-xs uppercase tracking-[0.2em]"
+              style={{ color: "#ef4444" }}
+            >
+              {"// колко часа седят в рутина"}
             </p>
             <h2
               className="font-display text-[clamp(32px,7vw,68px)] font-bold leading-[1.04] tracking-tight"
               style={{ overflowWrap: "break-word", hyphens: "auto" }}
             >
-              Спирай да плащаш<br />
-              <span style={{ color: "#ef4444" }}>заплати</span> за рутина.
+              Колко часа от месеца<br />
+              <span style={{ color: "#ef4444" }}>горят</span> в ръчна работа?
             </h2>
             <p className="mt-5 text-base text-[var(--color-text-secondary)] md:text-lg">
-              Един човек на 1 000 €/месец прави работа, която AI агент върши за{" "}
-              <span className="font-semibold text-[var(--color-text-primary)]">100 €/месец</span>.
-              Без отпуски, без болнични, без забавяне. Виж конкретно:
+              Един човек прави едни и същи задачи всеки ден — отнема му часове, които не остават
+              за стратегия и растеж. AI агент ги поема{" "}
+              <span className="font-semibold text-[var(--color-text-primary)]">за минути</span>.
+              Ето колко време ще си върнеш:
             </p>
           </div>
         </SectionReveal>
 
+        {/* Cards grid */}
         <div className="grid grid-cols-1 gap-5 md:grid-cols-2">
           {PAINS.map((p, i) => {
-            const manualCost = p.hoursPerMonth * p.rateEurPerHour;
-            const savings = manualCost - p.aiCostEur;
-            const savingsPct = Math.round((savings / manualCost) * 100);
+            const saved = p.hoursManual - p.hoursWithAi;
+            const pct = Math.round((saved / p.hoursManual) * 100);
             return (
               <SectionReveal key={p.task} delay={i * 60}>
                 <TiltCard className="h-full rounded-2xl">
@@ -153,7 +145,7 @@ export function PainPoints() {
                         borderBottomLeftRadius: "0.75rem",
                       }}
                     >
-                      −{savingsPct}%
+                      −{pct}%
                     </div>
 
                     <div className="flex items-start gap-3">
@@ -166,6 +158,7 @@ export function PainPoints() {
                       </div>
                     </div>
 
+                    {/* Time comparison */}
                     <div className="mt-6 grid grid-cols-2 gap-3">
                       <div
                         className="rounded-lg border p-3"
@@ -178,16 +171,19 @@ export function PainPoints() {
                           className="font-mono text-[10px] uppercase tracking-[0.2em]"
                           style={{ color: "#ef4444" }}
                         >
-                          Ръчно
+                          Ръчно / месец
                         </p>
                         <p
                           className="mt-1 font-display text-2xl font-extrabold line-through decoration-2"
-                          style={{ color: "#ef4444", textDecorationColor: "rgba(239,68,68,0.6)" }}
+                          style={{
+                            color: "#ef4444",
+                            textDecorationColor: "rgba(239,68,68,0.6)",
+                          }}
                         >
-                          {fmtEur(manualCost)}
+                          {p.hoursManual}ч
                         </p>
                         <p className="mt-0.5 text-[10px] text-[var(--color-text-tertiary)]">
-                          {p.hoursPerMonth}ч × {p.rateEurPerHour} €
+                          ≈ {Math.round(p.hoursManual / 22 * 10) / 10}ч/ден
                         </p>
                       </div>
                       <div
@@ -201,29 +197,44 @@ export function PainPoints() {
                           className="font-mono text-[10px] uppercase tracking-[0.2em]"
                           style={{ color: "#22c55e" }}
                         >
-                          С AI агент
+                          С AI / месец
                         </p>
                         <p
                           className="mt-1 font-display text-2xl font-extrabold"
                           style={{ color: "#22c55e" }}
                         >
-                          {fmtEur(p.aiCostEur)}
+                          {p.hoursWithAi}ч
                         </p>
                         <p className="mt-0.5 text-[10px] text-[var(--color-text-tertiary)]">
-                          24/7, без почивка
+                          само надзор + одобрение
                         </p>
+                      </div>
+                    </div>
+
+                    {/* Visual progress bar */}
+                    <div className="mt-4">
+                      <div className="h-2 w-full overflow-hidden rounded-full bg-[var(--color-bg-void)]/60">
+                        <div
+                          className="h-full rounded-full transition-all"
+                          style={{
+                            width: `${pct}%`,
+                            background:
+                              "linear-gradient(90deg, #22c55e 0%, #06b6d4 100%)",
+                            boxShadow: "0 0 8px rgba(34,197,94,0.4)",
+                          }}
+                        />
                       </div>
                     </div>
 
                     <div className="mt-4 flex items-center justify-between border-t border-[var(--color-border-default)] pt-3">
                       <span className="font-mono text-[10px] uppercase tracking-[0.2em] text-[var(--color-text-tertiary)]">
-                        Спестяваш
+                        Спестено време
                       </span>
                       <span
                         className="font-display text-lg font-bold"
                         style={{ color: "#22c55e" }}
                       >
-                        +{fmtEur(savings)} / месец
+                        {saved}ч ({pct}%) / месец
                       </span>
                     </div>
                   </div>
@@ -233,6 +244,7 @@ export function PainPoints() {
           })}
         </div>
 
+        {/* Total hero */}
         <SectionReveal delay={200}>
           <div
             className="mt-12 overflow-hidden rounded-3xl border p-8 md:p-12"
@@ -249,33 +261,37 @@ export function PainPoints() {
                   className="font-mono text-[10px] uppercase tracking-[0.3em]"
                   style={{ color: "#22c55e" }}
                 >
-                  Общо месечно спестяване
+                  Общо спестено време / месец
                 </p>
                 <p
                   className="mt-3 font-display text-5xl font-extrabold leading-none tracking-tight md:text-7xl"
                   style={{ color: "#22c55e" }}
                 >
-                  {fmtEur(displayed)}
+                  {displayed}ч <span className="text-3xl md:text-5xl">({avgPercent}%)</span>
                 </p>
                 <p className="mt-3 text-sm text-[var(--color-text-secondary)] md:text-base">
-                  Ако имаш дори половината от тези процеси —{" "}
+                  ≈{" "}
                   <span className="font-bold text-[var(--color-text-primary)]">
-                    {fmtEur(Math.floor(totalSavings / 2))}
+                    {Math.round(totalSaved / 22)} работни дни
                   </span>{" "}
-                  всеки месец остават в джоба ти, не на ведомостта.
+                  всеки месец, които оставят на човек да върши{" "}
+                  <span className="font-bold text-[var(--color-text-primary)]">
+                    стратегическа работа
+                  </span>
+                  , а не рутина.
                 </p>
               </div>
 
               <div className="grid grid-cols-3 gap-4 text-center md:gap-6">
-                <Stat label="Ръчно/мес" value={fmtEur(totalManual)} color="#ef4444" />
-                <Stat label="С AI/мес" value={fmtEur(totalAi)} color="#22c55e" />
-                <Stat label="Часа спестени" value={`${PAINS.reduce((s, p) => s + p.hoursPerMonth, 0)}ч`} color="var(--color-accent-cyan)" />
+                <Stat label="Ръчно/мес" value={`${totalManual}ч`} color="#ef4444" />
+                <Stat label="С AI/мес" value={`${totalWithAi}ч`} color="#22c55e" />
+                <Stat label="Свободни дни" value={`${Math.round(totalSaved / 8)}д`} color="var(--color-accent-cyan)" />
               </div>
             </div>
 
             <p className="mt-8 text-center text-xs text-[var(--color-text-tertiary)]">
-              * Калкулации на база средни ставки в България след въвеждане на еврото
-              (8–15 €/час за административна работа) + 30% overhead за осигуровки/болнични/отпуски.
+              * Часовете са усреднени за малки и средни фирми в България. Изчисленията предполагат
+              22 работни дни в месеца.
             </p>
           </div>
         </SectionReveal>
@@ -287,9 +303,7 @@ export function PainPoints() {
 function Stat({ label, value, color }: { label: string; value: string; color: string }) {
   return (
     <div>
-      <p
-        className="font-mono text-[9px] uppercase tracking-[0.2em] text-[var(--color-text-tertiary)]"
-      >
+      <p className="font-mono text-[9px] uppercase tracking-[0.2em] text-[var(--color-text-tertiary)]">
         {label}
       </p>
       <p
