@@ -1,21 +1,15 @@
+import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
-import { createClient } from "@/lib/supabase/server";
 import { AdminShell } from "@/components/admin/AdminShell";
+import { ADMIN_COOKIE, verifySession } from "@/lib/admin/session";
 
 export default async function ProtectedLayout({ children }: { children: React.ReactNode }) {
-  const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
+  const cookieStore = await cookies();
+  const token = cookieStore.get(ADMIN_COOKIE)?.value ?? null;
 
-  if (!user || !user.email) {
+  if (!verifySession(token)) {
     redirect("/admin/login");
   }
 
-  const allowed = (process.env.ALLOWED_ADMIN_EMAILS ?? "")
-    .split(",").map((s) => s.trim().toLowerCase()).filter(Boolean);
-
-  if (!allowed.includes(user.email.toLowerCase())) {
-    redirect("/admin/login?error=forbidden");
-  }
-
-  return <AdminShell email={user.email}>{children}</AdminShell>;
+  return <AdminShell email="Ивайло">{children}</AdminShell>;
 }

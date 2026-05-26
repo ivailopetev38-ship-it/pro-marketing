@@ -3,7 +3,6 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { Menu, X } from "lucide-react";
-import { createClient } from "@/lib/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Logo } from "@/components/landing/Logo";
 import { cn } from "@/lib/utils";
@@ -20,12 +19,12 @@ const LINKS = [
 export function AdminShell({ children, email }: { children: React.ReactNode; email: string }) {
   const path = usePathname();
   const router = useRouter();
-  const supabase = createClient();
   const [open, setOpen] = useState(false);
 
   const signOut = async () => {
-    await supabase.auth.signOut();
+    await fetch("/api/admin/auth", { method: "DELETE" });
     router.push("/admin/login");
+    router.refresh();
   };
 
   useEffect(() => {
