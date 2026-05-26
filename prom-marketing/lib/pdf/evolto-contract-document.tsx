@@ -144,26 +144,20 @@ export function EvoltoContractDocument() {
           сканиран подпис, изпратен по имейл, се признава като валиден.
         </Text>
 
-        <View style={{ marginTop: 40, flexDirection: "row" }}>
+        <View style={{ marginTop: 30, flexDirection: "row" }} wrap={false}>
           <View style={{ flex: 1, paddingRight: 20 }}>
-            <Text style={{ fontSize: 9, fontWeight: 700, marginBottom: 30 }}>
+            <Text style={{ fontSize: 9, fontWeight: 700, marginBottom: 24 }}>
               За Изпълнителя
             </Text>
-            <Text style={{ fontSize: 9, color: "#475569" }}>
-              ___________________________
-            </Text>
-            <Text style={{ fontSize: 9, color: "#475569", marginTop: 4 }}>Ивайло Петев</Text>
-            <Text style={{ fontSize: 9, color: "#475569" }}>ProMarketing LTD</Text>
+            <Text style={{ fontSize: 9, color: "#475569" }}>___________________________</Text>
+            <Text style={{ fontSize: 9, color: "#475569", marginTop: 3 }}>Ивайло Петев · ProMarketing LTD</Text>
           </View>
           <View style={{ flex: 1 }}>
-            <Text style={{ fontSize: 9, fontWeight: 700, marginBottom: 30 }}>
+            <Text style={{ fontSize: 9, fontWeight: 700, marginBottom: 24 }}>
               За Възложителя
             </Text>
-            <Text style={{ fontSize: 9, color: "#475569" }}>
-              ___________________________
-            </Text>
-            <Text style={{ fontSize: 9, color: "#475569", marginTop: 4 }}>Васил Бедров</Text>
-            <Text style={{ fontSize: 9, color: "#475569" }}>Evolto</Text>
+            <Text style={{ fontSize: 9, color: "#475569" }}>___________________________</Text>
+            <Text style={{ fontSize: 9, color: "#475569", marginTop: 3 }}>Васил Бедров · Evolto</Text>
           </View>
         </View>
       </Page>
