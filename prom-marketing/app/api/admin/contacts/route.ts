@@ -41,6 +41,8 @@ export async function POST(request: Request) {
     stage?: string;
     next_followup_at?: string;
     notes?: string;
+    company?: string;
+    full_name?: string;
   };
   try {
     body = await request.json();
@@ -70,6 +72,8 @@ export async function POST(request: Request) {
     if (body.stage) patch.stage = body.stage;
     if (body.next_followup_at) patch.next_followup_at = body.next_followup_at;
     if (body.notes !== undefined) patch.notes = body.notes || null;
+    if (body.company !== undefined) patch.company = body.company || null;
+    if (body.full_name) patch.full_name = body.full_name;
     if (Object.keys(patch).length > 0) {
       await sb.from("contacts").update(patch).eq("id", c.id);
     }
