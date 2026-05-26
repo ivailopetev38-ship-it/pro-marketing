@@ -115,7 +115,7 @@ const MODULES = [
 ];
 
 const PROCESS = [
-  { step: "1", title: "Разговор", body: "Утре 27.05 в 10:00 — обсъждаме процеси, болезнени места, какво искате да отпадне." },
+  { step: "1", title: "Разговор", body: "30 минути — обсъждаме процеси, болезнени места и какво искате да отпадне." },
   { step: "2", title: "План + демо", body: "Подготвям конкретен план + демо с примерни данни от агенция за имоти." },
   { step: "3", title: "Изграждане", body: "От 30 до 60 дни до пълно стартиране — според големината на проекта." },
   { step: "4", title: "Инсталация", body: "1-3 работни дни на място. Тренинг с екипа, настройка с реални данни." },
@@ -274,7 +274,7 @@ export default function GoldenKeyPage() {
             Как работим
           </p>
           <h2 className="mb-16 max-w-3xl font-[family-name:var(--font-editorial)] text-[clamp(36px,6vw,72px)] font-extrabold leading-[0.95]">
-            От утре в 10:00 до <span className="text-[var(--color-gold-bright)]">стартиране</span>.
+            От разговор до <span className="text-[var(--color-gold-bright)]">стартиране</span>.
           </h2>
 
           <div className="space-y-6">
@@ -304,13 +304,13 @@ export default function GoldenKeyPage() {
       <section className="relative border-t border-[var(--color-border-default)] py-32">
         <div className="mx-auto max-w-4xl px-6 text-center md:px-12">
           <p className="mb-6 font-[family-name:var(--font-mono)] text-xs uppercase tracking-[0.4em] text-[var(--color-gold-bright)]">
-            Утре в 10:00
+            Следваща стъпка
           </p>
           <h2 className="mb-8 font-[family-name:var(--font-editorial)] text-[clamp(40px,7vw,84px)] font-extrabold leading-[0.95]">
             Готови сме за <span className="text-[var(--color-gold-bright)]">разговор</span>.
           </h2>
           <p className="mx-auto mb-12 max-w-2xl text-lg leading-relaxed text-[var(--color-text-secondary)]">
-            Тази презентация е основата. На срещата утре обсъждаме конкретно кои модули искате първи и как да ги вплетем във вече съществуващите ви процеси.
+            Тази презентация е основата. На срещата обсъждаме конкретно кои модули искате първи и как да ги вплетем във вече съществуващите ви процеси.
           </p>
 
           <div className="flex flex-col items-center gap-4 sm:flex-row sm:justify-center">
