@@ -17,7 +17,7 @@ export async function GET() {
   return new NextResponse(webStream, {
     headers: {
       "Content-Type": "application/pdf",
-      "Content-Disposition": 'inline; filename="Evolto-Договор-ProMarketing.pdf"',
+      "Content-Disposition": 'inline; filename="Evolto-Dogovor-ProMarketing.pdf"',
       "Cache-Control": "no-store",
     },
   });
