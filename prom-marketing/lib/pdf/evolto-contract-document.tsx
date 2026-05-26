@@ -131,8 +131,7 @@ export function EvoltoContractDocument() {
         </Text>
 
         <Text style={s.intro}>
-          Днес, <Text style={{ fontWeight: 700 }}>{today}</Text>, се сключи настоящият Договор
-          между:
+          Днес, {today}, се сключи настоящият Договор между:
         </Text>
 
         <View style={s.partiesBlock}>
@@ -169,8 +168,7 @@ export function EvoltoContractDocument() {
         <View style={s.article}>
           <Text style={s.articleTitle}>Чл. 2. Цена и плащане</Text>
           <Text style={s.para}>
-            (1) Общата цена за изпълнение на предмета по чл. 1 е{" "}
-            <Text style={{ fontWeight: 700 }}>2 000 (две хиляди) евро без ДДС</Text>.
+            (1) Общата цена за изпълнение на предмета по чл. 1 е 2 000 (две хиляди) евро без ДДС.
           </Text>
           <Text style={s.para}>(2) Цената се заплаща по банкова сметка на Изпълнителя на две вноски:</Text>
           <View style={s.bulletRow}><Text style={s.bullet}>а)</Text><Text style={s.bulletText}>50% (1 000 € без ДДС) — авансово, в рамките на 3 работни дни от подписване на Договора;</Text></View>
@@ -183,18 +181,16 @@ export function EvoltoContractDocument() {
         {/* Article 3 */}
         <View style={s.article}>
           <Text style={s.articleTitle}>Чл. 3. Срокове</Text>
-          <View style={s.bulletRow}><Text style={s.bullet}>(1)</Text><Text style={s.bulletText}><Text style={{ fontWeight: 700 }}>Срок за изграждане:</Text> 10 (десет) работни дни от получаване на авансовото плащане.</Text></View>
-          <View style={s.bulletRow}><Text style={s.bullet}>(2)</Text><Text style={s.bulletText}><Text style={{ fontWeight: 700 }}>Инсталация на място:</Text> 1 (един) работен ден в офиса на Възложителя — настройка на корпоративен имейл, свързване на социалните мрежи, инсталация на Cloud и Hermes.</Text></View>
-          <View style={s.bulletRow}><Text style={s.bullet}>(3)</Text><Text style={s.bulletText}><Text style={{ fontWeight: 700 }}>Допълнителна донастройка:</Text> при необходимост от fine-tuning след инсталацията — до 30 (тридесет) календарни дни допълнителни онлайн срещи, без допълнително заплащане. Конкретният брой срещи зависи от времето, необходимо за пълна настройка.</Text></View>
+          <View style={s.bulletRow}><Text style={s.bullet}>(1)</Text><Text style={s.bulletText}>Срок за изграждане: 10 (десет) работни дни от получаване на авансовото плащане.</Text></View>
+          <View style={s.bulletRow}><Text style={s.bullet}>(2)</Text><Text style={s.bulletText}>Инсталация на място: 1 (един) работен ден в офиса на Възложителя — настройка на корпоративен имейл, свързване на социалните мрежи, инсталация на Cloud и Hermes.</Text></View>
+          <View style={s.bulletRow}><Text style={s.bullet}>(3)</Text><Text style={s.bulletText}>Допълнителна донастройка: при необходимост от fine-tuning след инсталацията — до 30 (тридесет) календарни дни допълнителни онлайн срещи, без допълнително заплащане. Конкретният брой срещи зависи от времето, необходимо за пълна настройка.</Text></View>
         </View>
 
         {/* Article 4 */}
         <View style={s.article}>
           <Text style={s.articleTitle}>Чл. 4. Поддръжка</Text>
           <Text style={s.para}>
-            (1) Изпълнителят осигурява <Text style={{ fontWeight: 700 }}>30 (тридесет) календарни дни</Text>{" "}
-            безплатна поддръжка след приключване на инсталацията — отговори на въпроси,
-            съдействие при оптимизация на системата, корекции на дефекти.
+            (1) Изпълнителят осигурява 30 (тридесет) календарни дни безплатна поддръжка след приключване на инсталацията — отговори на въпроси, съдействие при оптимизация на системата, корекции на дефекти.
           </Text>
           <Text style={s.para}>
             (2) След изтичане на този срок поддръжка се предоставя по отделна писмена договорка.
@@ -233,8 +229,7 @@ export function EvoltoContractDocument() {
             съгласие на другата страна.
           </Text>
           <Text style={s.para}>
-            (3) Задължението за конфиденциалност остава в сила <Text style={{ fontWeight: 700 }}>5 (пет) години</Text>{" "}
-            след прекратяване на Договора.
+            (3) Задължението за конфиденциалност остава в сила 5 (пет) години след прекратяване на Договора.
           </Text>
           <Text style={s.para}>
             (4) В случай на нарушение — нарушителят дължи неустойка в размер на цената по чл. 2,
