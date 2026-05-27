@@ -160,7 +160,7 @@ const MODULES = [
   { n: "02", title: "Разпределение по брокер", body: "Лидът директно отива при правилния брокер според район, специализация и натовареност.", bullets: ["Правила по район и специализация", "Авто-баланс на натовареност", "Round-robin или приоритет", "Push нотификации в реално време"] },
   { n: "03", title: "Custom нива в CRM", body: "Сами си създавате stage-овете — без програмист. Drag & drop.", bullets: ["Нови → Контакт → Огледан → Оферта → Сделка", "Добавяте нови нива в движение", "Авто-движение между нивата с правила", "Pipeline + Kanban визуализация"] },
   { n: "04", title: "AI CRM · оценка и прогноза", body: "AI оценява всеки лид (топъл/студен) и предсказва вероятност за сделка.", bullets: ["Score 0-100 спрямо качество", "Прогноза 'време до сделка' и бюджет", "Авто follow-up таски на брокера", "ROI анализ по източник на лиди"] },
-  { n: "05", title: "Чат за брокери", body: "Вътрешен бизнес чат с AI помощник — ваше пространство.", bullets: ["Канали по екипи, район, сделка", "Споделяне на имоти и документи", "AI: 'Намери ми всички 3-стайни в Тракия'", "Voice → text + auto-summary"] },
+  { n: "05", title: "Документи · договори и оферти", body: "Авто-генериране на оферти, договори, актове от данните в CRM-а.", bullets: ["Шаблони · договор за посредничество, наем, продажба", "Авто-попълване от данни за клиент и имот", "Електронен подпис от телефон/имейл", "PDF архив по клиент/имот в CRM-а"] },
   { n: "06", title: "HR · форми за персонал", body: "Кандидати за брокери — автоматизирана селекция.", bullets: ["Форма на сайт и социални мрежи", "AI скрининг по опит и мотивация", "Авто интервю scheduling", "База от минали кандидати"] },
   { n: "07", title: "Промотиране на обяви", body: "Имотите и експертизата ви достигат до повече хора.", bullets: ["Auto-публикуване във FB, IG, OLX, imot.bg", "AI описания на имоти от снимки", "Reels от обиколка на имот", "Targeted реклами по типов клиент"] },
   { n: "08", title: "Всички социални мрежи", body: "FB, IG, TikTok, LinkedIn, YouTube от един dashboard.", bullets: ["Един редактор → всички мрежи наведнъж", "Календар за следващите 30 дни", "DM и коментари в единна inbox", "Брандови шаблони за всеки пост"] },
@@ -225,6 +225,33 @@ const TIERS = [
   },
 ];
 
+const RECURRING_COSTS = [
+  {
+    badge: "ПОДДРЪЖКА",
+    title: "Месечна поддръжка и развитие",
+    price: "300 – 400 € / мес",
+    features: [
+      "Технически промени и нови функции по заявка",
+      "Корекции на грешки и оптимизация",
+      "Постоянно следене 24/7 + реагиране < 24ч",
+      "Тренинг на нови служители",
+      "Месечен отчет",
+    ],
+  },
+  {
+    badge: "ХОСТИНГ",
+    title: "Supabase · сигурно място",
+    price: "30 – 60 € / мес",
+    features: [
+      "Supabase Pro · EU (Frankfurt) · GDPR",
+      "Encrypted at rest · AES-256",
+      "Daily backup (7 дни recovery)",
+      "Weekly off-site → Wasabi EU",
+      "Възможност за още encryption keys",
+    ],
+  },
+];
+
 const SECURITY_HIGHLIGHTS = [
   "🔐 GDPR-съвместимо · Supabase EU (Frankfurt) · AES-256 encryption at rest",
   "🔄 3-слоен backup · Daily PITR + Weekly off-site + Monthly архив",
@@ -252,7 +279,7 @@ export function GoldenKeyPresentationDocument() {
           </Text>
           <Text style={s.tag}>Агенция за недвижими имоти</Text>
           <Text style={s.lead}>
-            Тотална автоматизация — лийдове, разпределение, нива в CRM, AI оценка, чат за брокери,
+            Тотална автоматизация — лийдове, разпределение, нива в CRM, AI оценка, документи и оферти,
             HR форми, промотиране на обяви, всички социални мрежи в едно. Брокерите се фокусират
             върху сделките, не върху ръчната работа.
           </Text>
@@ -296,6 +323,27 @@ export function GoldenKeyPresentationDocument() {
           </View>
           <Text style={{ fontSize: 8, color: C.inkSoft, marginTop: 8, textAlign: "center" }}>
             Плащане: 50% при подписване · 50% при стартиране · ДДС се добавя при фактуриране, ако е приложим
+          </Text>
+
+          <Text style={s.sectionTitle}>Ежемесечни разходи · след стартиране</Text>
+          <View style={s.tiersRow} wrap={false}>
+            {RECURRING_COSTS.map((r) => (
+              <View key={r.title} style={s.tierCard}>
+                <Text style={s.tierBadge}>{r.badge}</Text>
+                <Text style={s.tierTitle}>{r.title}</Text>
+                <Text style={s.tierPrice}>{r.price}</Text>
+                <Text style={s.tierPriceSub}>без ДДС</Text>
+                {r.features.map((f) => (
+                  <View key={f} style={s.tierFeature}>
+                    <Text style={s.tierCheck}>✓</Text>
+                    <Text style={s.tierFeatureText}>{f}</Text>
+                  </View>
+                ))}
+              </View>
+            ))}
+          </View>
+          <Text style={{ fontSize: 7.5, color: C.inkSoft, marginTop: 6, textAlign: "center" }}>
+            Алтернатива: почасова поддръжка 50 €/час, но абонаментът е по-изгоден за активен бизнес.
           </Text>
 
           <Text style={s.sectionTitle}>Сигурност на данните · GDPR</Text>

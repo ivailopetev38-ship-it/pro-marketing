@@ -54,15 +54,15 @@ const MODULES = [
   },
   {
     n: "05",
-    title: "WhatsApp + Telegram · интеграция",
-    body: "Ползвате тези канали? Свързваме ги с CRM-а — без да сменяте навиците на екипа.",
+    title: "Документи · договори и оферти",
+    body: "Авто-генериране на оферти, договори, актове — директно от данните в CRM-а, готови за подпис.",
     bullets: [
-      "WhatsApp Business API → разговорите с клиенти автоматично в CRM",
-      "Telegram групи на брокерите → AI summary на дискусии",
-      "Auto-логване на размяна на имоти/документи в картата на клиента",
-      "AI команди в Telegram: 'Намери ми всички 3-стайни в Тракия до 150к'",
-      "Voice messages → текст + автоматичен запис в timeline-а",
-      "Не сменяте Viber/WhatsApp — обогатяваме ги с автоматизация",
+      "Шаблони на договори: предварителен договор, договор за наем, посредничество",
+      "Автоматично попълване от данните на клиента и имота",
+      "Електронен подпис · клиентът подписва от телефон/имейл",
+      "Авто-генериране на оферти (PDF) при натискане на бутон",
+      "Архив на всички документи по клиент/имот в CRM-а",
+      "GDPR · клиентите могат да заявят експорт/изтриване на своите данни",
     ],
   },
   {
@@ -188,6 +188,39 @@ const TIERS = [
       "Monthly archive backup · 5 години retention",
     ],
     cta: "Пълно решение",
+  },
+];
+
+const RECURRING = [
+  {
+    badge: "Поддръжка",
+    title: "Месечна поддръжка и развитие",
+    price: "300 – 400 €",
+    priceSub: "на месец · без ДДС",
+    color: "var(--color-gold)",
+    features: [
+      "Технически промени и нови функции по заявка",
+      "Корекции на грешки и оптимизация",
+      "Постоянно следене на работоспособност 24/7",
+      "Тренинг на нови служители при наемане",
+      "Реагиране в рамките на 24 часа за критични проблеми",
+      "Месечен отчет за свършена работа",
+    ],
+  },
+  {
+    badge: "Хостинг",
+    title: "Supabase · сигурно място за данните",
+    price: "30 – 60 €",
+    priceSub: "на месец · спрямо обем",
+    color: "var(--color-gold-bright)",
+    features: [
+      "Supabase Pro · EU (Frankfurt) · GDPR-съвместимо",
+      "Encrypted at rest · AES-256 · TLS in transit",
+      "Daily point-in-time backup (7 дни recovery)",
+      "Weekly off-site backup → Wasabi EU",
+      "Възможност за добавяне на още encryption keys при нужда",
+      "Автоматично скалиране при ръст на данните",
+    ],
   },
 ];
 
@@ -339,7 +372,7 @@ export default function GoldenKeyPage() {
                   crm.goldenkey.bg/dashboard
                 </span>
                 <span className="rounded-full bg-[var(--color-gold)]/20 px-3 py-1 text-[10px] font-mono text-[var(--color-gold-bright)]">
-                  👤 Иво · мениджър
+                  👤 Росен · собственик
                 </span>
               </div>
 
@@ -348,7 +381,7 @@ export default function GoldenKeyPage() {
                 <div className="mb-6 flex flex-wrap items-end justify-between gap-3">
                   <div>
                     <p className="font-mono text-[10px] uppercase tracking-[0.3em] text-[var(--color-gold)]">GOLDEN KEY · 27 МАЙ 2026</p>
-                    <h4 className="mt-1 font-display text-2xl font-bold text-white">Добро утро, Иво</h4>
+                    <h4 className="mt-1 font-display text-2xl font-bold text-white">Добро утро, Росене</h4>
                   </div>
                   <div className="text-right">
                     <p className="text-[10px] text-[var(--color-text-tertiary)]">Live · обновено току що</p>
@@ -857,7 +890,7 @@ export default function GoldenKeyPage() {
             </div>
           </div>
 
-          {/* MOCKUP 10: HR + WhatsApp */}
+          {/* MOCKUP 10: HR + Документи */}
           <div className="mb-20 grid gap-6 lg:grid-cols-2">
             {/* HR */}
             <div>
@@ -898,45 +931,48 @@ export default function GoldenKeyPage() {
               </div>
             </div>
 
-            {/* WhatsApp / Telegram */}
+            {/* Документи · договори и оферти */}
             <div>
               <div className="mb-4 flex items-center gap-3">
                 <span className="font-mono text-[10px] uppercase tracking-[0.3em] text-[var(--color-gold-bright)]">Изглед 11</span>
-                <h3 className="font-[family-name:var(--font-editorial)] text-2xl font-bold">WhatsApp + Telegram · вход за CRM</h3>
+                <h3 className="font-[family-name:var(--font-editorial)] text-2xl font-bold">Документи · договори и оферти</h3>
               </div>
               <p className="mb-4 text-sm leading-relaxed text-[var(--color-text-secondary)]">
-                Брокерът разменя WhatsApp/Viber съобщения с клиента — те влизат автоматично в timeline-а.
+                Авто-генериране на договори и оферти от данните в CRM-а. Електронен подпис.
               </p>
               <div className="rounded-lg border-2 border-[var(--color-border-bright)] bg-[#0f1a2e] p-4 shadow-2xl">
-                <div className="mb-3 flex items-center gap-2 border-b border-white/10 pb-2">
-                  <span className="rounded bg-[#25D366] px-1.5 py-0.5 text-[9px] font-bold text-white">WhatsApp</span>
-                  <span className="text-[10px] text-white/60">Мария ↔ Иван Костов</span>
-                  <span className="ml-auto rounded bg-[var(--color-gold)]/20 px-1.5 py-0.5 text-[9px] text-[var(--color-gold-bright)]">→ CRM</span>
+                <div className="mb-3 flex items-center justify-between border-b border-white/10 pb-2">
+                  <span className="text-[10px] font-mono text-white/60">📄 Документи · Иван Костов</span>
+                  <button className="rounded bg-[var(--color-gold)] px-2 py-0.5 text-[9px] font-bold text-black">+ Нов</button>
                 </div>
                 <div className="space-y-2">
-                  <div className="flex">
-                    <div className="max-w-[80%] rounded-lg rounded-bl-sm bg-white/5 px-3 py-1.5 text-[10px] text-white/90">
-                      Здравейте, видях обявата за апартамента в Тракия. Може ли оглед?
+                  {[
+                    { icon: "📜", name: "Договор за посредничество", status: "✍️ Подписан", color: "#22c55e", date: "вчера" },
+                    { icon: "💎", name: "Оферта · ап. Тракия €128К", status: "👀 Видяна 3х", color: "#facc15", date: "преди 2 дни" },
+                    { icon: "📋", name: "Предварителен договор", status: "📤 Изпратен", color: "#06b6d4", date: "преди 3 дни" },
+                    { icon: "📄", name: "Декларация ЗЗЛД (GDPR)", status: "✍️ Подписан", color: "#22c55e", date: "1 седм." },
+                  ].map((d) => (
+                    <div key={d.name} className="flex items-center justify-between rounded border border-white/10 bg-white/5 p-2">
+                      <div className="flex items-center gap-2">
+                        <span className="text-base">{d.icon}</span>
+                        <div>
+                          <p className="text-[10px] font-medium text-white">{d.name}</p>
+                          <p className="text-[8px] text-white/50">{d.date}</p>
+                        </div>
+                      </div>
+                      <span
+                        className="rounded-full px-2 py-0.5 text-[8px] font-bold"
+                        style={{ background: `${d.color}22`, color: d.color }}
+                      >
+                        {d.status}
+                      </span>
                     </div>
-                  </div>
-                  <div className="flex justify-end">
-                    <div className="max-w-[80%] rounded-lg rounded-br-sm bg-[#25D366]/20 px-3 py-1.5 text-[10px] text-white">
-                      Разбира се! Утре в 14:00 свободен?
-                    </div>
-                  </div>
-                  <div className="flex">
-                    <div className="max-w-[80%] rounded-lg rounded-bl-sm bg-white/5 px-3 py-1.5 text-[10px] text-white/90">
-                      Да, перфектно. Адресът?
-                    </div>
-                  </div>
+                  ))}
                 </div>
-                <div className="mt-3 rounded border border-[var(--color-gold)]/30 bg-[var(--color-gold)]/5 p-2">
-                  <p className="text-[9px] text-[var(--color-gold-bright)]">🤖 AI авто-действия:</p>
-                  <ul className="mt-1 space-y-0.5 text-[10px] text-white/70">
-                    <li>✓ Създадена карта на клиент · Иван Костов</li>
-                    <li>✓ Запазен оглед за утре 14:00 (Мария + Тракия)</li>
-                    <li>✓ Имотът маркиран „с интерес"</li>
-                  </ul>
+                <div className="mt-3 grid grid-cols-3 gap-1 border-t border-white/10 pt-2">
+                  <button className="rounded border border-white/20 py-1 text-[9px] text-white/80">📥 PDF</button>
+                  <button className="rounded border border-white/20 py-1 text-[9px] text-white/80">✍️ e-sign</button>
+                  <button className="rounded border border-white/20 py-1 text-[9px] text-white/80">📤 Email</button>
                 </div>
               </div>
             </div>
@@ -1074,6 +1110,63 @@ export default function GoldenKeyPage() {
 
           <p className="mt-10 text-center text-xs text-[var(--color-text-tertiary)]">
             Плащане: 50% при подписване · 50% при стартиране · ДДС се добавя при фактуриране, ако е приложим
+          </p>
+        </div>
+      </section>
+
+      {/* RECURRING · ЕЖЕМЕСЕЧНИ РАЗХОДИ */}
+      <section id="recurring" className="relative border-t border-[var(--color-border-default)] py-32" style={{ background: "rgba(212, 175, 55, 0.025)" }}>
+        <div className="mx-auto max-w-6xl px-6 md:px-12">
+          <p className="mb-4 font-[family-name:var(--font-mono)] text-xs uppercase tracking-[0.4em] text-[var(--color-gold-bright)]">
+            След стартиране
+          </p>
+          <h2 className="mb-4 max-w-3xl font-[family-name:var(--font-editorial)] text-[clamp(36px,6vw,72px)] font-extrabold leading-[0.95]">
+            Ежемесечни <span className="text-[var(--color-gold-bright)]">разходи</span>.
+          </h2>
+          <p className="mb-16 max-w-3xl text-base leading-relaxed text-[var(--color-text-secondary)]">
+            След първоначалното изграждане системата трябва да живее, да расте и да съхранява данните на клиентите ви сигурно. Това са постоянните оперативни разходи.
+          </p>
+
+          <div className="grid gap-6 md:grid-cols-2">
+            {RECURRING.map((r) => (
+              <div
+                key={r.title}
+                className="flex flex-col rounded-lg border bg-[var(--color-bg-deep)] p-7"
+                style={{ borderColor: "var(--color-border-default)", borderTopWidth: "3px", borderTopColor: r.color }}
+              >
+                <p className="mb-2 font-[family-name:var(--font-mono)] text-[10px] uppercase tracking-[0.3em]" style={{ color: r.color }}>
+                  {r.badge}
+                </p>
+                <h3 className="mb-3 font-[family-name:var(--font-editorial)] text-2xl font-bold">
+                  {r.title}
+                </h3>
+                <div className="mb-1 flex items-baseline gap-2">
+                  <span
+                    className="font-[family-name:var(--font-editorial)] text-4xl font-extrabold"
+                    style={{ color: r.color }}
+                  >
+                    {r.price}
+                  </span>
+                </div>
+                <p className="mb-6 text-xs text-[var(--color-text-tertiary)]">
+                  {r.priceSub}
+                </p>
+                <ul className="flex-1 space-y-2">
+                  {r.features.map((f, i) => (
+                    <li key={i} className="flex gap-2 text-sm leading-relaxed">
+                      <span aria-hidden style={{ color: r.color }}>
+                        ✓
+                      </span>
+                      <span className="text-[var(--color-text-primary)]">{f}</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            ))}
+          </div>
+
+          <p className="mt-10 text-center text-xs text-[var(--color-text-tertiary)]">
+            Възможна е почасова поддръжка вместо абонамент (50 €/час), но абонаментът е по-изгоден за активен бизнес.
           </p>
         </div>
       </section>
