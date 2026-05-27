@@ -152,82 +152,26 @@ export default async function AdminDashboard() {
         />
       </div>
 
-      {/* 🆕 Нови лидове — последните 72 часа, с бележки */}
+      {/* New leads quick link */}
       {newLeads.length > 0 && (
-        <section className="mb-8">
-          <h2 className="mb-3 flex items-center gap-2 font-mono text-xs uppercase tracking-[0.3em] text-[#facc15]">
-            <span>🆕</span> Нови лидове · {newLeads.length} за 72 часа
-          </h2>
-          <div className="grid gap-3 md:grid-cols-2">
-            {newLeads.map((c) => (
-              <Link
-                key={c.id}
-                href={`/admin/clients/${c.id}`}
-                className="block rounded-lg border-2 border-[#facc15]/30 bg-[#facc15]/5 p-4 transition-colors hover:border-[#facc15]"
-              >
-                <div className="mb-2 flex items-start justify-between gap-3">
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-2">
-                      <p className="font-bold text-[var(--color-text-primary)]">
-                        {c.full_name || c.email || "—"}
-                      </p>
-                      <span
-                        className="rounded-full px-2 py-0.5 text-[10px] font-bold uppercase"
-                        style={{
-                          background: `${STAGE_COLOR[c.stage]}22`,
-                          color: STAGE_COLOR[c.stage],
-                        }}
-                      >
-                        {STAGE_LABEL[c.stage]}
-                      </span>
-                    </div>
-                    {c.company && (
-                      <p className="mt-0.5 text-xs text-[var(--color-text-tertiary)]">
-                        {c.company}
-                      </p>
-                    )}
-                  </div>
-                  <span className="font-mono text-[10px] uppercase tracking-wider text-[#facc15] whitespace-nowrap">
-                    {formatRelativeShort(c.created_at)}
-                  </span>
-                </div>
-
-                {/* Контакти */}
-                <div className="mb-2 flex flex-wrap gap-3 text-[11px]">
-                  {c.email && (
-                    <span className="font-mono text-[var(--color-text-secondary)]">
-                      📧 {c.email}
-                    </span>
-                  )}
-                  {c.phone && (
-                    <span className="font-mono text-[var(--color-text-secondary)]">
-                      📞 {c.phone}
-                    </span>
-                  )}
-                </div>
-
-                {/* Бележки */}
-                {c.notes && (
-                  <p className="mt-2 line-clamp-4 whitespace-pre-wrap text-xs leading-relaxed text-[var(--color-text-secondary)]">
-                    {c.notes}
-                  </p>
-                )}
-
-                {/* Footer — източник + следваща стъпка */}
-                <div className="mt-3 flex flex-wrap items-center justify-between gap-2 text-[10px] text-[var(--color-text-tertiary)]">
-                  <span className="font-mono uppercase tracking-wider">
-                    Източник: {sourceLabel(c.source)}
-                  </span>
-                  {c.next_followup_at && (
-                    <span className="font-mono text-[#22c55e]">
-                      ⏰ {formatFollowup(c.next_followup_at)}
-                    </span>
-                  )}
-                </div>
-              </Link>
-            ))}
-          </div>
-        </section>
+        <div className="mb-8">
+          <Link
+            href="/admin/new-leads"
+            className="flex items-center justify-between gap-3 rounded-lg border border-[#facc15]/30 bg-[#facc15]/5 p-4 transition-colors hover:border-[#facc15]"
+          >
+            <div>
+              <p className="font-mono text-xs uppercase tracking-[0.3em] text-[#facc15]">
+                🆕 Нови лидове · последните 72 часа
+              </p>
+              <p className="mt-1 text-sm text-[var(--color-text-secondary)]">
+                {newLeads.length} нови контакти чакат обработка
+              </p>
+            </div>
+            <span className="rounded-full bg-[#facc15]/20 px-4 py-2 text-xl font-bold text-[#facc15]">
+              {newLeads.length} →
+            </span>
+          </Link>
+        </div>
       )}
 
       {/* Upcoming follow-ups alert */}
