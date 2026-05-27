@@ -98,6 +98,12 @@ export default async function AdminDashboard() {
     (c) => c.next_followup_at && new Date(c.next_followup_at).getTime() < now - 24 * 3600 * 1000
   );
 
+  // 🆕 Нови лидове — създадени през последните 72 часа, ясно подредени с бележките
+  const seventyTwoHoursAgo = now - 72 * 3600 * 1000;
+  const newLeads = enriched
+    .filter((c) => new Date(c.created_at).getTime() >= seventyTwoHoursAgo)
+    .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
+
   // Приоритет: най-близо до сделка отляво → леад отдясно
   const stagesToShow: ContactStage[] = [
     "won",
@@ -145,6 +151,84 @@ export default async function AdminDashboard() {
           color={overdueFollowups.length > 0 ? "#ef4444" : "#7da8cc"}
         />
       </div>
+
+      {/* 🆕 Нови лидове — последните 72 часа, с бележки */}
+      {newLeads.length > 0 && (
+        <section className="mb-8">
+          <h2 className="mb-3 flex items-center gap-2 font-mono text-xs uppercase tracking-[0.3em] text-[#facc15]">
+            <span>🆕</span> Нови лидове · {newLeads.length} за 72 часа
+          </h2>
+          <div className="grid gap-3 md:grid-cols-2">
+            {newLeads.map((c) => (
+              <Link
+                key={c.id}
+                href={`/admin/clients/${c.id}`}
+                className="block rounded-lg border-2 border-[#facc15]/30 bg-[#facc15]/5 p-4 transition-colors hover:border-[#facc15]"
+              >
+                <div className="mb-2 flex items-start justify-between gap-3">
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-2">
+                      <p className="font-bold text-[var(--color-text-primary)]">
+                        {c.full_name || c.email || "—"}
+                      </p>
+                      <span
+                        className="rounded-full px-2 py-0.5 text-[10px] font-bold uppercase"
+                        style={{
+                          background: `${STAGE_COLOR[c.stage]}22`,
+                          color: STAGE_COLOR[c.stage],
+                        }}
+                      >
+                        {STAGE_LABEL[c.stage]}
+                      </span>
+                    </div>
+                    {c.company && (
+                      <p className="mt-0.5 text-xs text-[var(--color-text-tertiary)]">
+                        {c.company}
+                      </p>
+                    )}
+                  </div>
+                  <span className="font-mono text-[10px] uppercase tracking-wider text-[#facc15] whitespace-nowrap">
+                    {formatRelativeShort(c.created_at)}
+                  </span>
+                </div>
+
+                {/* Контакти */}
+                <div className="mb-2 flex flex-wrap gap-3 text-[11px]">
+                  {c.email && (
+                    <span className="font-mono text-[var(--color-text-secondary)]">
+                      📧 {c.email}
+                    </span>
+                  )}
+                  {c.phone && (
+                    <span className="font-mono text-[var(--color-text-secondary)]">
+                      📞 {c.phone}
+                    </span>
+                  )}
+                </div>
+
+                {/* Бележки */}
+                {c.notes && (
+                  <p className="mt-2 line-clamp-4 whitespace-pre-wrap text-xs leading-relaxed text-[var(--color-text-secondary)]">
+                    {c.notes}
+                  </p>
+                )}
+
+                {/* Footer — източник + следваща стъпка */}
+                <div className="mt-3 flex flex-wrap items-center justify-between gap-2 text-[10px] text-[var(--color-text-tertiary)]">
+                  <span className="font-mono uppercase tracking-wider">
+                    Източник: {sourceLabel(c.source)}
+                  </span>
+                  {c.next_followup_at && (
+                    <span className="font-mono text-[#22c55e]">
+                      ⏰ {formatFollowup(c.next_followup_at)}
+                    </span>
+                  )}
+                </div>
+              </Link>
+            ))}
+          </div>
+        </section>
+      )}
 
       {/* Upcoming follow-ups alert */}
       {upcomingFollowups.length > 0 && (
@@ -382,4 +466,27 @@ function formatFollowup(iso: string): string {
   if (diff === -1) return `Вчера ${time}`;
   if (diff < 0) return `Преди ${Math.abs(diff)} дни`;
   return d.toLocaleDateString("bg-BG", { day: "2-digit", month: "short" }) + " " + time;
+}
+
+function formatRelativeShort(iso: string): string {
+  const ms = Date.now() - new Date(iso).getTime();
+  const minutes = Math.floor(ms / (1000 * 60));
+  if (minutes < 60) return `преди ${minutes} мин`;
+  const hours = Math.floor(minutes / 60);
+  if (hours < 24) return `преди ${hours} ч`;
+  const days = Math.floor(hours / 24);
+  if (days === 1) return "вчера";
+  if (days < 7) return `преди ${days} дни`;
+  return new Date(iso).toLocaleDateString("bg-BG", { day: "2-digit", month: "short" });
+}
+
+function sourceLabel(source: string): string {
+  const map: Record<string, string> = {
+    meta_lead: "📥 Meta реклама",
+    website_form: "🌐 Уебсайт форма",
+    cal_booking: "📅 Cal.com",
+    email: "✉️ Имейл",
+    manual: "✋ Ръчно",
+  };
+  return map[source] ?? source;
 }
