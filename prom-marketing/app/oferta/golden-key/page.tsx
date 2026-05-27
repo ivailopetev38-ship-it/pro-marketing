@@ -272,13 +272,394 @@ export default function GoldenKeyPage() {
             </p>
           </div>
 
-          <a
-            href="#modules"
-            className="mt-20 inline-flex items-center gap-2 text-sm uppercase tracking-[0.25em] text-[var(--color-text-tertiary)] transition-colors hover:text-[var(--color-gold-bright)]"
-          >
-            Какво изграждаме
-            <span aria-hidden>↓</span>
-          </a>
+          <div className="mt-20 flex flex-wrap gap-4">
+            <a
+              href="#design"
+              className="inline-flex items-center gap-2 rounded-full border-2 px-6 py-3 text-sm font-bold uppercase tracking-[0.15em] transition-colors"
+              style={{
+                borderColor: "var(--color-gold-bright)",
+                color: "var(--color-gold-bright)",
+                background: "rgba(212, 175, 55, 0.08)",
+              }}
+            >
+              🎨 Виж дизайна
+              <span aria-hidden>↓</span>
+            </a>
+            <a
+              href="#tiers"
+              className="inline-flex items-center gap-2 rounded-full border px-6 py-3 text-sm uppercase tracking-[0.15em] text-[var(--color-text-secondary)] transition-colors hover:border-[var(--color-gold-bright)] hover:text-[var(--color-gold-bright)]"
+              style={{ borderColor: "var(--color-border-default)" }}
+            >
+              💎 Цени и нива
+            </a>
+            <a
+              href="#modules"
+              className="inline-flex items-center gap-2 text-sm uppercase tracking-[0.15em] text-[var(--color-text-tertiary)] transition-colors hover:text-[var(--color-gold-bright)]"
+            >
+              9-те модула
+              <span aria-hidden>→</span>
+            </a>
+          </div>
+        </div>
+      </section>
+
+      {/* VISUAL DESIGN MOCKUPS */}
+      <section id="design" className="relative border-t border-[var(--color-border-default)] py-32" style={{ background: "rgba(212, 175, 55, 0.02)" }}>
+        <div className="mx-auto max-w-6xl px-6 md:px-12">
+          <p className="mb-4 font-[family-name:var(--font-mono)] text-xs uppercase tracking-[0.4em] text-[var(--color-gold-bright)]">
+            Как ще изглежда системата ви
+          </p>
+          <h2 className="mb-4 max-w-3xl font-[family-name:var(--font-editorial)] text-[clamp(36px,6vw,72px)] font-extrabold leading-[0.95]">
+            Дизайн на <span className="text-[var(--color-gold-bright)]">CRM-а</span>.
+          </h2>
+          <p className="mb-16 max-w-3xl text-base leading-relaxed text-[var(--color-text-secondary)]">
+            Не показваме слайдове с обещания. Това са визуални mock-ups на реалните екрани, които ще получите. Всеки модул, всеки изглед, в подробности.
+          </p>
+
+          {/* MOCKUP 1: Главен Dashboard */}
+          <div className="mb-20">
+            <div className="mb-4 flex items-center gap-3">
+              <span className="font-mono text-[10px] uppercase tracking-[0.3em] text-[var(--color-gold-bright)]">Изглед 01</span>
+              <h3 className="font-[family-name:var(--font-editorial)] text-2xl font-bold">Главен Dashboard</h3>
+            </div>
+            <p className="mb-6 max-w-3xl text-sm leading-relaxed text-[var(--color-text-secondary)]">
+              Влизаш сутрин и виждаш всичко важно за 30 секунди. KPI карти, графика на тенденции, топ брокери, последни активности — всичко на едно място, mobile-friendly.
+            </p>
+
+            {/* Browser Window Mock */}
+            <div className="overflow-hidden rounded-lg border-2 border-[var(--color-border-bright)] bg-[#0f1a2e] shadow-2xl">
+              {/* Top bar */}
+              <div className="flex items-center gap-2 border-b border-[var(--color-border-default)] bg-black/40 px-4 py-2.5">
+                <span className="h-3 w-3 rounded-full bg-red-500/60" />
+                <span className="h-3 w-3 rounded-full bg-yellow-500/60" />
+                <span className="h-3 w-3 rounded-full bg-green-500/60" />
+                <span className="ml-3 flex-1 rounded bg-white/5 px-3 py-1 text-xs font-mono text-[var(--color-text-secondary)]">
+                  crm.goldenkey.bg/dashboard
+                </span>
+                <span className="rounded-full bg-[var(--color-gold)]/20 px-3 py-1 text-[10px] font-mono text-[var(--color-gold-bright)]">
+                  👤 Иво · мениджър
+                </span>
+              </div>
+
+              <div className="p-6">
+                {/* Header */}
+                <div className="mb-6 flex flex-wrap items-end justify-between gap-3">
+                  <div>
+                    <p className="font-mono text-[10px] uppercase tracking-[0.3em] text-[var(--color-gold)]">GOLDEN KEY · 27 МАЙ 2026</p>
+                    <h4 className="mt-1 font-display text-2xl font-bold text-white">Добро утро, Иво</h4>
+                  </div>
+                  <div className="text-right">
+                    <p className="text-[10px] text-[var(--color-text-tertiary)]">Live · обновено току що</p>
+                    <p className="text-xs text-[#22c55e]">🟢 Всичко работи</p>
+                  </div>
+                </div>
+
+                {/* KPI Cards */}
+                <div className="mb-6 grid grid-cols-2 gap-3 md:grid-cols-4">
+                  {[
+                    { label: "АКТИВНИ КЛИЕНТИ", value: "127", hint: "+12 тази седмица", color: "#06b6d4" },
+                    { label: "СДЕЛКИ · МАЙ", value: "23", hint: "€127K общ оборот", color: "#22c55e" },
+                    { label: "НОВИ ЛИДОВЕ", value: "45", hint: "32 FB · 13 уебсайт", color: "#ec4899" },
+                    { label: "ОГЛЕДИ ДНЕС", value: "8", hint: "по 6 брокери", color: "#facc15" },
+                  ].map((s) => (
+                    <div key={s.label} className="rounded-md border border-white/10 bg-white/5 p-3">
+                      <p className="font-mono text-[9px] uppercase tracking-wider text-white/50">{s.label}</p>
+                      <p className="mt-1 text-2xl font-bold" style={{ color: s.color }}>{s.value}</p>
+                      <p className="mt-0.5 text-[10px] text-white/60">{s.hint}</p>
+                    </div>
+                  ))}
+                </div>
+
+                {/* Chart placeholder + Top brokers */}
+                <div className="grid gap-4 md:grid-cols-2">
+                  <div className="rounded-md border border-white/10 bg-white/5 p-4">
+                    <p className="mb-3 font-mono text-[10px] uppercase tracking-wider text-white/60">📈 СДЕЛКИ · ПОСЛЕДНИ 12 СЕДМИЦИ</p>
+                    <div className="flex h-32 items-end justify-around gap-1">
+                      {[3, 5, 4, 7, 6, 8, 5, 9, 11, 8, 10, 12].map((h, i) => (
+                        <div
+                          key={i}
+                          className="flex-1 rounded-t bg-gradient-to-t from-[var(--color-gold)] to-[var(--color-gold-bright)]"
+                          style={{ height: `${(h / 12) * 100}%`, opacity: 0.7 + (i / 24) }}
+                        />
+                      ))}
+                    </div>
+                    <div className="mt-2 flex justify-between text-[9px] text-white/40">
+                      <span>март</span>
+                      <span>април</span>
+                      <span>май</span>
+                    </div>
+                  </div>
+
+                  <div className="rounded-md border border-white/10 bg-white/5 p-4">
+                    <p className="mb-3 font-mono text-[10px] uppercase tracking-wider text-white/60">🏆 ТОП БРОКЕРИ · МАЙ</p>
+                    <div className="space-y-2.5">
+                      {[
+                        { rank: 1, name: "Мария Петрова", deals: 12, revenue: "€4 200" },
+                        { rank: 2, name: "Иван Стоянов", deals: 8, revenue: "€2 800" },
+                        { rank: 3, name: "Петя Димитрова", deals: 6, revenue: "€2 100" },
+                      ].map((b) => (
+                        <div key={b.rank} className="flex items-center justify-between text-xs">
+                          <div className="flex items-center gap-2">
+                            <span className="flex h-5 w-5 items-center justify-center rounded-full bg-[var(--color-gold)]/20 text-[10px] text-[var(--color-gold-bright)]">{b.rank}</span>
+                            <span className="text-white">{b.name}</span>
+                          </div>
+                          <div className="text-right">
+                            <span className="font-mono text-[10px] text-[var(--color-gold-bright)]">{b.deals} сделки</span>
+                            <span className="ml-2 font-mono text-[10px] text-white/50">{b.revenue}</span>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* MOCKUP 2: Pipeline Kanban */}
+          <div className="mb-20">
+            <div className="mb-4 flex items-center gap-3">
+              <span className="font-mono text-[10px] uppercase tracking-[0.3em] text-[var(--color-gold-bright)]">Изглед 02</span>
+              <h3 className="font-[family-name:var(--font-editorial)] text-2xl font-bold">Pipeline на клиентите · Custom нива</h3>
+            </div>
+            <p className="mb-6 max-w-3xl text-sm leading-relaxed text-[var(--color-text-secondary)]">
+              Сами създавате стъпките през които минават клиентите — от нов лид до сделка. Влачите с мишката, променяте имена и цветове, без програмист.
+            </p>
+
+            <div className="overflow-x-auto rounded-lg border-2 border-[var(--color-border-bright)] bg-[#0f1a2e] p-5 shadow-2xl">
+              <div className="grid min-w-[900px] grid-cols-6 gap-3">
+                {[
+                  { title: "Нов лид", count: 12, color: "#7da8cc", cards: [
+                    { name: "Г. Иванов", note: "FB реклама · апартамент Тракия" },
+                    { name: "С. Петрова", note: "Уебсайт форма · къща Лозен" },
+                  ]},
+                  { title: "Контакт", count: 8, color: "#a78bfa", cards: [
+                    { name: "М. Костов", note: "Звъня вчера · интерес до €120K" },
+                  ]},
+                  { title: "Оглед", count: 5, color: "#06b6d4", cards: [
+                    { name: "Сем. Атанасови", note: "2 огледа · харесват двата" },
+                  ]},
+                  { title: "Оферта", count: 3, color: "#facc15", cards: [
+                    { name: "К. Тодоров", note: "€95K оферта · чакаме отговор" },
+                  ]},
+                  { title: "Резервация", count: 2, color: "#fb923c", cards: [
+                    { name: "Д. Маринов", note: "Депозит €5K · юрист преглежда" },
+                  ]},
+                  { title: "Сделка", count: 1, color: "#22c55e", cards: [
+                    { name: "В. Стоянов", note: "Подписан · €138K · комисиона €4.1K" },
+                  ]},
+                ].map((col) => (
+                  <div key={col.title} className="rounded-md bg-white/5 p-2">
+                    <div className="mb-2 flex items-center justify-between">
+                      <h4 className="text-xs font-bold uppercase tracking-wider" style={{ color: col.color }}>
+                        {col.title}
+                      </h4>
+                      <span className="rounded-full px-2 py-0.5 font-mono text-[10px]" style={{ background: `${col.color}22`, color: col.color }}>
+                        {col.count}
+                      </span>
+                    </div>
+                    <div className="space-y-1.5">
+                      {col.cards.map((c, i) => (
+                        <div key={i} className="rounded border border-white/10 bg-black/30 p-2">
+                          <p className="text-[11px] font-medium text-white">{c.name}</p>
+                          <p className="mt-0.5 text-[9px] leading-snug text-white/50">{c.note}</p>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+            <p className="mt-3 text-xs text-[var(--color-text-tertiary)]">
+              ✨ Drag &amp; drop между колоните · авто-преместване по правила (напр. „След 7 дни без активност → ⚠️")
+            </p>
+          </div>
+
+          {/* MOCKUP 3 + 4: Side by side */}
+          <div className="mb-20 grid gap-6 lg:grid-cols-2">
+            {/* Broker profile */}
+            <div>
+              <div className="mb-4 flex items-center gap-3">
+                <span className="font-mono text-[10px] uppercase tracking-[0.3em] text-[var(--color-gold-bright)]">Изглед 03</span>
+                <h3 className="font-[family-name:var(--font-editorial)] text-2xl font-bold">Карта на брокер</h3>
+              </div>
+              <p className="mb-4 text-sm leading-relaxed text-[var(--color-text-secondary)]">
+                Профил с ефективност, активни клиенти, последни действия — за всеки от екипа.
+              </p>
+              <div className="rounded-lg border-2 border-[var(--color-border-bright)] bg-[#0f1a2e] p-5 shadow-2xl">
+                <div className="mb-4 flex items-center gap-3">
+                  <div className="flex h-14 w-14 items-center justify-center rounded-full bg-[var(--color-gold)]/20 text-2xl">👤</div>
+                  <div className="flex-1">
+                    <p className="text-base font-bold text-white">Мария Петрова</p>
+                    <p className="text-[10px] text-white/50">Team Lead · Тракия · от Юли 2024</p>
+                  </div>
+                  <span className="rounded-full bg-[#22c55e]/20 px-2 py-1 text-[10px] text-[#22c55e]">🟢 Активен</span>
+                </div>
+                <div className="grid grid-cols-3 gap-2">
+                  {[
+                    { label: "Активни клиенти", value: "23" },
+                    { label: "Сделки · Май", value: "12" },
+                    { label: "Среден срок", value: "14 дни" },
+                  ].map((s) => (
+                    <div key={s.label} className="rounded border border-white/10 bg-white/5 p-2 text-center">
+                      <p className="text-[8px] uppercase tracking-wider text-white/50">{s.label}</p>
+                      <p className="mt-0.5 text-lg font-bold text-[var(--color-gold-bright)]">{s.value}</p>
+                    </div>
+                  ))}
+                </div>
+                <div className="mt-4 border-t border-white/10 pt-3">
+                  <p className="mb-2 font-mono text-[9px] uppercase tracking-wider text-white/50">ПОСЛЕДНИ АКТИВНОСТИ</p>
+                  <div className="space-y-1.5 text-[10px] text-white/70">
+                    <div className="flex justify-between"><span>🤝 Оглед с Иван Костов</span><span className="text-white/40">преди 2ч</span></div>
+                    <div className="flex justify-between"><span>📧 Изпрати оферта · €95K</span><span className="text-white/40">вчера</span></div>
+                    <div className="flex justify-between"><span>📞 3 звъняния към лидове</span><span className="text-white/40">вчера</span></div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* AI Chat */}
+            <div>
+              <div className="mb-4 flex items-center gap-3">
+                <span className="font-mono text-[10px] uppercase tracking-[0.3em] text-[var(--color-gold-bright)]">Изглед 04</span>
+                <h3 className="font-[family-name:var(--font-editorial)] text-2xl font-bold">AI Асистент · разговор</h3>
+              </div>
+              <p className="mb-4 text-sm leading-relaxed text-[var(--color-text-secondary)]">
+                Питаш на български или говориш в Telegram → AI ти дава отчет, графика, експорт. Без копаене в менюта.
+              </p>
+              <div className="rounded-lg border-2 border-[var(--color-border-bright)] bg-[#0f1a2e] p-4 shadow-2xl">
+                <div className="mb-3 flex items-center gap-2 border-b border-white/10 pb-2">
+                  <span className="text-lg">💬</span>
+                  <span className="text-sm font-bold text-white">AI Асистент</span>
+                  <span className="ml-auto text-[10px] text-[#22c55e]">● онлайн</span>
+                </div>
+                <div className="space-y-3">
+                  <div className="flex justify-end">
+                    <div className="max-w-[80%] rounded-lg rounded-br-sm bg-[var(--color-gold)]/20 px-3 py-2 text-[11px] text-white">
+                      Дай ми отчет за днес
+                    </div>
+                  </div>
+                  <div className="flex">
+                    <div className="max-w-[85%] rounded-lg rounded-bl-sm bg-white/5 px-3 py-2 text-[11px] leading-relaxed text-white/90">
+                      <p className="mb-1.5 font-bold text-[var(--color-gold-bright)]">Днес 27.05.2026:</p>
+                      <ul className="space-y-0.5">
+                        <li>• <strong>12 нови лида</strong> (5 от FB, 7 от уебсайт)</li>
+                        <li>• <strong>8 огледа</strong> разпределени по брокери</li>
+                        <li>• <strong>2 оферти</strong> изпратени (€95K + €120K)</li>
+                        <li>• <strong>1 сделка</strong> подписана (€138K, Мария)</li>
+                      </ul>
+                      <p className="mt-2 text-[10px] text-white/60">📊 Виж в Dashboard / 📧 Прати ми на имейл / 💾 Експортирай PDF</p>
+                    </div>
+                  </div>
+                  <div className="flex justify-end">
+                    <div className="max-w-[80%] rounded-lg rounded-br-sm bg-[var(--color-gold)]/20 px-3 py-2 text-[11px] text-white">
+                      Прати ми на имейл
+                    </div>
+                  </div>
+                  <div className="flex">
+                    <div className="max-w-[85%] rounded-lg rounded-bl-sm bg-white/5 px-3 py-2 text-[11px] text-white/90">
+                      ✅ Готово. Отчетът е в имейла ти.
+                    </div>
+                  </div>
+                </div>
+                <div className="mt-3 flex items-center gap-2 border-t border-white/10 pt-2">
+                  <span className="flex-1 rounded bg-white/5 px-3 py-1.5 text-[10px] text-white/40">Напиши съобщение…</span>
+                  <span className="text-base">🎤</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* MOCKUP 5: Mobile */}
+          <div className="mb-12">
+            <div className="mb-4 flex items-center gap-3">
+              <span className="font-mono text-[10px] uppercase tracking-[0.3em] text-[var(--color-gold-bright)]">Изглед 05</span>
+              <h3 className="font-[family-name:var(--font-editorial)] text-2xl font-bold">На телефон · брокерите в полето</h3>
+            </div>
+            <p className="mb-6 max-w-3xl text-sm leading-relaxed text-[var(--color-text-secondary)]">
+              Брокерите работят от телефона си — въвеждат данни в момента на огледа, виждат новите лиди през 5 секунди, отговарят на клиенти.
+            </p>
+
+            <div className="flex flex-wrap items-start justify-center gap-6">
+              {/* Phone 1 - Inbox */}
+              <div className="w-[200px] overflow-hidden rounded-2xl border-4 border-[var(--color-border-bright)] bg-[#0f1a2e] shadow-2xl">
+                <div className="bg-black px-2 py-1 text-center">
+                  <span className="inline-block h-1 w-12 rounded-full bg-white/20" />
+                </div>
+                <div className="p-3">
+                  <p className="mb-2 text-[9px] font-mono uppercase tracking-wider text-white/50">📥 МОИТЕ ЛИДОВЕ · 5</p>
+                  <div className="space-y-1.5">
+                    {[
+                      { name: "Г. Иванов", time: "10 мин", red: true },
+                      { name: "С. Петрова", time: "1ч", red: false },
+                      { name: "М. Костов", time: "3ч", red: false },
+                    ].map((l) => (
+                      <div key={l.name} className="rounded border border-white/10 bg-white/5 p-1.5">
+                        <div className="flex items-center justify-between">
+                          <span className="text-[10px] font-bold text-white">{l.name}</span>
+                          {l.red && <span className="h-1.5 w-1.5 rounded-full bg-red-500" />}
+                        </div>
+                        <p className="text-[8px] text-white/50">преди {l.time}</p>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+
+              {/* Phone 2 - Property */}
+              <div className="w-[200px] overflow-hidden rounded-2xl border-4 border-[var(--color-border-bright)] bg-[#0f1a2e] shadow-2xl">
+                <div className="bg-black px-2 py-1 text-center">
+                  <span className="inline-block h-1 w-12 rounded-full bg-white/20" />
+                </div>
+                <div className="p-3">
+                  <p className="mb-1 text-[9px] font-mono uppercase tracking-wider text-white/50">🏠 ИМОТ</p>
+                  <p className="text-[11px] font-bold text-white">3-стаен · Тракия</p>
+                  <p className="text-[9px] text-white/60">85м² · 2 ет. · €128 000</p>
+                  <div className="mt-2 h-20 rounded bg-gradient-to-br from-[var(--color-gold)]/30 to-[var(--color-gold)]/5" />
+                  <div className="mt-2 space-y-1">
+                    <button className="w-full rounded bg-[var(--color-gold)] py-1 text-[9px] font-bold text-black">📞 Запази оглед</button>
+                    <button className="w-full rounded border border-white/20 py-1 text-[9px] text-white/80">📤 Сподели</button>
+                  </div>
+                </div>
+              </div>
+
+              {/* Phone 3 - Voice */}
+              <div className="w-[200px] overflow-hidden rounded-2xl border-4 border-[var(--color-border-bright)] bg-[#0f1a2e] shadow-2xl">
+                <div className="bg-black px-2 py-1 text-center">
+                  <span className="inline-block h-1 w-12 rounded-full bg-white/20" />
+                </div>
+                <div className="p-3">
+                  <p className="mb-2 text-[9px] font-mono uppercase tracking-wider text-white/50">🎤 ГЛАСОВО ВЪВЕЖДАНЕ</p>
+                  <div className="rounded bg-white/5 p-2">
+                    <p className="text-[10px] leading-snug text-white/80">„Огледах апартамента в Тракия с клиента Иван. Хареса му. Иска оферта до €130К."</p>
+                  </div>
+                  <p className="mt-2 text-center text-[8px] text-white/40">AI разпознава → запис в CRM</p>
+                  <div className="mt-2 flex h-16 items-center justify-center">
+                    <div className="flex gap-1">
+                      {[3, 6, 4, 8, 5, 7, 3, 6, 5].map((h, i) => (
+                        <div
+                          key={i}
+                          className="w-1 rounded-full bg-[var(--color-gold-bright)]"
+                          style={{ height: `${h * 4}px`, opacity: 0.4 + i * 0.05 }}
+                        />
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Design philosophy footer */}
+          <div className="rounded-lg border border-[var(--color-border-default)] bg-[var(--color-bg-deep)] p-8 text-center">
+            <p className="font-mono text-[10px] uppercase tracking-[0.4em] text-[var(--color-gold-bright)]">Дизайн философия</p>
+            <h3 className="mt-3 font-[family-name:var(--font-editorial)] text-3xl font-bold leading-tight">
+              <span className="text-[var(--color-gold-bright)]">3 секунди</span> до отговор.
+            </h3>
+            <p className="mx-auto mt-4 max-w-2xl text-sm leading-relaxed text-[var(--color-text-secondary)]">
+              Всеки екран отговаря на въпрос за по-малко от 3 секунди. Без меню в меню в меню. Без обучение от 2 седмици. Брокерите ще го ползват от ден 1.
+            </p>
+          </div>
         </div>
       </section>
 
