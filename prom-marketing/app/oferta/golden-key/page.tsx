@@ -209,15 +209,15 @@ const RECURRING = [
   },
   {
     badge: "Хостинг",
-    title: "Supabase · сигурно място за данните",
+    title: "Хостинг · сигурно място за данните",
     price: "30 – 60 €",
     priceSub: "на месец · спрямо обем",
     color: "var(--color-gold-bright)",
     features: [
-      "Supabase Pro · EU (Frankfurt) · GDPR-съвместимо",
+      "Сървър в EU (Frankfurt) · GDPR-съвместим",
       "Encrypted at rest · AES-256 · TLS in transit",
       "Daily point-in-time backup (7 дни recovery)",
-      "Weekly off-site backup → Wasabi EU",
+      "Weekly off-site backup · EU дата центрове",
       "Възможност за добавяне на още encryption keys при нужда",
       "Автоматично скалиране при ръст на данните",
     ],
@@ -227,7 +227,7 @@ const RECURRING = [
 const SECURITY = [
   {
     title: "GDPR-съвместима архитектура",
-    body: "Supabase PostgreSQL · EU (Frankfurt) · encrypted at rest (AES-256) · TLS encryption in transit · Row Level Security (всеки брокер вижда само своите клиенти).",
+    body: "Сървър в EU (Frankfurt) · encrypted at rest (AES-256) · TLS encryption in transit · Row Level Security (всеки брокер вижда само своите клиенти).",
   },
   {
     title: "Многослоен backup",
@@ -239,7 +239,7 @@ const SECURITY = [
   },
   {
     title: "Опционален локален сървър",
-    body: "За максимална контрола — Self-hosted Supabase на офис компютър/NAS със Cloud replica за disaster recovery. One-time €1 500 setup + €100/мес поддръжка.",
+    body: "За максимална контрола — Self-hosted сървър на офис компютър/NAS със Cloud replica за disaster recovery. One-time €1 500 setup + €100/мес поддръжка.",
   },
 ];
 

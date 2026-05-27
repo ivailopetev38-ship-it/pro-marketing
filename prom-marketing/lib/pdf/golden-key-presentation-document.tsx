@@ -240,10 +240,10 @@ const RECURRING_COSTS = [
   },
   {
     badge: "ХОСТИНГ",
-    title: "Supabase · сигурно място",
+    title: "Хостинг · сигурно място",
     price: "30 – 60 € / мес",
     features: [
-      "Supabase Pro · EU (Frankfurt) · GDPR",
+      "Сървър EU (Frankfurt) · GDPR",
       "Encrypted at rest · AES-256",
       "Daily backup (7 дни recovery)",
       "Weekly off-site → Wasabi EU",
@@ -253,7 +253,7 @@ const RECURRING_COSTS = [
 ];
 
 const SECURITY_HIGHLIGHTS = [
-  "🔐 GDPR-съвместимо · Supabase EU (Frankfurt) · AES-256 encryption at rest",
+  "🔐 GDPR-съвместимо · сървър в EU (Frankfurt) · AES-256 encryption at rest",
   "🔄 3-слоен backup · Daily PITR + Weekly off-site + Monthly архив",
   "👤 Audit log · кой/кога/какво — пълна следа за GDPR одит",
   "🏢 Опционален локален сървър · self-hosted в офиса (Phase 3, +€1500)",
