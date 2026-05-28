@@ -48,7 +48,7 @@ export default function BookingPage() {
             <span className="mt-0.5 text-lg" aria-hidden>⚠️</span>
             <div>
               <p className="font-mono text-[11px] uppercase tracking-[0.3em] text-amber-300">
-                Заето · понеделник 02.06.2026
+                Заето · понеделник 01.06.2026
               </p>
               <p className="mt-2 text-sm leading-relaxed text-[#e6dab0]">
                 В понеделник съм на терен — инсталирам система при клиент и нямам възможност за разговори. Моля, изберете друг ден от седмицата.
