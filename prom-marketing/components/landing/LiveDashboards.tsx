@@ -86,7 +86,7 @@ export function LiveDashboards() {
               </h2>
               <p className="mt-4 max-w-xl text-sm text-[var(--color-text-secondary)] md:text-base">
                 Не бот за чат — а пълноценен екип от агенти със собствени роли,
-                задачи и метрики. Видими в общ дашборд. Управляват се с чат.
+                задачи и метрики. Видими в общо табло. Управляват се с чат.
               </p>
             </div>
 

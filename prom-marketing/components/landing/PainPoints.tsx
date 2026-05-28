@@ -22,13 +22,13 @@ const PAINS: PainPoint[] = [
   {
     icon: "📱",
     task: "Постове и reels всеки ден",
-    detail: "Текст, визия, hashtags, calendar — ръчно",
+    detail: "Текст, визия, хаштагове, календар — ръчно",
     hoursManual: 66,
     hoursWithAi: 8,
   },
   {
     icon: "✉️",
-    task: "Follow-up имейли до лийдове",
+    task: "Проследяващи имейли до лидове",
     detail: '"Кога ще се чуем", "имаш ли време", "напомням"',
     hoursManual: 33,
     hoursWithAi: 2,
@@ -36,13 +36,13 @@ const PAINS: PainPoint[] = [
   {
     icon: "📅",
     task: "Запис на срещи и потвърждения",
-    detail: "Обаждания за час, преразпределения, no-show",
+    detail: "Обаждания за час, преразпределения, неявяване",
     hoursManual: 44,
     hoursWithAi: 3,
   },
   {
     icon: "🎯",
-    task: "Сортиране на лийдове по приоритет",
+    task: "Сортиране на лидове по приоритет",
     detail: "Кой е готов да купи, кой губи времето ти",
     hoursManual: 44,
     hoursWithAi: 4,
@@ -57,13 +57,13 @@ const PAINS: PainPoint[] = [
   {
     icon: "📊",
     task: "Седмични отчети и анализи",
-    detail: "Excel формули, графики, summary за директора",
+    detail: "Excel формули, графики, обобщение за директора",
     hoursManual: 16,
     hoursWithAi: 1,
   },
   {
     icon: "🧾",
-    task: "Фактуриране и счетоводна административа",
+    task: "Фактуриране и счетоводна администрация",
     detail: "Издаване, изпращане, проследяване на плащания",
     hoursManual: 44,
     hoursWithAi: 4,
