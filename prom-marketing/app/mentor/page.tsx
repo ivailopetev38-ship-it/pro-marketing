@@ -83,7 +83,7 @@ const FAQ = [
   },
   {
     q: "Има ли гаранция?",
-    a: "Да. Ако след първите 2 сесии решиш, че не е за теб — връщам авансовото плащане без въпроси.",
+    a: "Да. Ако след първите 2 сесии решиш, че не е за теб — връщам пълната сума без въпроси.",
   },
   {
     q: "Какво след 4-те месеца?",
@@ -331,41 +331,22 @@ export default function MentorPage() {
               </p>
             </div>
 
-            <div className="mb-8 grid gap-4 md:grid-cols-2">
-              <div
-                className="rounded-xl border p-5"
-                style={{
-                  borderColor: "var(--color-border-bright)",
-                  background: "rgba(139, 92, 246, 0.06)",
-                }}
-              >
-                <p className="mb-1 font-mono text-[10px] uppercase tracking-[0.3em] text-[var(--color-violet-bright)]">
-                  Вариант 1
-                </p>
-                <p className="mb-1 font-[family-name:var(--font-editorial)] text-2xl font-bold">
-                  2 × 1 000 €
-                </p>
-                <p className="text-sm text-[var(--color-text-secondary)]">
-                  1 000 € авансово · 1 000 € след 2-ри месец.
-                </p>
-              </div>
-              <div
-                className="rounded-xl border p-5"
-                style={{
-                  borderColor: "var(--color-border-bright)",
-                  background: "rgba(139, 92, 246, 0.06)",
-                }}
-              >
-                <p className="mb-1 font-mono text-[10px] uppercase tracking-[0.3em] text-[var(--color-gold)]">
-                  Вариант 2
-                </p>
-                <p className="mb-1 font-[family-name:var(--font-editorial)] text-2xl font-bold">
-                  4 × 500 €
-                </p>
-                <p className="text-sm text-[var(--color-text-secondary)]">
-                  Месечно по 500 €. Без оскъпяване.
-                </p>
-              </div>
+            <div
+              className="mb-8 rounded-xl border p-6 text-center"
+              style={{
+                borderColor: "var(--color-border-bright)",
+                background: "rgba(139, 92, 246, 0.06)",
+              }}
+            >
+              <p className="font-mono text-[10px] uppercase tracking-[0.3em] text-[var(--color-violet-bright)]">
+                Условие на плащане
+              </p>
+              <p className="mt-2 font-[family-name:var(--font-editorial)] text-2xl font-bold text-[var(--color-text-primary)]">
+                Еднократно · 2 000 €
+              </p>
+              <p className="mt-1 text-sm text-[var(--color-text-secondary)]">
+                Цялата сума се заплаща при стартиране на програмата.
+              </p>
             </div>
 
             <div
@@ -379,7 +360,7 @@ export default function MentorPage() {
                 Гаранция
               </p>
               <p className="mt-2 text-sm leading-relaxed text-[var(--color-text-primary)]">
-                Ако след първите 2 сесии решиш, че програмата не е за теб — връщам авансовото плащане без
+                Ако след първите 2 сесии решиш, че програмата не е за теб — връщам пълната сума без
                 въпроси.
               </p>
             </div>
