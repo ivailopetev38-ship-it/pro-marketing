@@ -653,10 +653,11 @@ export default function Antoan09Page() {
             </p>
             <div className="mx-auto mt-5 grid max-w-xl gap-2 text-left text-sm">
               {[
-                "QR сканиране · 5 примерни пожарогасителя",
-                "Генериране на 1 примерен протокол (PDF)",
+                "QR сканиране · неограничени тестове",
+                "Генериране на примерни протоколи (PDF)",
                 "Демо акаунт на телефон + дашборд",
                 "30-мин онлайн презентация на живо",
+                "Сумата се приспада от основния проект, ако продължите",
               ].map((f) => (
                 <div key={f} className="flex gap-2">
                   <span aria-hidden style={{ color: "#22c55e" }}>✓</span>
