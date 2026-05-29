@@ -627,6 +627,48 @@ export default function Antoan09Page() {
               </p>
             </div>
           </div>
+
+          {/* DEMO VERSION */}
+          <div
+            className="mt-10 rounded-lg border-2 p-8 text-center"
+            style={{
+              borderColor: "rgba(34, 197, 94, 0.40)",
+              background: "linear-gradient(135deg, rgba(34, 197, 94, 0.08), rgba(34, 197, 94, 0.02))",
+            }}
+          >
+            <p className="mb-2 font-mono text-[10px] uppercase tracking-[0.3em]" style={{ color: "#22c55e" }}>
+              🧪 DEMO ВЕРСИЯ · ЗА ИЗПРОБВАНЕ
+            </p>
+            <div className="my-4 flex items-baseline justify-center gap-3">
+              <span
+                className="font-[family-name:var(--font-editorial)] text-5xl font-extrabold"
+                style={{ color: "#22c55e" }}
+              >
+                180 €
+              </span>
+              <span className="text-sm text-[var(--color-text-tertiary)]">без ДДС</span>
+            </div>
+            <p className="text-sm text-[var(--color-text-secondary)]">
+              Работещо demo на основните модули, за да видите реално как изглежда системата с вашите данни — преди да решите за пълния проект.
+            </p>
+            <div className="mx-auto mt-5 grid max-w-xl gap-2 text-left text-sm">
+              {[
+                "QR сканиране · 5 примерни пожарогасителя",
+                "Генериране на 1 примерен протокол (PDF)",
+                "Демо акаунт на телефон + дашборд",
+                "30-мин онлайн презентация на живо",
+                "Сумата се приспада, ако продължите с пълния проект",
+              ].map((f) => (
+                <div key={f} className="flex gap-2">
+                  <span aria-hidden style={{ color: "#22c55e" }}>✓</span>
+                  <span className="text-[var(--color-text-primary)]">{f}</span>
+                </div>
+              ))}
+            </div>
+            <p className="mt-5 text-xs text-[var(--color-text-tertiary)]">
+              ⏱ Demo-то е готово за 7-10 работни дни
+            </p>
+          </div>
         </div>
       </section>
 
