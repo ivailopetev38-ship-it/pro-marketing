@@ -1,3 +1,4 @@
+import Image from "next/image";
 import { SectionReveal } from "@/components/effects/SectionReveal";
 import { Calendar, Mail, Phone, MapPin } from "lucide-react";
 
@@ -66,10 +67,12 @@ export function Expert() {
                   background: "rgba(10, 10, 31, 0.40)",
                 }}
               >
-                <img
+                <Image
                   src="/images/ivailo/IMG_7318.jpeg"
                   alt="Ивайло Петев · основател и AI експерт на ProMarketing"
-                  loading="lazy"
+                  width={960}
+                  height={1200}
+                  sizes="(min-width: 768px) 40vw, 100vw"
                   className="block h-full w-full object-cover"
                   style={{ aspectRatio: "4/5" }}
                 />

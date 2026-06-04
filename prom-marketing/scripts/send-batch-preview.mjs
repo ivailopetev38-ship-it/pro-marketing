@@ -45,28 +45,6 @@ function buildHtml(greeting) {
 </div>`;
 }
 
-function buildText(greeting) {
-  return `${greeting},
-
-Видях, че се интересувате от AI автоматизация — затова ви пиша лично. Аз съм Ивайло Петев от „ПроМаркетинг" ЕООД. Изграждаме AI операционни системи по поръчка.
-
-Какво правим:
-- AI CRM — оценка на lead-ове, оферти, договори, проследяване
-- Content AI Engine — социални публикации, банери, Reels
-- Реклами + дневен анализ на Meta и Google
-- Чат бот контрол на български
-- Cloud + автоматизация
-
-Цените започват от 500 € (без ДДС). Срок: 30-60 дни според проекта + 30 дни безплатна поддръжка.
-
-Резервирайте 30 мин: https://promarketing.pw/booking
-Или отговорете на този имейл — ще ви се обадя.
-
-Поздрави,
-Ивайло Петев
-+359 877 399 963 · promarketing.pw`;
-}
-
 // Build preview that shows the full plan
 const list = RECIPIENTS.map((r, i) => `<li><strong>${i + 1}.</strong> ${r.name} — <code>${r.email}</code><br/><span style="color:#666;font-size:12px">Обръщение: „${r.greeting}"</span></li>`).join("");
 

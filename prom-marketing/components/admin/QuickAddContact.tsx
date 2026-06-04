@@ -76,17 +76,20 @@ export function QuickAddContact({ defaultInquiry, open: openProp, onClose }: Pro
     if (open) {
       setTimeout(() => firstFieldRef.current?.focus(), 50);
     } else {
-      // Reset form on close
-      setFullName("");
-      setEmail("");
-      setPhone("");
-      setCompany("");
-      setStage("lead");
-      setInquiry(defaultInquiry ?? "");
-      setSmartInput("");
-      setErr(null);
-      setSavedId(null);
-      setBusy(false);
+      // Reset form on close, deferred to avoid cascading render work in the effect.
+      const tick = window.setTimeout(() => {
+        setFullName("");
+        setEmail("");
+        setPhone("");
+        setCompany("");
+        setStage("lead");
+        setInquiry(defaultInquiry ?? "");
+        setSmartInput("");
+        setErr(null);
+        setSavedId(null);
+        setBusy(false);
+      }, 0);
+      return () => window.clearTimeout(tick);
     }
   }, [open, defaultInquiry]);
 

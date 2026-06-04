@@ -1,5 +1,5 @@
 "use client";
-import { useEffect, useState, useRef } from "react";
+import { useCallback, useEffect, useState, useRef } from "react";
 import { createClient } from "@/lib/supabase/client";
 
 interface FileRow {
@@ -47,7 +47,7 @@ export function FilesPanel({ contactId }: { contactId: string }) {
   const [pendingDescription, setPendingDescription] = useState("");
   const inputRef = useRef<HTMLInputElement>(null);
 
-  const reload = async () => {
+  const reload = useCallback(async () => {
     setLoading(true);
     try {
       const r = await fetch(`/api/admin/contacts/${contactId}/files`);
@@ -56,10 +56,10 @@ export function FilesPanel({ contactId }: { contactId: string }) {
     } finally {
       setLoading(false);
     }
-  };
+  }, [contactId]);
 
   useEffect(() => {
-    void reload();
+    const tick = window.setTimeout(() => void reload(), 0);
     // Live updates на файлове — ако друг tab/устройство качи или изтрие.
     const supabase = createClient();
     const ch = supabase
@@ -78,10 +78,10 @@ export function FilesPanel({ contactId }: { contactId: string }) {
       )
       .subscribe();
     return () => {
+      window.clearTimeout(tick);
       void supabase.removeChannel(ch);
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [contactId]);
+  }, [contactId, reload]);
 
   const handleFiles = async (filesIn: FileList | File[]) => {
     const arr = Array.from(filesIn);

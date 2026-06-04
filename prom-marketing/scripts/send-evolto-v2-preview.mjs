@@ -2,9 +2,6 @@
 // One-off: изпрати preview към ivailopetev38@gmail.com с обновените PDF-и
 // (юристки корекции v2) преди реално изпращане към Станислава.
 
-import fs from "node:fs";
-import path from "node:path";
-
 const TOKEN = "d57f2e068ec50e6ebccc5e98dbf9a9189a2fbaa238b22354036250334a57872e";
 const HOST = "https://promarketing.pw";
 

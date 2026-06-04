@@ -28,6 +28,21 @@ function loadVisitor(): { name?: string; email?: string; phone?: string } {
   }
 }
 
+function loadSessionId(): string {
+  if (typeof window === "undefined") return "";
+  let id = window.localStorage.getItem(SESSION_KEY);
+  if (!id) {
+    id = randomSessionId();
+    window.localStorage.setItem(SESSION_KEY, id);
+  }
+  return id;
+}
+
+function loadOpenState(): boolean {
+  if (typeof window === "undefined") return false;
+  return window.localStorage.getItem(STATE_KEY) === "open";
+}
+
 const GREETING: Message = {
   id: "system-greeting",
   role: "assistant",
@@ -36,8 +51,8 @@ const GREETING: Message = {
 };
 
 export function ChatWidget() {
-  const [open, setOpen] = useState(false);
-  const [sessionId, setSessionId] = useState<string>("");
+  const [open, setOpen] = useState(loadOpenState);
+  const [sessionId] = useState<string>(loadSessionId);
   const [messages, setMessages] = useState<Message[]>([GREETING]);
   const [draft, setDraft] = useState("");
   const [busy, setBusy] = useState(false);
@@ -46,23 +61,11 @@ export function ChatWidget() {
     "Какви услуги предлагате?",
     "Колко струва?",
   ]);
-  const [visitor, setVisitor] = useState<{ name?: string; email?: string; phone?: string }>({});
+  const [visitor, setVisitor] = useState<{ name?: string; email?: string; phone?: string }>(loadVisitor);
   const [showContactForm, setShowContactForm] = useState(false);
   // When true, replaces the message thread with an inline Cal.com booking iframe.
   const [showBooking, setShowBooking] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
-
-  // Restore session/visitor + open state on first render.
-  useEffect(() => {
-    let id = window.localStorage.getItem(SESSION_KEY);
-    if (!id) {
-      id = randomSessionId();
-      window.localStorage.setItem(SESSION_KEY, id);
-    }
-    setSessionId(id);
-    setVisitor(loadVisitor());
-    setOpen(window.localStorage.getItem(STATE_KEY) === "open");
-  }, []);
 
   useEffect(() => {
     if (sessionId) {

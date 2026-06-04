@@ -36,6 +36,8 @@ export interface BookingRow {
 type Tab = "upcoming" | "past";
 
 export function BookingsTable({ upcoming, past }: { upcoming: BookingRow[]; past: BookingRow[] }) {
+  "use no memo";
+
   const [tab, setTab] = useState<Tab>("upcoming");
   const [sorting, setSorting] = useState<SortingState>([{ id: "scheduled_at", desc: false }]);
   const [filter, setFilter] = useState("");
@@ -136,6 +138,9 @@ export function BookingsTable({ upcoming, past }: { upcoming: BookingRow[]; past
     },
   ], []);
 
+  // TanStack Table intentionally returns non-memoizable helper functions; keep
+  // the component outside React Compiler optimization for this integration.
+  // eslint-disable-next-line react-hooks/incompatible-library
   const table = useReactTable({
     data: filtered,
     columns,

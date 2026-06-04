@@ -64,6 +64,29 @@ const DEFAULT_HINTS = [
 const HISTORY_KEY = "pm_copilot_history_v1";
 const OPEN_KEY = "pm_copilot_open_v1";
 
+const GREETING: Msg = {
+  id: "greet",
+  role: "assistant",
+  content: `Здравей! Аз съм AI co-pilot на CRM-а. Пиши ми като на колега — 'напиши имейл', 'кои клиенти забравих', 'смени етап', или каквото е нужно. Hermes вече е свързан и може да изпълнява CRM действия автоматично; клиентски имейли минават през preview и одобрение.`,
+};
+
+function loadInitialOpen(): boolean {
+  if (typeof window === "undefined") return false;
+  return window.localStorage.getItem(OPEN_KEY) === "open";
+}
+
+function loadInitialMessages(): Msg[] {
+  if (typeof window === "undefined") return [GREETING];
+  try {
+    const raw = window.localStorage.getItem(HISTORY_KEY);
+    if (!raw) return [GREETING];
+    const arr = JSON.parse(raw) as Msg[];
+    return Array.isArray(arr) && arr.length > 0 ? arr : [GREETING];
+  } catch {
+    return [GREETING];
+  }
+}
+
 function pageHints(path: string): string[] {
   for (const p of PAGE_HINTS) {
     if (p.match.test(path)) return p.hints;
@@ -73,30 +96,12 @@ function pageHints(path: string): string[] {
 
 export function CopilotWidget() {
   const path = usePathname() ?? "";
-  const [open, setOpen] = useState(false);
+  const [open, setOpen] = useState(loadInitialOpen);
   const [draft, setDraft] = useState("");
   const [busy, setBusy] = useState(false);
-  const [messages, setMessages] = useState<Msg[]>([
-    {
-      id: "greet",
-      role: "assistant",
-      content: `Здравей! Аз съм AI co-pilot на CRM-а. Пиши ми като на колега — 'напиши имейл', 'кои клиенти забравих', 'смени етап', или каквото е нужно. Утре когато Hermes е свързан, ще изпълнявам действията напълно автоматично.`,
-    },
-  ]);
+  const [messages, setMessages] = useState<Msg[]>(loadInitialMessages);
   const scrollRef = useRef<HTMLDivElement>(null);
   const hints = useMemo(() => pageHints(path), [path]);
-
-  // Restore last open state + history (last 10 turns).
-  useEffect(() => {
-    setOpen(window.localStorage.getItem(OPEN_KEY) === "open");
-    try {
-      const raw = window.localStorage.getItem(HISTORY_KEY);
-      if (raw) {
-        const arr = JSON.parse(raw) as Msg[];
-        if (Array.isArray(arr) && arr.length > 0) setMessages(arr);
-      }
-    } catch {}
-  }, []);
 
   useEffect(() => {
     window.localStorage.setItem(OPEN_KEY, open ? "open" : "closed");
