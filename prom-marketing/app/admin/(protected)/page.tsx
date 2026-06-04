@@ -72,7 +72,7 @@ export default async function AdminDashboard() {
     .eq("status", "confirmed")
     .lt("scheduled_at", nowIso);
 
-  const [contactsRes, activitiesRes, bookingsRes, metaLeadsRes, invoicesRes, manualReviewRes, paymentsRes, expensesRes, metaReportsRes] = await Promise.all([
+  const [contactsRes, activitiesRes, bookingsRes, metaLeadsRes, invoicesRes, manualReviewRes, paymentsRes, expensesRes, metaReportsRes, gpsRes, recurringRes] = await Promise.all([
     supabase.from("contacts").select("*").order("updated_at", { ascending: false }),
     supabase
       .from("contact_activities")
@@ -90,6 +90,8 @@ export default async function AdminDashboard() {
       .select("report_date, spend, leads, cpl, currency")
       .order("report_date", { ascending: false })
       .limit(30),
+    supabase.from("gps_devices").select("status, monthly_fee, currency"),
+    supabase.from("recurring_services").select("active, amount, currency, billing_period"),
   ]);
 
   const allContacts = (contactsRes.data ?? []) as ContactRow[];
@@ -116,6 +118,8 @@ export default async function AdminDashboard() {
   const payments = (paymentsRes.data ?? []) as Array<{ amount: number | null; paid_at: string | null; created_at: string; match_status: string }>;
   const expenses = (expensesRes.data ?? []) as Array<{ amount_gross: number | null; status: string; expense_date: string | null }>;
   const metaReports = (metaReportsRes.data ?? []) as Array<{ report_date: string; spend: number | null; leads: number | null; cpl: number | null; currency: string }>;
+  const gpsDevices = (gpsRes.data ?? []) as Array<{ status: string; monthly_fee: number | null; currency: string }>;
+  const recurringServices = (recurringRes.data ?? []) as Array<{ active: boolean | null; amount: number | null; currency: string; billing_period: string | null }>;
 
   // ── Pipeline distribution ──────────────────────────────────────────────
   const byStage = new Map<ContactStage, ContactRow[]>();
@@ -239,6 +243,19 @@ export default async function AdminDashboard() {
   const metaLeadsToday = metaToday.reduce((s, r) => s + (Number(r.leads) || 0), 0);
   const metaCpl = metaLeadsToday > 0 ? metaSpend / metaLeadsToday : 0;
 
+  // ── Повтарящ се приход (MRR): GPS устройства + Абонаменти ───────────────
+  const gpsActive = gpsDevices.filter((d) => d.status === "active");
+  const gpsMrr = gpsActive.reduce((s, d) => s + (Number(d.monthly_fee) || 0), 0);
+  const subsActive = recurringServices.filter((r) => r.active !== false);
+  const monthlyEquivalent = (amount: number, period: string | null) => {
+    if (period === "yearly" || period === "annual") return amount / 12;
+    if (period === "quarterly") return amount / 3;
+    if (period === "weekly") return amount * 4.33;
+    return amount; // monthly / null
+  };
+  const subsMrr = subsActive.reduce((s, r) => s + monthlyEquivalent(Number(r.amount) || 0, r.billing_period), 0);
+  const totalMrr = gpsMrr + subsMrr;
+
   // ── Lead sources donut ─────────────────────────────────────────────────
   const sourceCounts = new Map<string, number>();
   for (const c of active) {
@@ -347,9 +364,16 @@ export default async function AdminDashboard() {
         <h2 className="mb-3 font-mono text-[10px] uppercase tracking-[0.3em] text-[var(--color-text-tertiary)]">
           Счетоводство · този месец
         </h2>
-        <div className="grid grid-cols-2 gap-3 md:grid-cols-3 xl:grid-cols-6">
+        <div className="grid grid-cols-2 gap-3 md:grid-cols-4 xl:grid-cols-7">
           <KpiCard label="Приход" value={formatMoney(revenueMonth)} hint="издадени фактури" color="#facc15" href="/admin/accounting" />
           <KpiCard label="Получени" value={formatMoney(receivedMonth)} hint="плащания" color="#22c55e" href="/admin/payments" />
+          <KpiCard
+            label="Повтарящ се / мес"
+            value={formatMoney(totalMrr)}
+            hint={`GPS ${formatMoney(gpsMrr)} · абонаменти ${formatMoney(subsMrr)}`}
+            color="#14b8a6"
+            href="/admin/recurring"
+          />
           <KpiCard label="Разходи" value={formatMoney(expensesMonth)} hint="към доставчици" color="#fb923c" href="/admin/expenses" />
           <KpiCard
             label="Печалба"
@@ -677,7 +701,18 @@ export default async function AdminDashboard() {
               hint={manualReviewOpen > 0 ? `${manualReviewOpen} отворени` : "чисто"}
             />
             <NavCard href="/admin/expenses" icon="🧮" label="Разходи" hint="към доставчици" />
-            <NavCard href="/admin/gps" icon="🛰️" label="GPS устройства" hint="монтажи, история" />
+            <NavCard
+              href="/admin/recurring"
+              icon="🔁"
+              label="Абонаменти"
+              hint={subsActive.length > 0 ? `${subsActive.length} активни · ${formatMoney(subsMrr)}/мес` : "месечни услуги"}
+            />
+            <NavCard
+              href="/admin/gps"
+              icon="🛰️"
+              label="GPS устройства"
+              hint={gpsActive.length > 0 ? `${gpsActive.length} активни · ${formatMoney(gpsMrr)}/мес` : "монтажи, история"}
+            />
             <NavCard href="/admin/documents" icon="📁" label="Документи" hint="фактури, OCR" />
             <NavCard href="/admin/meta-ads" icon="📈" label="Meta анализ" hint="реклами днес" />
           </div>
