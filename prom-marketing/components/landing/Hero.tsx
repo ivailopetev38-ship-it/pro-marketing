@@ -19,26 +19,31 @@ export function Hero() {
         </div>
       </div>
 
-      <div className="relative z-[3] mx-auto flex max-w-6xl flex-col items-start justify-center px-6 pt-44 pb-32 lg:min-h-[100svh] lg:pt-32">
-        <span className="mb-6 inline-flex items-center gap-2 rounded-full border border-[var(--color-border-default)] bg-[var(--color-bg-glass)] px-3 py-1 text-xs font-mono uppercase tracking-[0.18em] text-[var(--color-accent-cyan)]">
+      <div className="relative z-[3] mx-auto flex max-w-5xl flex-col items-start justify-center px-6 pt-44 pb-32 lg:min-h-[100svh] lg:pt-32">
+        <span className="mb-7 inline-flex items-center gap-2.5 rounded-full border border-[var(--color-border-default)] bg-[var(--color-bg-glass)] px-3.5 py-1.5 text-[11px] font-mono uppercase tracking-[0.22em] text-[var(--color-accent-cyan)]">
           <span className="h-1.5 w-1.5 rounded-full bg-[var(--color-accent-cyan)] shadow-[0_0_8px_rgba(6,182,212,0.8)]" />
           AI · Automation · Growth
         </span>
 
-        <h1 className="max-w-3xl font-display text-[clamp(34px,7vw,96px)] font-bold leading-[1.02] tracking-tight [overflow-wrap:break-word] [hyphens:auto]" lang="bg">
+        <h1
+          className="max-w-3xl font-display text-[clamp(30px,5vw,60px)] font-semibold leading-[1.08] tracking-tight [overflow-wrap:break-word] [hyphens:auto]"
+          lang="bg"
+        >
           <TextScramble text="Автоматизирай" />{" "}
-          <HolographicText>бизнеса си</HolographicText>{" "}
-          с AI агенти.
+          <HolographicText>бизнеса си</HolographicText>
+          <br className="hidden sm:block" />
+          <span className="font-light text-[var(--color-text-secondary)]">с AI агенти,</span>{" "}
+          <span className="font-light text-[var(--color-text-secondary)]">които работят</span>{" "}
+          <span className="text-[var(--color-accent-cyan)]">24/7</span>
+          <span className="font-light text-[var(--color-text-secondary)]">.</span>
         </h1>
 
-        <p className="mt-8 max-w-xl text-lg text-[var(--color-text-secondary)] md:text-xl">
-          Превръщаме рутината в растеж. AI чат агенти, личен{" "}
-          <span className="font-semibold text-[var(--color-text-primary)]">AI CRM</span>{" "}
+        <p className="mt-7 max-w-xl text-base text-[var(--color-text-secondary)] md:text-lg">
+          AI чат агенти, личен{" "}
+          <span className="font-medium text-[var(--color-text-primary)]">AI CRM</span>{" "}
           и{" "}
-          <span className="font-semibold text-[var(--color-text-primary)]">
-            AI софтуер по поръчка
-          </span>{" "}
-          — работят 24/7 и автоматизират процесите, които те бавят.
+          <span className="font-medium text-[var(--color-text-primary)]">софтуер по поръчка</span>{" "}
+          — поемат рутината и ти оставят само решенията, които носят растеж.
         </p>
 
         <div className="mt-10 flex flex-wrap items-center gap-4">

@@ -1,22 +1,11 @@
 "use server";
 import { revalidatePath } from "next/cache";
-import { createClient } from "@/lib/supabase/server";
 import { createServiceClient } from "@/lib/supabase/service";
+import { requireAdmin } from "@/lib/admin/require-admin";
 import { CONTACT_STAGES, type ContactStage } from "@/lib/contacts/types";
 
-async function getAdminEmail(): Promise<string> {
-  const sb = await createClient();
-  const { data: { user } } = await sb.auth.getUser();
-  const allowed = (process.env.ALLOWED_ADMIN_EMAILS ?? "")
-    .split(",").map((s) => s.trim().toLowerCase()).filter(Boolean);
-  if (!user?.email || !allowed.includes(user.email.toLowerCase())) {
-    throw new Error("Forbidden");
-  }
-  return user.email;
-}
-
 export async function updateStageAction(formData: FormData) {
-  const email = await getAdminEmail();
+  const email = await requireAdmin();
 
   const contactId = String(formData.get("contact_id") ?? "");
   const stage = String(formData.get("stage") ?? "") as ContactStage;
@@ -42,7 +31,7 @@ export async function updateStageAction(formData: FormData) {
 }
 
 export async function updateContactFieldsAction(formData: FormData) {
-  await getAdminEmail();
+  await requireAdmin();
 
   const contactId = String(formData.get("contact_id") ?? "");
   if (!contactId) throw new Error("Invalid input");
@@ -71,7 +60,7 @@ export async function updateContactFieldsAction(formData: FormData) {
 }
 
 export async function addActivityAction(formData: FormData) {
-  const email = await getAdminEmail();
+  const email = await requireAdmin();
 
   const contactId = String(formData.get("contact_id") ?? "");
   const type = String(formData.get("activity_type") ?? "").trim() || "note";
@@ -93,7 +82,7 @@ export async function addActivityAction(formData: FormData) {
 }
 
 export async function addContactAction(formData: FormData) {
-  const email = await getAdminEmail();
+  const email = await requireAdmin();
 
   const fullName = String(formData.get("full_name") ?? "").trim() || null;
   const contactEmail = String(formData.get("email") ?? "").trim().toLowerCase() || null;

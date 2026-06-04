@@ -19,6 +19,10 @@ vi.mock("@/lib/meta/conversions-api", () => ({
   sendCapiEvent: vi.fn().mockResolvedValue({ ok: true }),
 }));
 
+vi.mock("@/lib/contacts/repository", () => ({
+  upsertContactAndLog: vi.fn().mockResolvedValue({ id: "contact-1" }),
+}));
+
 process.env.CAL_WEBHOOK_SECRET = "test-secret-123";
 
 import { POST } from "./route";
@@ -115,6 +119,51 @@ describe("POST /api/webhooks/cal", () => {
       "Email / SMS автоматизация",
     ]);
     expect(arg.timeline).toBe("До 1 месец");
+  });
+
+  it("extracts Google Meet URL from metadata.videoCallUrl", async () => {
+    const payload = {
+      triggerEvent: "BOOKING_CREATED",
+      payload: {
+        uid: "meet-001",
+        startTime: "2026-06-03T10:00:00.000Z",
+        endTime: "2026-06-03T10:30:00.000Z",
+        attendees: [{ name: "Петър", email: "petar@example.com" }],
+        metadata: { videoCallUrl: "https://meet.google.com/abc-defg-hij" },
+        location: "integrations:google:meet",
+      },
+    };
+    const body = JSON.stringify(payload);
+    const res = await POST(makeRequest(body, sign(body)));
+    expect(res.status).toBe(200);
+    const arg = upsertMock.mock.calls[0][0];
+    expect(arg.meeting_url).toBe("https://meet.google.com/abc-defg-hij");
+  });
+
+  it("falls back to raw URL in location when metadata is empty", async () => {
+    const payload = {
+      triggerEvent: "BOOKING_CREATED",
+      payload: {
+        uid: "fallback-001",
+        startTime: "2026-06-04T10:00:00.000Z",
+        endTime: "2026-06-04T10:30:00.000Z",
+        attendees: [{ name: "Анна", email: "anna@example.com" }],
+        location: "https://app.cal.com/video/somecallid",
+      },
+    };
+    const body = JSON.stringify(payload);
+    const res = await POST(makeRequest(body, sign(body)));
+    expect(res.status).toBe(200);
+    const arg = upsertMock.mock.calls[0][0];
+    expect(arg.meeting_url).toBe("https://app.cal.com/video/somecallid");
+  });
+
+  it("returns null meeting_url when no URL is present", async () => {
+    const body = JSON.stringify(validPayload);
+    const res = await POST(makeRequest(body, sign(body)));
+    expect(res.status).toBe(200);
+    const arg = upsertMock.mock.calls[0][0];
+    expect(arg.meeting_url).toBeNull();
   });
 
   it("skips unknown trigger events with 200 (no upsert)", async () => {

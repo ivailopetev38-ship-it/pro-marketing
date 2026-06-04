@@ -113,7 +113,7 @@ export function PainPoints() {
               {"// колко часа седят в рутина"}
             </p>
             <h2
-              className="font-display text-[clamp(32px,7vw,68px)] font-bold leading-[1.04] tracking-tight"
+              className="font-display text-[clamp(28px,5vw,52px)] font-semibold leading-[1.04] tracking-tight"
               style={{ overflowWrap: "break-word", hyphens: "auto" }}
             >
               Колко часа от месеца<br />

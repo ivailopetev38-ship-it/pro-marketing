@@ -33,6 +33,47 @@ export const STAGE_COLOR: Record<ContactStage, string> = {
   lost: "#64748b",
 };
 
+// Sales follow-up status — the "where are we on the last touch" state, distinct
+// from the pipeline `stage`. Kept in sync with the DB CHECK constraint in
+// 20260604120000_crm_hermes_backend.sql.
+export const FOLLOWUP_STATUSES = [
+  "sent_email",
+  "sent_presentation",
+  "sent_offer",
+  "sent_proforma",
+  "needs_call",
+  "called_waiting_feedback",
+  "interested",
+  "not_interested",
+  "ready_to_close",
+] as const;
+
+export type FollowupStatus = (typeof FOLLOWUP_STATUSES)[number];
+
+export const FOLLOWUP_STATUS_LABEL: Record<FollowupStatus, string> = {
+  sent_email: "Изпратен имейл",
+  sent_presentation: "Изпратена презентация",
+  sent_offer: "Изпратена оферта",
+  sent_proforma: "Изпратена проформа",
+  needs_call: "Да се обади",
+  called_waiting_feedback: "Чака обратна връзка",
+  interested: "Заинтересован",
+  not_interested: "Незаинтересован",
+  ready_to_close: "Готов за затваряне",
+};
+
+export const FOLLOWUP_STATUS_COLOR: Record<FollowupStatus, string> = {
+  sent_email: "#a78bfa",
+  sent_presentation: "#ec4899",
+  sent_offer: "#facc15",
+  sent_proforma: "#f59e0b",
+  needs_call: "#00d4ff",
+  called_waiting_feedback: "#fb923c",
+  interested: "#22c55e",
+  not_interested: "#64748b",
+  ready_to_close: "#10b981",
+};
+
 export const ACTIVITY_LABEL: Record<string, string> = {
   meta_lead: "Meta lead",
   website_form: "Форма от сайта",
@@ -83,6 +124,8 @@ export interface ContactRow {
   notes: string | null;
   deal_value_eur: number | null;
   next_followup_at: string | null;
+  followup_status: FollowupStatus | null;
+  last_heard_from_at: string | null;
   created_at: string;
   updated_at: string;
 }

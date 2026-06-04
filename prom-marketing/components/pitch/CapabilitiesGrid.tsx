@@ -3,7 +3,7 @@ import { TiltCard } from "@/components/effects/TiltCard";
 import { HolographicText } from "@/components/effects/HolographicText";
 import {
   Bot,
-  Mic,
+  LayoutDashboard,
   Database,
   Filter,
   Workflow,
@@ -37,11 +37,11 @@ const CAPABILITIES: Capability[] = [
     accent: "cyan",
   },
   {
-    icon: Mic,
-    badge: "Voice AI",
-    title: "Гласови AI агенти",
-    body: "Реални обаждания на естествен български. Изходящи и входящи. Не отличаваш ги от човек.",
-    bullets: ["Потвърждения на поръчки", "Follow-up на лийдове", "Reception 24/7"],
+    icon: LayoutDashboard,
+    badge: "AI Co-pilot",
+    title: "AI CRM Co-pilot",
+    body: "Пишеш на човешки език, CRM-ът изпълнява. „Пусни follow-up на застоялите сделки“ — и е готово. Командваш целия бизнес с думи.",
+    bullets: ["Команди на естествен език", "Авто follow-up, оферти, имейли", "Прогнози и препоръки в реално време"],
     accent: "violet",
   },
   {

@@ -47,7 +47,7 @@ export function FAQ() {
               {"// въпроси"}
             </p>
             <h2
-              className="font-display text-[clamp(32px,7vw,64px)] font-bold leading-[1.08] tracking-tight"
+              className="font-display text-[clamp(28px,5vw,52px)] font-semibold leading-[1.08] tracking-tight"
               style={{ overflowWrap: "break-word", hyphens: "auto", wordBreak: "break-word" }}
               lang="bg"
             >

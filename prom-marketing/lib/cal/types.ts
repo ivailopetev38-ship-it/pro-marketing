@@ -32,6 +32,15 @@ export const calBookingSchema = z.object({
     responses: z.record(z.string(), responseValueSchema).optional(),
     userFieldsResponses: z.record(z.string(), responseValueSchema).optional(),
     status: z.string().optional(),
+    // Google Meet/Cal Video URL lives here; Cal also mirrors it in `location`
+    // when the location resolves to a remote URL.
+    metadata: z
+      .object({
+        videoCallUrl: z.string().optional(),
+      })
+      .passthrough()
+      .optional(),
+    location: z.string().optional(),
   }),
   createdAt: z.string().optional(),
 });
@@ -91,6 +100,21 @@ export function extractStringArray(
 export function extractPhone(p: CalBookingPayload["payload"]): string | null {
   // Cal.com sends phone under attendeePhoneNumber identifier
   return extractString(p, "phone") ?? extractString(p, "attendeePhoneNumber");
+}
+
+// Cal.com puts the live meeting URL under `metadata.videoCallUrl` regardless of
+// provider (Google Meet, Cal Video, Zoom...). `location` may instead hold the
+// raw URL when Cal can't resolve a provider-specific URL. Accept either.
+export function extractMeetingUrl(p: CalBookingPayload["payload"]): string | null {
+  const fromMetadata = p.metadata?.videoCallUrl;
+  if (typeof fromMetadata === "string" && /^https?:\/\//.test(fromMetadata)) {
+    return fromMetadata;
+  }
+  const loc = p.location;
+  if (typeof loc === "string" && /^https?:\/\//.test(loc)) {
+    return loc;
+  }
+  return null;
 }
 
 export function statusFromTrigger(t: string): string {

@@ -139,8 +139,8 @@ const WHY = [
 const TIERS = [
   {
     name: "Phase 1 · Базов",
-    price: "от 3 000 €",
-    suffix: "ориентировъчно · без ДДС · финализира се след среща",
+    price: "Подлежи на преговори",
+    suffix: "след среща и уточняване на нужди",
     badge: "Препоръчан старт",
     highlight: true,
     features: [
@@ -266,7 +266,7 @@ export default function IrinaPage() {
               className="inline-flex items-center gap-2 rounded-full border px-6 py-3 text-sm uppercase tracking-[0.15em] text-[var(--color-text-secondary)] transition-colors hover:border-[var(--color-emerald-bright)] hover:text-[var(--color-emerald-bright)]"
               style={{ borderColor: "var(--color-border-default)" }}
             >
-              💎 Phase 1 · от 3 000 €
+              💎 Phase 1 · основни модули
             </a>
             <a
               href="#modules"
@@ -329,7 +329,7 @@ export default function IrinaPage() {
             </p>
             <p className="mt-3 text-sm leading-relaxed text-[var(--color-text-primary)]">
               <span className="font-bold">Това е базова презентация</span>, съобразена със спецификата на складове с храни. Конкретните модули, обхват и цена{" "}
-              <span className="font-bold text-[var(--color-amber)]">персонализираме</span> след кратка среща с теб и проучване на вашата фирма — според реалните ви процеси, екип и приоритети. Цената може да се промени нагоре или надолу според нуждите.
+              <span className="font-bold text-[var(--color-amber)]">персонализираме</span> след кратка среща с теб и проучване на вашата фирма — според реалните ви процеси, екип и приоритети.
             </p>
           </div>
         </div>

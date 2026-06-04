@@ -78,7 +78,7 @@ export function LiveDashboards() {
                 {"// на живо"}
               </p>
               <h2
-                className="font-display text-[clamp(32px,7vw,64px)] font-bold leading-[1.06] tracking-tight"
+                className="font-display text-[clamp(28px,5vw,52px)] font-semibold leading-[1.06] tracking-tight"
                 style={{ overflowWrap: "break-word", hyphens: "auto" }}
               >
                 Твоят AI екип<br />

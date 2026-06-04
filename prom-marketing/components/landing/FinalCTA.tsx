@@ -11,7 +11,7 @@ export function FinalCTA() {
       <div className="relative mx-auto max-w-3xl px-6 text-center">
         <SectionReveal>
           <h2
-            className="font-display text-[clamp(32px,8vw,72px)] font-bold leading-[1.05] tracking-tight"
+            className="font-display text-[clamp(30px,6vw,58px)] font-semibold leading-[1.05] tracking-tight"
             style={{ overflowWrap: "break-word", hyphens: "auto", wordBreak: "break-word" }}
             lang="bg"
           >

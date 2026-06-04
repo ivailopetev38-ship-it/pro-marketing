@@ -6,17 +6,60 @@ import { Menu, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Logo } from "@/components/landing/Logo";
 import { cn } from "@/lib/utils";
+import { CopilotWidget } from "@/components/admin/CopilotWidget";
+import { QuickAddContact } from "@/components/admin/QuickAddContact";
 
-const LINKS = [
-  { href: "/admin", label: "Преглед" },
-  { href: "/admin/new-leads", label: "🆕 Нови лидове" },
-  { href: "/admin/clients", label: "Клиенти" },
-  { href: "/admin/bookings", label: "Срещи" },
-  { href: "/admin/leads", label: "Meta лийдове" },
-  { href: "/admin/ads", label: "Реклами" },
-  { href: "/admin/email", label: "Имейл" },
-  { href: "/admin/settings", label: "Настройки" },
+type LinkGroup = {
+  label: string;
+  items: Array<{ href: string; label: string }>;
+};
+
+const LINK_GROUPS: LinkGroup[] = [
+  {
+    label: "Команден център",
+    items: [
+      { href: "/admin", label: "📊 Преглед" },
+      { href: "/admin/new-leads", label: "🆕 Нови лидове" },
+    ],
+  },
+  {
+    label: "CRM",
+    items: [
+      { href: "/admin/clients", label: "📋 Клиенти" },
+      { href: "/admin/follow-up", label: "🎯 Follow-up" },
+      { href: "/admin/bookings", label: "📅 Срещи" },
+      { href: "/admin/leads", label: "📥 Meta лидове" },
+      { href: "/admin/email", label: "✉️ Имейл" },
+    ],
+  },
+  {
+    label: "Счетоводство",
+    items: [
+      { href: "/admin/accounting", label: "📊 Счетоводно табло" },
+      { href: "/admin/invoices", label: "🧾 Фактури" },
+      { href: "/admin/payments", label: "💰 Плащания" },
+      { href: "/admin/recurring", label: "🔁 Абонаменти" },
+      { href: "/admin/manual-review", label: "🔍 Ръчна проверка" },
+    ],
+  },
+  {
+    label: "Канали и AI",
+    items: [
+      { href: "/admin/chatbots", label: "💬 Чатботове" },
+      { href: "/admin/messenger", label: "📘 Messenger" },
+      { href: "/admin/whatsapp", label: "💚 WhatsApp" },
+      { href: "/admin/social", label: "📱 Соц. мрежи" },
+      { href: "/admin/ads", label: "📣 Реклами" },
+      { href: "/admin/demo", label: "🎬 Demo" },
+    ],
+  },
+  {
+    label: "Система",
+    items: [{ href: "/admin/settings", label: "⚙️ Настройки" }],
+  },
 ];
+
+const ALL_LINKS = LINK_GROUPS.flatMap((g) => g.items);
 
 export function AdminShell({ children, email }: { children: React.ReactNode; email: string }) {
   const path = usePathname();
@@ -89,21 +132,28 @@ export function AdminShell({ children, email }: { children: React.ReactNode; ema
             <X className="h-5 w-5" />
           </button>
         </div>
-        <nav className="mt-8 flex flex-col gap-1">
-          {LINKS.map((l) => (
-            <Link
-              key={l.href}
-              href={l.href}
-              onClick={() => setOpen(false)}
-              className={cn(
-                "rounded-lg px-3 py-2 text-sm transition-colors",
-                path === l.href
-                  ? "bg-[var(--color-accent-cyan)]/10 text-[var(--color-accent-cyan)]"
-                  : "text-[var(--color-text-secondary)] hover:bg-white/5 hover:text-[var(--color-text-primary)]"
-              )}
-            >
-              {l.label}
-            </Link>
+        <nav className="mt-6 flex flex-col gap-4 overflow-y-auto">
+          {LINK_GROUPS.map((g) => (
+            <div key={g.label}>
+              <p className="mb-1 px-3 font-mono text-[9px] uppercase tracking-[0.2em] text-[var(--color-text-tertiary)]">
+                {g.label}
+              </p>
+              {g.items.map((l) => (
+                <Link
+                  key={l.href}
+                  href={l.href}
+                  onClick={() => setOpen(false)}
+                  className={cn(
+                    "block rounded-lg px-3 py-2 text-sm transition-colors",
+                    path === l.href
+                      ? "bg-[var(--color-accent-cyan)]/10 text-[var(--color-accent-cyan)]"
+                      : "text-[var(--color-text-secondary)] hover:bg-white/5 hover:text-[var(--color-text-primary)]"
+                  )}
+                >
+                  {l.label}
+                </Link>
+              ))}
+            </div>
           ))}
         </nav>
         <div className="mt-auto">
@@ -117,20 +167,27 @@ export function AdminShell({ children, email }: { children: React.ReactNode; ema
       {/* Desktop sidebar */}
       <aside className="fixed inset-y-0 left-0 hidden w-64 flex-col gap-2 border-r border-[var(--color-border-default)] bg-[var(--color-bg-deep)]/60 p-6 md:flex">
         <Link href="/admin"><Logo /></Link>
-        <nav className="mt-8 flex flex-col gap-1">
-          {LINKS.map((l) => (
-            <Link
-              key={l.href}
-              href={l.href}
-              className={cn(
-                "rounded-lg px-3 py-2 text-sm transition-colors",
-                path === l.href
-                  ? "bg-[var(--color-accent-cyan)]/10 text-[var(--color-accent-cyan)]"
-                  : "text-[var(--color-text-secondary)] hover:bg-white/5 hover:text-[var(--color-text-primary)]"
-              )}
-            >
-              {l.label}
-            </Link>
+        <nav className="mt-6 flex flex-col gap-4 overflow-y-auto pr-1">
+          {LINK_GROUPS.map((g) => (
+            <div key={g.label}>
+              <p className="mb-1 px-3 font-mono text-[9px] uppercase tracking-[0.2em] text-[var(--color-text-tertiary)]">
+                {g.label}
+              </p>
+              {g.items.map((l) => (
+                <Link
+                  key={l.href}
+                  href={l.href}
+                  className={cn(
+                    "block rounded-lg px-3 py-2 text-sm transition-colors",
+                    path === l.href
+                      ? "bg-[var(--color-accent-cyan)]/10 text-[var(--color-accent-cyan)]"
+                      : "text-[var(--color-text-secondary)] hover:bg-white/5 hover:text-[var(--color-text-primary)]"
+                  )}
+                >
+                  {l.label}
+                </Link>
+              ))}
+            </div>
           ))}
         </nav>
         <div className="mt-auto">
@@ -141,6 +198,10 @@ export function AdminShell({ children, email }: { children: React.ReactNode; ema
         </div>
       </aside>
       <main className="md:pl-64">{children}</main>
+      <QuickAddContact />
+      <CopilotWidget />
     </div>
   );
 }
+
+export { ALL_LINKS };

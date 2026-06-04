@@ -28,17 +28,53 @@ const jetbrains = JetBrains_Mono({
 export const metadata: Metadata = {
   title: "ProMarketing LTD — AI автоматизации за бизнеса",
   description:
-    "Автоматизирай рутината с AI агенти. Поверявай ни процеси, връщай си времето. Запази безплатна консултация.",
+    "Автоматизирай рутината с AI агенти. AI чат агенти, личен AI CRM и софтуер по поръчка — работят 24/7 и спестяват 12-15ч седмично.",
   metadataBase: new URL(
     (process.env.NEXT_PUBLIC_SITE_URL && process.env.NEXT_PUBLIC_SITE_URL.trim()) ||
       "https://promarketing.pw"
   ),
+  keywords: [
+    "AI автоматизация",
+    "AI агенти България",
+    "AI CRM",
+    "чатбот за бизнес",
+    "автоматизация на продажби",
+    "AI асистент",
+    "ProMarketing",
+    "AI софтуер по поръчка",
+  ],
+  authors: [{ name: "Ивайло Петев", url: "https://promarketing.pw" }],
+  creator: "ProMarketing LTD",
+  publisher: "ProMarketing LTD",
   openGraph: {
     type: "website",
     locale: "bg_BG",
+    url: "https://promarketing.pw",
     siteName: "ProMarketing LTD",
+    title: "ProMarketing LTD — AI автоматизации за бизнеса",
+    description:
+      "AI чат агенти, личен AI CRM и софтуер по поръчка. Спестявай 12-15ч седмично. Запази безплатна консултация.",
   },
-  robots: { index: true, follow: true },
+  twitter: {
+    card: "summary_large_image",
+    title: "ProMarketing LTD — AI автоматизации за бизнеса",
+    description:
+      "AI агенти работят 24/7, ти само одобряваш. Спестявай 12-15ч седмично.",
+  },
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+      "max-image-preview": "large",
+      "max-snippet": -1,
+    },
+  },
+  alternates: {
+    canonical: "https://promarketing.pw",
+    languages: { "bg-BG": "https://promarketing.pw" },
+  },
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {

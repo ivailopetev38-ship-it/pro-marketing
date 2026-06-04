@@ -2,6 +2,10 @@ import type { Metadata } from "next";
 import { PitchHero } from "@/components/pitch/PitchHero";
 import { ShiftSection } from "@/components/pitch/ShiftSection";
 import { CapabilitiesGrid } from "@/components/pitch/CapabilitiesGrid";
+import { CRMDashboard } from "@/components/pitch/CRMDashboard";
+import { LiveDemoSection } from "@/components/pitch/LiveDemoSection";
+import { CRMShowcase } from "@/components/landing/CRMShowcase";
+import { ImpactChart } from "@/components/pitch/ImpactChart";
 import { ResultsSection } from "@/components/pitch/ResultsSection";
 import { ProcessSection } from "@/components/pitch/ProcessSection";
 import { TechStackSection } from "@/components/pitch/TechStackSection";
@@ -33,6 +37,10 @@ export default function PitchPage() {
         <PitchHero />
         <ShiftSection />
         <CapabilitiesGrid />
+        <CRMDashboard />
+        <LiveDemoSection />
+        <CRMShowcase />
+        <ImpactChart />
         <ResultsSection />
         <ProcessSection />
         <TechStackSection />

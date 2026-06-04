@@ -1,5 +1,5 @@
 "use client";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import {
   ColumnDef,
   flexRender,
@@ -30,11 +30,22 @@ export interface BookingRow {
   automation_goal: string | null;
   services_interested: string[] | null;
   timeline: string | null;
+  meeting_url?: string | null;
 }
 
-export function BookingsTable({ rows }: { rows: BookingRow[] }) {
-  const [sorting, setSorting] = useState<SortingState>([{ id: "scheduled_at", desc: true }]);
+type Tab = "upcoming" | "past";
+
+export function BookingsTable({ upcoming, past }: { upcoming: BookingRow[]; past: BookingRow[] }) {
+  const [tab, setTab] = useState<Tab>("upcoming");
+  const [sorting, setSorting] = useState<SortingState>([{ id: "scheduled_at", desc: false }]);
   const [filter, setFilter] = useState("");
+
+  const rows = tab === "upcoming" ? upcoming : past;
+
+  // Upcoming sorts ASC (nearest first), Archive sorts DESC (latest first).
+  useEffect(() => {
+    setSorting([{ id: "scheduled_at", desc: tab === "past" }]);
+  }, [tab]);
 
   const filtered = useMemo(() => {
     const q = filter.trim().toLowerCase();
@@ -97,8 +108,30 @@ export function BookingsTable({ rows }: { rows: BookingRow[] }) {
       header: "Статус",
       cell: (info) => {
         const s = info.getValue<string>();
-        const tone = s === "confirmed" ? "text-emerald-300" : s === "cancelled" ? "text-red-300" : "text-amber-300";
-        return <span className={tone}>{s}</span>;
+        const label =
+          s === "confirmed" ? "потвърдена" :
+          s === "completed" ? "проведена" :
+          s === "cancelled" ? "отказана" :
+          s === "rescheduled" ? "разместена" : s;
+        const tone =
+          s === "confirmed" ? "bg-emerald-500/15 text-emerald-300 border-emerald-500/30" :
+          s === "completed" ? "bg-sky-500/15 text-sky-300 border-sky-500/30" :
+          s === "cancelled" ? "bg-red-500/15 text-red-300 border-red-500/30" :
+          "bg-amber-500/15 text-amber-300 border-amber-500/30";
+        return <span className={`inline-flex items-center rounded-full border px-2 py-0.5 text-[10px] font-mono uppercase tracking-wider ${tone}`}>{label}</span>;
+      },
+    },
+    {
+      accessorKey: "meeting_url",
+      header: "Линк",
+      cell: (info) => {
+        const url = info.getValue<string | null | undefined>();
+        if (!url) return <span className="text-[var(--color-text-tertiary)]">—</span>;
+        return (
+          <a href={url} target="_blank" rel="noreferrer" className="text-[var(--color-accent-cyan)] hover:underline">
+            Отвори
+          </a>
+        );
       },
     },
   ], []);
@@ -145,6 +178,30 @@ export function BookingsTable({ rows }: { rows: BookingRow[] }) {
   return (
     <div className="space-y-4">
       <div className="flex flex-wrap items-center gap-3">
+        <div className="inline-flex rounded-lg border border-[var(--color-border-default)] bg-[var(--color-bg-deep)] p-1">
+          <button
+            type="button"
+            onClick={() => setTab("upcoming")}
+            className={`rounded-md px-3 py-1.5 text-xs font-medium transition ${
+              tab === "upcoming"
+                ? "bg-[var(--color-accent-cyan)] text-black"
+                : "text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)]"
+            }`}
+          >
+            Предстоящи · {upcoming.length}
+          </button>
+          <button
+            type="button"
+            onClick={() => setTab("past")}
+            className={`rounded-md px-3 py-1.5 text-xs font-medium transition ${
+              tab === "past"
+                ? "bg-[var(--color-accent-cyan)] text-black"
+                : "text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)]"
+            }`}
+          >
+            Архив · {past.length}
+          </button>
+        </div>
         <input
           value={filter}
           onChange={(e) => setFilter(e.target.value)}
@@ -180,8 +237,8 @@ export function BookingsTable({ rows }: { rows: BookingRow[] }) {
             ))}
             {table.getRowModel().rows.length === 0 && (
               <TableRow>
-                <TableCell colSpan={8} className="py-8 text-center text-[var(--color-text-tertiary)]">
-                  Няма заявки
+                <TableCell colSpan={9} className="py-8 text-center text-[var(--color-text-tertiary)]">
+                  {tab === "upcoming" ? "Няма предстоящи срещи" : "Няма приключени срещи"}
                 </TableCell>
               </TableRow>
             )}

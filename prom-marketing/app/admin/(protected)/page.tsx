@@ -7,430 +7,671 @@ import {
   type ContactRow,
   type ContactStage,
 } from "@/lib/contacts/types";
+import { KpiCard } from "@/components/admin/KpiCard";
+import { PipelineBars } from "@/components/admin/charts/PipelineBars";
+import { DonutChart } from "@/components/admin/charts/DonutChart";
+import { Sparkline, type SparklinePoint } from "@/components/admin/charts/Sparkline";
 
 export const dynamic = "force-dynamic";
 
-interface ContactWithActivity extends ContactRow {
-  last_activity_at?: string | null;
-  last_activity_title?: string | null;
-  total_activities?: number;
-  total_files?: number;
+const DAY_MS = 24 * 60 * 60 * 1000;
+const SOURCE_PALETTE: Record<string, { label: string; color: string }> = {
+  meta_lead: { label: "Meta реклама", color: "#1877F2" },
+  website_form: { label: "Сайт", color: "#06b6d4" },
+  cal_booking: { label: "Cal.com", color: "#22c55e" },
+  email: { label: "Имейл", color: "#a78bfa" },
+  manual: { label: "Ръчно", color: "#facc15" },
+  oferta: { label: "Оферта линк", color: "#ec4899" },
+  presentation: { label: "Презентация", color: "#fb923c" },
+};
+
+function sourceMeta(source: string) {
+  return SOURCE_PALETTE[source] ?? { label: source, color: "#64748b" };
+}
+
+// Build a YYYY-MM-DD bucket key in local time (Sofia). Avoids the "midnight
+// UTC shifts to 02:00 local" off-by-one for activity timestamps near midnight.
+function dayKey(iso: string): string {
+  const d = new Date(iso);
+  const y = d.getFullYear();
+  const m = String(d.getMonth() + 1).padStart(2, "0");
+  const day = String(d.getDate()).padStart(2, "0");
+  return `${y}-${m}-${day}`;
+}
+
+function buildSparkline(activities: { occurred_at: string }[], days: number): SparklinePoint[] {
+  const buckets = new Map<string, number>();
+  const now = new Date();
+  now.setHours(0, 0, 0, 0);
+  for (let i = days - 1; i >= 0; i--) {
+    const d = new Date(now.getTime() - i * DAY_MS);
+    buckets.set(dayKey(d.toISOString()), 0);
+  }
+  for (const a of activities) {
+    const k = dayKey(a.occurred_at);
+    if (buckets.has(k)) buckets.set(k, (buckets.get(k) ?? 0) + 1);
+  }
+  return Array.from(buckets.entries()).map(([date, value]) => ({ date, value }));
 }
 
 export default async function AdminDashboard() {
   const supabase = createServiceClient();
+  const nowIso = new Date().toISOString();
+  const nowMs = new Date().getTime();
+  const sevenAgo = new Date(nowMs - 7 * DAY_MS).toISOString();
+  const fourteenAgo = new Date(nowMs - 14 * DAY_MS).toISOString();
+  const thirtyAgo = new Date(nowMs - 30 * DAY_MS).toISOString();
+  const sixtyAgo = new Date(nowMs - 60 * DAY_MS).toISOString();
 
-  // Fetch all non-lost contacts + their last activity + file count
-  const { data: contactsRaw } = await supabase
-    .from("contacts")
-    .select("*")
-    .neq("stage", "lost")
-    .order("updated_at", { ascending: false });
+  // Auto-promote stale confirmed bookings → completed (also covers the admin
+  // overview when nobody opened /admin/bookings recently).
+  await supabase
+    .from("bookings")
+    .update({ status: "completed", updated_at: nowIso })
+    .eq("status", "confirmed")
+    .lt("scheduled_at", nowIso);
 
-  const contacts = (contactsRaw ?? []) as ContactRow[];
-  const ids = contacts.map((c) => c.id);
-
-  // Fetch last activity per contact + file counts in parallel
-  const [activitiesRes, filesRes] = await Promise.all([
-    ids.length > 0
-      ? supabase
-          .from("contact_activities")
-          .select("contact_id, title, occurred_at, activity_type")
-          .in("contact_id", ids)
-          .order("occurred_at", { ascending: false })
-      : Promise.resolve({ data: [] }),
-    ids.length > 0
-      ? supabase
-          .from("contact_files")
-          .select("contact_id")
-          .in("contact_id", ids)
-      : Promise.resolve({ data: [] }),
+  const [contactsRes, activitiesRes, bookingsRes, metaLeadsRes, invoicesRes, manualReviewRes] = await Promise.all([
+    supabase.from("contacts").select("*").order("updated_at", { ascending: false }),
+    supabase
+      .from("contact_activities")
+      .select("activity_type, occurred_at, contact_id")
+      .gte("occurred_at", sixtyAgo)
+      .order("occurred_at", { ascending: false }),
+    supabase.from("bookings").select("id, status, scheduled_at, attendee_name, attendee_email, business, meeting_url"),
+    supabase.from("meta_leads").select("id, processed, created_at"),
+    supabase.from("invoices").select("id, status, amount_gross, due_date, issue_date, contact_id"),
+    supabase.from("manual_review_items").select("id").eq("status", "open"),
   ]);
 
-  const lastActivityByContact = new Map<string, { title: string; occurred_at: string; type: string }>();
-  const activityCountByContact = new Map<string, number>();
-  for (const a of (activitiesRes.data ?? []) as Array<{
-    contact_id: string;
-    title: string;
-    occurred_at: string;
-    activity_type: string;
-  }>) {
-    activityCountByContact.set(a.contact_id, (activityCountByContact.get(a.contact_id) ?? 0) + 1);
-    if (!lastActivityByContact.has(a.contact_id)) {
-      lastActivityByContact.set(a.contact_id, {
-        title: a.title,
-        occurred_at: a.occurred_at,
-        type: a.activity_type,
-      });
-    }
-  }
+  const allContacts = (contactsRes.data ?? []) as ContactRow[];
+  const active = allContacts.filter((c) => c.stage !== "lost");
+  const allActivities = (activitiesRes.data ?? []) as Array<{ activity_type: string; occurred_at: string; contact_id: string }>;
+  const allBookings = (bookingsRes.data ?? []) as Array<{
+    id: string;
+    status: string;
+    scheduled_at: string;
+    attendee_name: string;
+    attendee_email: string;
+    business: string | null;
+    meeting_url: string | null;
+  }>;
+  const metaLeads = (metaLeadsRes.data ?? []) as Array<{ id: string; processed: boolean | null; created_at: string }>;
+  const invoices = (invoicesRes.data ?? []) as Array<{
+    id: string;
+    status: string;
+    amount_gross: number | null;
+    due_date: string | null;
+    issue_date: string | null;
+    contact_id: string | null;
+  }>;
 
-  const fileCountByContact = new Map<string, number>();
-  for (const f of (filesRes.data ?? []) as Array<{ contact_id: string }>) {
-    fileCountByContact.set(f.contact_id, (fileCountByContact.get(f.contact_id) ?? 0) + 1);
-  }
+  // ── Pipeline distribution ──────────────────────────────────────────────
+  const byStage = new Map<ContactStage, ContactRow[]>();
+  for (const s of CONTACT_STAGES) byStage.set(s, []);
+  for (const c of active) byStage.get(c.stage)?.push(c);
+  const pipelineSegments = (
+    ["won", "negotiating", "offer_sent", "presentation_sent", "discovery", "contacted", "lead"] as ContactStage[]
+  ).map((s) => ({ stage: s, count: byStage.get(s)?.length ?? 0 }));
 
-  const enriched: ContactWithActivity[] = contacts.map((c) => {
-    const la = lastActivityByContact.get(c.id);
-    return {
-      ...c,
-      last_activity_at: la?.occurred_at ?? null,
-      last_activity_title: la?.title ?? null,
-      total_activities: activityCountByContact.get(c.id) ?? 0,
-      total_files: fileCountByContact.get(c.id) ?? 0,
-    };
+  // ── KPI: active contacts + 7d delta ────────────────────────────────────
+  const createdLast7 = active.filter((c) => c.created_at >= sevenAgo).length;
+  const createdPrev7 = active.filter((c) => c.created_at >= fourteenAgo && c.created_at < sevenAgo).length;
+  const activeDelta = createdLast7 - createdPrev7;
+
+  // ── KPI: Conversion ────────────────────────────────────────────────────
+  const reachedContacted = allContacts.filter((c) =>
+    ["contacted", "discovery", "presentation_sent", "offer_sent", "negotiating", "won"].includes(c.stage)
+  ).length;
+  const wonCount = allContacts.filter((c) => c.stage === "won").length;
+  const conversionPct = reachedContacted > 0 ? Math.round((wonCount / reachedContacted) * 100) : 0;
+
+  // ── KPI: Deal value pipeline ───────────────────────────────────────────
+  const pipelineEur = active
+    .filter((c) => ["offer_sent", "negotiating", "presentation_sent"].includes(c.stage))
+    .reduce((sum, c) => sum + (Number(c.deal_value_eur) || 0), 0);
+  const wonEur = allContacts
+    .filter((c) => c.stage === "won")
+    .reduce((sum, c) => sum + (Number(c.deal_value_eur) || 0), 0);
+
+  // ── KPI: Срещи ─────────────────────────────────────────────────────────
+  const upcomingBookings = allBookings.filter(
+    (b) => b.status !== "cancelled" && b.scheduled_at >= nowIso
+  );
+  const completedThisMonth = allBookings.filter((b) => {
+    if (b.status !== "completed") return false;
+    const d = new Date(b.scheduled_at);
+    const now = new Date();
+    return d.getFullYear() === now.getFullYear() && d.getMonth() === now.getMonth();
+  }).length;
+  const completedPrevMonth = allBookings.filter((b) => {
+    if (b.status !== "completed") return false;
+    const d = new Date(b.scheduled_at);
+    const now = new Date();
+    const prev = new Date(now.getFullYear(), now.getMonth() - 1, 1);
+    return d.getFullYear() === prev.getFullYear() && d.getMonth() === prev.getMonth();
+  }).length;
+  const bookingsDelta = completedThisMonth - completedPrevMonth;
+
+  // ── KPI: Имейли пратени ────────────────────────────────────────────────
+  const emailsLast7 = allActivities.filter(
+    (a) => a.activity_type === "email_sent" && a.occurred_at >= sevenAgo
+  ).length;
+  const emailsPrev7 = allActivities.filter(
+    (a) => a.activity_type === "email_sent" && a.occurred_at >= fourteenAgo && a.occurred_at < sevenAgo
+  ).length;
+  const emailsDelta = emailsLast7 - emailsPrev7;
+
+  // ── KPI: Просрочени followup-и ─────────────────────────────────────────
+  const heardSinceDue = (c: ContactRow) =>
+    !!c.last_heard_from_at && !!c.next_followup_at && c.last_heard_from_at >= c.next_followup_at;
+  const overdueFollowups = active
+    .filter((c) => {
+      if (!c.next_followup_at) return false;
+      if (c.next_followup_at >= new Date(nowMs - DAY_MS).toISOString()) return false;
+      // requirement #7 — not overdue if Ivailo has already heard from them.
+      if (heardSinceDue(c)) return false;
+      return true;
+    })
+    .sort((a, b) => (a.next_followup_at! > b.next_followup_at! ? 1 : -1));
+
+  // ── Today/Tomorrow agenda ──────────────────────────────────────────────
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  const tomorrowEnd = new Date(today.getTime() + 2 * DAY_MS);
+  const todayTomorrowBookings = upcomingBookings
+    .filter((b) => new Date(b.scheduled_at) < tomorrowEnd)
+    .sort((a, b) => a.scheduled_at.localeCompare(b.scheduled_at));
+  const todayTomorrowFollowups = active
+    .filter((c) => {
+      if (!c.next_followup_at) return false;
+      const t = new Date(c.next_followup_at).getTime();
+      return t >= today.getTime() && t < tomorrowEnd.getTime();
+    })
+    .sort((a, b) => (a.next_followup_at! > b.next_followup_at! ? 1 : -1));
+
+  // ── Daily focus widget ─────────────────────────────────────────────────
+  const startTomorrow = new Date(today.getTime() + DAY_MS);
+  const needToHearToday = active.filter(
+    (c) => c.next_followup_at && new Date(c.next_followup_at) < startTomorrow && !heardSinceDue(c)
+  ).length;
+  const offerSentCount = active.filter(
+    (c) => c.stage === "offer_sent" || c.followup_status === "sent_offer"
+  ).length;
+  const presentationSentCount = active.filter(
+    (c) => c.stage === "presentation_sent" || c.followup_status === "sent_presentation"
+  ).length;
+  const awaitingPaymentCount = invoices.filter((i) =>
+    ["sent", "awaiting_payment", "partially_paid", "overdue"].includes(i.status)
+  ).length;
+  const manualReviewOpen = (manualReviewRes.data ?? []).length;
+
+  // ── Lead sources donut ─────────────────────────────────────────────────
+  const sourceCounts = new Map<string, number>();
+  for (const c of active) {
+    sourceCounts.set(c.source, (sourceCounts.get(c.source) ?? 0) + 1);
+  }
+  const sourceSlices = Array.from(sourceCounts.entries())
+    .map(([source, value]) => ({
+      label: sourceMeta(source).label,
+      color: sourceMeta(source).color,
+      value,
+    }))
+    .sort((a, b) => b.value - a.value);
+
+  // ── Activity 30d sparkline ─────────────────────────────────────────────
+  const last30 = allActivities.filter((a) => a.occurred_at >= thirtyAgo);
+  const activitySparkline = buildSparkline(last30, 30);
+
+  // ── Top opportunities ──────────────────────────────────────────────────
+  const topOpportunities = active
+    .filter((c) => ["presentation_sent", "offer_sent", "negotiating"].includes(c.stage))
+    .sort((a, b) => {
+      const va = Number(a.deal_value_eur) || 0;
+      const vb = Number(b.deal_value_eur) || 0;
+      if (va !== vb) return vb - va;
+      return a.updated_at < b.updated_at ? 1 : -1;
+    })
+    .slice(0, 5);
+
+  // ── Raw Meta leads waiting ─────────────────────────────────────────────
+  const unprocessedMetaLeads = metaLeads.filter((l) => !l.processed).length;
+
+  // ── Date label ─────────────────────────────────────────────────────────
+  const todayLabel = new Date().toLocaleDateString("bg-BG", {
+    weekday: "long",
+    day: "numeric",
+    month: "long",
+    year: "numeric",
   });
 
-  // Group by stage
-  const byStage = new Map<ContactStage, ContactWithActivity[]>();
-  for (const s of CONTACT_STAGES) byStage.set(s, []);
-  for (const c of enriched) {
-    if (c.stage !== "lost") byStage.get(c.stage)?.push(c);
-  }
-
-  // Quick stats
-  const now = Date.now();
-  const upcomingFollowups = enriched
-    .filter((c) => c.next_followup_at && new Date(c.next_followup_at).getTime() > now - 24 * 3600 * 1000)
-    .sort((a, b) => new Date(a.next_followup_at!).getTime() - new Date(b.next_followup_at!).getTime());
-
-  const overdueFollowups = enriched.filter(
-    (c) => c.next_followup_at && new Date(c.next_followup_at).getTime() < now - 24 * 3600 * 1000
-  );
-
-  // 🆕 Нови лидове — създадени през последните 72 часа, ясно подредени с бележките
-  const seventyTwoHoursAgo = now - 72 * 3600 * 1000;
-  const newLeads = enriched
-    .filter((c) => new Date(c.created_at).getTime() >= seventyTwoHoursAgo)
-    .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
-
-  // Приоритет: най-близо до сделка отляво → леад отдясно
-  const stagesToShow: ContactStage[] = [
-    "won",
-    "negotiating",
-    "offer_sent",
-    "presentation_sent",
-    "discovery",
-    "contacted",
-    "lead",
-  ];
-
   return (
-    <div className="p-6 md:p-10">
-      <header className="mb-8">
-        <h1 className="font-display text-3xl font-bold">Преглед на CRM</h1>
-        <p className="text-sm text-[var(--color-text-secondary)]">
-          Всички активни клиенти и до какъв етап са стигнали — бърз поглед за 30 секунди
-        </p>
-      </header>
-
-      {/* Top stats */}
-      <div className="mb-8 grid grid-cols-2 gap-3 md:grid-cols-4">
-        <StatCard
-          label="Активни клиенти"
-          value={enriched.length}
-          hint={`от ${contacts.length} общо`}
-          color="#06b6d4"
-        />
-        <StatCard
-          label="Оферти + презентации"
-          value={(byStage.get("offer_sent")?.length ?? 0) + (byStage.get("presentation_sent")?.length ?? 0) + (byStage.get("negotiating")?.length ?? 0)}
-          hint={`${byStage.get("offer_sent")?.length ?? 0} оферти + ${byStage.get("presentation_sent")?.length ?? 0} презентации`}
-          color="#FFB800"
-        />
-        <StatCard
-          label="Предстоящи срещи"
-          value={upcomingFollowups.length}
-          hint="следващите дни"
-          color="#22c55e"
-        />
-        <StatCard
-          label="Просрочени follow-up"
-          value={overdueFollowups.length}
-          hint="спешно действие"
-          color={overdueFollowups.length > 0 ? "#ef4444" : "#7da8cc"}
-        />
-      </div>
-
-      {/* New leads quick link */}
-      {newLeads.length > 0 && (
-        <div className="mb-8">
+    <div className="space-y-8 p-6 md:p-10">
+      {/* ─── Header ──────────────────────────────────────────────────── */}
+      <header className="flex flex-wrap items-end justify-between gap-4">
+        <div>
+          <p className="font-mono text-[10px] uppercase tracking-[0.3em] text-[var(--color-accent-cyan)]">
+            ProMarketing · Команден център
+          </p>
+          <h1 className="mt-1 font-display text-4xl font-bold">Преглед на CRM</h1>
+          <p className="mt-1 text-sm capitalize text-[var(--color-text-secondary)]">{todayLabel}</p>
+        </div>
+        <div className="flex flex-wrap gap-2">
           <Link
-            href="/admin/new-leads"
-            className="flex items-center justify-between gap-3 rounded-lg border border-[#facc15]/30 bg-[#facc15]/5 p-4 transition-colors hover:border-[#facc15]"
+            href="/admin/clients"
+            className="rounded-lg border border-[var(--color-accent-cyan)]/40 bg-[var(--color-accent-cyan)]/10 px-4 py-2 text-sm font-medium text-[var(--color-accent-cyan)] transition hover:bg-[var(--color-accent-cyan)]/20"
           >
-            <div>
-              <p className="font-mono text-xs uppercase tracking-[0.3em] text-[#facc15]">
-                🆕 Нови лидове · последните 72 часа
-              </p>
-              <p className="mt-1 text-sm text-[var(--color-text-secondary)]">
-                {newLeads.length} нови контакти чакат обработка
-              </p>
-            </div>
-            <span className="rounded-full bg-[#facc15]/20 px-4 py-2 text-xl font-bold text-[#facc15]">
-              {newLeads.length} →
-            </span>
+            📋 Всички клиенти
+          </Link>
+          <Link
+            href="/admin/bookings"
+            className="rounded-lg border border-[var(--color-border-default)] bg-[var(--color-bg-deep)]/40 px-4 py-2 text-sm font-medium text-[var(--color-text-primary)] transition hover:border-[var(--color-accent-cyan)]/60"
+          >
+            📅 Срещи · {upcomingBookings.length}
           </Link>
         </div>
-      )}
+      </header>
 
-      {/* Upcoming follow-ups alert */}
-      {upcomingFollowups.length > 0 && (
-        <section className="mb-8">
-          <h2 className="mb-3 font-mono text-xs uppercase tracking-[0.3em] text-[var(--color-accent-violet)]">
-            🔔 Предстоящи срещи / разговори
-          </h2>
-          <div className="grid gap-2 md:grid-cols-2 lg:grid-cols-3">
-            {upcomingFollowups.slice(0, 6).map((c) => (
-              <Link
-                key={c.id}
-                href={`/admin/clients/${c.id}`}
-                className="rounded-lg border border-[#22c55e]/30 bg-[#22c55e]/5 p-3 transition-colors hover:border-[#22c55e]"
-              >
-                <p className="text-xs font-mono uppercase tracking-wider text-[#22c55e]">
-                  {formatFollowup(c.next_followup_at!)}
-                </p>
-                <p className="mt-1 text-sm font-medium text-[var(--color-text-primary)]">
-                  {c.full_name || c.email || "—"}
-                </p>
-                {c.company && (
-                  <p className="text-xs text-[var(--color-text-tertiary)]">{c.company}</p>
-                )}
-              </Link>
-            ))}
-          </div>
-        </section>
-      )}
-
-      {/* Overdue alert */}
-      {overdueFollowups.length > 0 && (
-        <section className="mb-8">
-          <h2 className="mb-3 font-mono text-xs uppercase tracking-[0.3em] text-[#ef4444]">
-            ⚠️ Просрочени · нужно действие
-          </h2>
-          <div className="grid gap-2 md:grid-cols-2 lg:grid-cols-3">
-            {overdueFollowups.slice(0, 6).map((c) => (
-              <Link
-                key={c.id}
-                href={`/admin/clients/${c.id}`}
-                className="rounded-lg border border-[#ef4444]/30 bg-[#ef4444]/5 p-3 transition-colors hover:border-[#ef4444]"
-              >
-                <p className="text-xs font-mono uppercase tracking-wider text-[#ef4444]">
-                  {formatFollowup(c.next_followup_at!)}
-                </p>
-                <p className="mt-1 text-sm font-medium text-[var(--color-text-primary)]">
-                  {c.full_name || c.email || "—"}
-                </p>
-                {c.company && (
-                  <p className="text-xs text-[var(--color-text-tertiary)]">{c.company}</p>
-                )}
-              </Link>
-            ))}
-          </div>
-        </section>
-      )}
-
-      {/* Pipeline columns */}
+      {/* ─── Daily focus ─────────────────────────────────────────────── */}
       <section>
-        <h2 className="mb-4 font-display text-xl font-bold">
-          🚀 Pipeline · {enriched.length} активни клиенти
+        <h2 className="mb-3 font-mono text-[10px] uppercase tracking-[0.3em] text-[var(--color-text-tertiary)]">
+          Днес
         </h2>
-        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-7">
-          {stagesToShow.map((s) => {
-            const items = byStage.get(s) ?? [];
-            return (
-              <div
-                key={s}
-                className="rounded-lg border border-[var(--color-border-default)] bg-[var(--color-bg-deep)]/40 p-3"
-              >
-                <div className="mb-3 flex items-center justify-between gap-2">
-                  <h3
-                    className="text-xs font-bold uppercase tracking-wider"
-                    style={{ color: STAGE_COLOR[s] }}
-                  >
-                    {STAGE_LABEL[s]}
-                  </h3>
-                  <span
-                    className="rounded-full px-2 py-0.5 text-xs font-mono"
-                    style={{
-                      background: `${STAGE_COLOR[s]}1a`,
-                      color: STAGE_COLOR[s],
-                    }}
-                  >
-                    {items.length}
-                  </span>
-                </div>
-                <div className="space-y-2">
-                  {items.map((c) => (
-                    <ClientCard key={c.id} contact={c} />
-                  ))}
-                  {items.length === 0 && (
-                    <p className="rounded-md border border-dashed border-[var(--color-border-default)] p-3 text-center text-[10px] text-[var(--color-text-tertiary)]">
-                      Празно
-                    </p>
-                  )}
-                </div>
-              </div>
-            );
-          })}
+        <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
+          <KpiCard
+            label="Днес ги чуй"
+            value={needToHearToday}
+            hint="просрочени + днешни, още не чути"
+            color={needToHearToday > 0 ? "#ef4444" : "#22c55e"}
+            href="/admin/follow-up"
+          />
+          <KpiCard
+            label="Оферта изпратена"
+            value={offerSentCount}
+            hint="чакат решение"
+            color="#facc15"
+            href="/admin/follow-up"
+          />
+          <KpiCard
+            label="Презентация изпратена"
+            value={presentationSentCount}
+            hint="чакат фийдбек"
+            color="#ec4899"
+            href="/admin/follow-up"
+          />
+          <KpiCard
+            label="Чакаме плащане"
+            value={awaitingPaymentCount}
+            hint="неплатени фактури"
+            color="#06b6d4"
+            href="/admin/invoices"
+          />
         </div>
       </section>
 
-      {/* Quick links */}
-      <section className="mt-10 grid gap-4 md:grid-cols-3">
-        <Link
-          href="/admin/clients"
-          className="rounded-lg border border-[var(--color-border-default)] bg-[var(--color-bg-deep)]/40 p-5 transition-colors hover:border-[var(--color-accent-cyan)]"
+      {/* ─── KPI strip (6 cards) ─────────────────────────────────────── */}
+      <section>
+        <h2 className="mb-3 font-mono text-[10px] uppercase tracking-[0.3em] text-[var(--color-text-tertiary)]">
+          Ключови метрики
+        </h2>
+        <div className="grid grid-cols-2 gap-3 md:grid-cols-3 xl:grid-cols-6">
+          <KpiCard
+            label="Активни клиенти"
+            value={active.length}
+            hint={`нови 7д · общо ${allContacts.length}`}
+            delta={activeDelta}
+            color="#06b6d4"
+            href="/admin/clients"
+          />
+          <KpiCard
+            label="Превърнати в сделка"
+            value={`${conversionPct}%`}
+            hint={`${wonCount} спечелени от ${reachedContacted}`}
+            color="#22c55e"
+          />
+          <KpiCard
+            label="Pipeline стойност"
+            value={`€${pipelineEur.toLocaleString("bg-BG")}`}
+            hint={`оферти + преговори · спечелени €${wonEur.toLocaleString("bg-BG")}`}
+            color="#facc15"
+          />
+          <KpiCard
+            label="Срещи този месец"
+            value={completedThisMonth}
+            hint={`предстоящи ${upcomingBookings.length}`}
+            delta={bookingsDelta}
+            color="#a78bfa"
+            href="/admin/bookings"
+          />
+          <KpiCard
+            label="Имейли 7 дни"
+            value={emailsLast7}
+            hint="пратени към клиенти"
+            delta={emailsDelta}
+            color="#ec4899"
+            href="/admin/email"
+          />
+          <KpiCard
+            label="Просрочени"
+            value={overdueFollowups.length}
+            hint={overdueFollowups.length > 0 ? "нужно действие" : "всичко чисто"}
+            color={overdueFollowups.length > 0 ? "#ef4444" : "#22c55e"}
+          />
+        </div>
+      </section>
+
+      {/* ─── Visualization row ───────────────────────────────────────── */}
+      <section className="grid gap-4 lg:grid-cols-3">
+        {/* Pipeline bars */}
+        <div className="rounded-xl border border-[var(--color-border-default)] bg-[var(--color-bg-deep)]/40 p-5">
+          <div className="mb-4 flex items-center justify-between">
+            <h3 className="font-display text-base font-semibold">📊 Етапи на сделките</h3>
+            <span className="font-mono text-xs text-[var(--color-text-tertiary)]">{active.length} активни</span>
+          </div>
+          <PipelineBars segments={pipelineSegments} />
+        </div>
+
+        {/* Lead sources donut */}
+        <div className="rounded-xl border border-[var(--color-border-default)] bg-[var(--color-bg-deep)]/40 p-5">
+          <div className="mb-4 flex items-center justify-between">
+            <h3 className="font-display text-base font-semibold">📥 Източници на лидове</h3>
+            <span className="font-mono text-xs text-[var(--color-text-tertiary)]">всичко</span>
+          </div>
+          {sourceSlices.length > 0 ? (
+            <DonutChart slices={sourceSlices} centerValue={String(active.length)} centerLabel="лидове" />
+          ) : (
+            <p className="text-sm text-[var(--color-text-tertiary)]">Няма данни още</p>
+          )}
+        </div>
+
+        {/* Activity sparkline */}
+        <div className="rounded-xl border border-[var(--color-border-default)] bg-[var(--color-bg-deep)]/40 p-5">
+          <div className="mb-2 flex items-center justify-between">
+            <h3 className="font-display text-base font-semibold">📈 Активност · 30 дни</h3>
+            <span className="font-mono text-xs text-[var(--color-text-tertiary)]">
+              {last30.length} действия
+            </span>
+          </div>
+          <p className="mb-3 text-[11px] text-[var(--color-text-tertiary)]">
+            Имейли, разговори, бележки, срещи — всичко по дни
+          </p>
+          <Sparkline points={activitySparkline} color="#06b6d4" height={80} showAxis />
+          <div className="mt-3 flex items-center justify-between text-[10px] font-mono uppercase tracking-wider text-[var(--color-text-tertiary)]">
+            <span>{new Date(nowMs - 30 * DAY_MS).toLocaleDateString("bg-BG", { day: "2-digit", month: "short" })}</span>
+            <span>днес</span>
+          </div>
+        </div>
+      </section>
+
+      {/* ─── Today / Tomorrow + Overdue ──────────────────────────────── */}
+      <section className="grid gap-4 lg:grid-cols-2">
+        {/* Днес / Утре */}
+        <div className="rounded-xl border border-[var(--color-border-default)] bg-[var(--color-bg-deep)]/40 p-5">
+          <div className="mb-4 flex items-center justify-between">
+            <h3 className="font-display text-base font-semibold">🔔 Днес и утре</h3>
+            <span className="font-mono text-xs text-[var(--color-text-tertiary)]">
+              {todayTomorrowBookings.length + todayTomorrowFollowups.length} ангажимента
+            </span>
+          </div>
+          {todayTomorrowBookings.length === 0 && todayTomorrowFollowups.length === 0 ? (
+            <p className="text-sm text-[var(--color-text-tertiary)]">
+              Свободен график — добра възможност за outreach.
+            </p>
+          ) : (
+            <div className="space-y-2">
+              {todayTomorrowBookings.map((b) => (
+                <div
+                  key={b.id}
+                  className="flex items-center gap-3 rounded-lg border border-emerald-500/20 bg-emerald-500/5 p-3"
+                >
+                  <span className="text-lg">📅</span>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm font-medium text-[var(--color-text-primary)] truncate">
+                      {b.attendee_name}
+                    </p>
+                    <p className="text-[11px] text-[var(--color-text-tertiary)] truncate">
+                      {b.business ?? b.attendee_email}
+                    </p>
+                  </div>
+                  <div className="text-right">
+                    <p className="text-xs font-mono text-emerald-300">{formatBookingTime(b.scheduled_at)}</p>
+                    {b.meeting_url && (
+                      <a
+                        href={b.meeting_url}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="text-[10px] text-[var(--color-accent-cyan)] hover:underline"
+                      >
+                        отвори линк →
+                      </a>
+                    )}
+                  </div>
+                </div>
+              ))}
+              {todayTomorrowFollowups.map((c) => (
+                <Link
+                  key={c.id}
+                  href={`/admin/clients/${c.id}`}
+                  className="flex items-center gap-3 rounded-lg border border-[var(--color-border-default)] bg-[var(--color-bg-deep)]/60 p-3 transition hover:border-[var(--color-accent-cyan)]/40"
+                >
+                  <span className="text-lg">📞</span>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm font-medium text-[var(--color-text-primary)] truncate">
+                      {c.full_name || c.email || "—"}
+                    </p>
+                    <p className="text-[11px] text-[var(--color-text-tertiary)] truncate">
+                      {c.company ?? STAGE_LABEL[c.stage]}
+                    </p>
+                  </div>
+                  <p className="text-xs font-mono text-[var(--color-accent-cyan)]">
+                    {formatFollowup(c.next_followup_at!)}
+                  </p>
+                </Link>
+              ))}
+            </div>
+          )}
+        </div>
+
+        {/* Просрочени */}
+        <div
+          className={`rounded-xl border p-5 ${
+            overdueFollowups.length > 0
+              ? "border-red-500/30 bg-red-500/5"
+              : "border-[var(--color-border-default)] bg-[var(--color-bg-deep)]/40"
+          }`}
         >
-          <p className="font-mono text-xs uppercase tracking-wider text-[var(--color-text-tertiary)]">
-            Преглед
-          </p>
-          <p className="mt-1 text-lg font-bold">📋 Всички клиенти</p>
-          <p className="mt-1 text-xs text-[var(--color-text-secondary)]">
-            Пълен списък с филтри и търсене
-          </p>
-        </Link>
-        <Link
-          href="/admin/leads"
-          className="rounded-lg border border-[var(--color-border-default)] bg-[var(--color-bg-deep)]/40 p-5 transition-colors hover:border-[var(--color-accent-cyan)]"
-        >
-          <p className="font-mono text-xs uppercase tracking-wider text-[var(--color-text-tertiary)]">
-            Източници
-          </p>
-          <p className="mt-1 text-lg font-bold">📥 Meta лидове</p>
-          <p className="mt-1 text-xs text-[var(--color-text-secondary)]">
-            Внасяне на лидове от Facebook кампании
-          </p>
-        </Link>
-        <Link
-          href="/admin/email"
-          className="rounded-lg border border-[var(--color-border-default)] bg-[var(--color-bg-deep)]/40 p-5 transition-colors hover:border-[var(--color-accent-cyan)]"
-        >
-          <p className="font-mono text-xs uppercase tracking-wider text-[var(--color-text-tertiary)]">
-            Изпращане
-          </p>
-          <p className="mt-1 text-lg font-bold">✉️ Имейли</p>
-          <p className="mt-1 text-xs text-[var(--color-text-secondary)]">
-            Прати персонален имейл към клиент
-          </p>
-        </Link>
+          <div className="mb-4 flex items-center justify-between">
+            <h3 className="font-display text-base font-semibold">
+              {overdueFollowups.length > 0 ? "⚠️ Просрочени" : "✅ Всичко чисто"}
+            </h3>
+            <span className="font-mono text-xs text-[var(--color-text-tertiary)]">
+              {overdueFollowups.length} клиента
+            </span>
+          </div>
+          {overdueFollowups.length === 0 ? (
+            <p className="text-sm text-[var(--color-text-tertiary)]">
+              Няма просрочени follow-up. Продължавай в същия дух.
+            </p>
+          ) : (
+            <div className="space-y-2">
+              {overdueFollowups.slice(0, 5).map((c) => (
+                <Link
+                  key={c.id}
+                  href={`/admin/clients/${c.id}`}
+                  className="flex items-center gap-3 rounded-lg border border-red-500/20 bg-red-500/10 p-3 transition hover:bg-red-500/20"
+                >
+                  <span className="text-lg">⏰</span>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm font-medium text-[var(--color-text-primary)] truncate">
+                      {c.full_name || c.email || "—"}
+                    </p>
+                    <p className="text-[11px] text-[var(--color-text-tertiary)] truncate">
+                      {STAGE_LABEL[c.stage]} · {c.company ?? "—"}
+                    </p>
+                  </div>
+                  <p className="text-xs font-mono text-red-300">
+                    {formatFollowup(c.next_followup_at!)}
+                  </p>
+                </Link>
+              ))}
+              {overdueFollowups.length > 5 && (
+                <Link
+                  href="/admin/clients"
+                  className="block py-2 text-center text-xs text-[var(--color-text-tertiary)] hover:text-[var(--color-accent-cyan)]"
+                >
+                  Виж всички {overdueFollowups.length} →
+                </Link>
+              )}
+            </div>
+          )}
+        </div>
+      </section>
+
+      {/* ─── Top opportunities ───────────────────────────────────────── */}
+      {topOpportunities.length > 0 && (
+        <section className="rounded-xl border border-[var(--color-border-default)] bg-[var(--color-bg-deep)]/40 p-5">
+          <div className="mb-4 flex items-center justify-between">
+            <h3 className="font-display text-base font-semibold">⭐ Топ възможности</h3>
+            <span className="font-mono text-xs text-[var(--color-text-tertiary)]">
+              най-близо до сделка
+            </span>
+          </div>
+          <div className="grid gap-3 md:grid-cols-2 lg:grid-cols-5">
+            {topOpportunities.map((c) => (
+              <Link
+                key={c.id}
+                href={`/admin/clients/${c.id}`}
+                className="block rounded-lg border border-[var(--color-border-default)] bg-black/30 p-3 transition hover:border-[var(--color-accent-cyan)]"
+              >
+                <p
+                  className="mb-1 font-mono text-[9px] uppercase tracking-wider"
+                  style={{ color: STAGE_COLOR[c.stage] }}
+                >
+                  {STAGE_LABEL[c.stage]}
+                </p>
+                <p className="truncate text-sm font-medium text-[var(--color-text-primary)]">
+                  {c.full_name || c.email || "—"}
+                </p>
+                {c.company && (
+                  <p className="truncate text-[11px] text-[var(--color-text-tertiary)]">{c.company}</p>
+                )}
+                {c.deal_value_eur != null && Number(c.deal_value_eur) > 0 && (
+                  <p className="mt-2 text-sm font-bold text-emerald-300">
+                    €{Number(c.deal_value_eur).toLocaleString("bg-BG")}
+                  </p>
+                )}
+              </Link>
+            ))}
+          </div>
+        </section>
+      )}
+
+      {/* ─── Quick navigation cards ──────────────────────────────────── */}
+      <section className="space-y-6">
+        <div>
+          <h2 className="mb-3 font-mono text-[10px] uppercase tracking-[0.3em] text-[var(--color-text-tertiary)]">
+            CRM ядро
+          </h2>
+          <div className="grid gap-3 md:grid-cols-3 lg:grid-cols-6">
+            <NavCard href="/admin/clients" icon="📋" label="Клиенти" hint="всички контакти" />
+            <NavCard
+              href="/admin/new-leads"
+              icon="🆕"
+              label="Нови лидове"
+              hint={`72ч · ${active.filter((c) => c.created_at >= new Date(nowMs - 72 * 3600 * 1000).toISOString()).length}`}
+            />
+            <NavCard href="/admin/bookings" icon="📅" label="Срещи" hint={`${upcomingBookings.length} предстоящи`} />
+            <NavCard
+              href="/admin/leads"
+              icon="📥"
+              label="Meta лидове"
+              hint={unprocessedMetaLeads > 0 ? `${unprocessedMetaLeads} необработени` : "обработени"}
+            />
+            <NavCard href="/admin/email" icon="✉️" label="Имейли" hint="прати към клиент" />
+            <NavCard href="/admin/ads" icon="📣" label="Реклами" hint="Meta кампании" />
+          </div>
+        </div>
+
+        <div>
+          <h2 className="mb-3 font-mono text-[10px] uppercase tracking-[0.3em] text-[var(--color-text-tertiary)]">
+            Продажби и счетоводство
+          </h2>
+          <div className="grid gap-3 md:grid-cols-2 lg:grid-cols-4">
+            <NavCard
+              href="/admin/follow-up"
+              icon="🎯"
+              label="Sales follow-up"
+              hint={needToHearToday > 0 ? `${needToHearToday} за чуване днес` : "всичко чисто"}
+            />
+            <NavCard href="/admin/accounting" icon="📊" label="Счетоводно табло" hint="приходи и плащания" />
+            <NavCard
+              href="/admin/invoices"
+              icon="🧾"
+              label="Фактури"
+              hint={awaitingPaymentCount > 0 ? `${awaitingPaymentCount} чакат плащане` : "всичко платено"}
+            />
+            <NavCard
+              href="/admin/manual-review"
+              icon="🔍"
+              label="Ръчна проверка"
+              hint={manualReviewOpen > 0 ? `${manualReviewOpen} отворени` : "чисто"}
+            />
+          </div>
+        </div>
+
+        <div>
+          <h2 className="mb-3 font-mono text-[10px] uppercase tracking-[0.3em] text-[var(--color-text-tertiary)]">
+            Канали и автоматизация
+          </h2>
+          <div className="grid gap-3 md:grid-cols-2 lg:grid-cols-4">
+            <NavCard href="/admin/social" icon="📱" label="Социални мрежи" hint="скелет · готов за свързване" />
+            <NavCard href="/admin/chatbots" icon="💬" label="Чатботове" hint="база знания + сесии" />
+            <NavCard href="/admin/whatsapp" icon="💚" label="WhatsApp" hint="inbox · очаква верификация" />
+            <NavCard href="/admin/demo" icon="🎬" label="Demo за клиенти" hint="публични мостри" />
+          </div>
+        </div>
       </section>
     </div>
   );
 }
 
-function StatCard({
-  label,
-  value,
-  hint,
-  color,
-}: {
-  label: string;
-  value: number;
-  hint: string;
-  color: string;
-}) {
-  return (
-    <div
-      className="rounded-lg border p-4"
-      style={{
-        borderColor: "var(--color-border-default)",
-        background: "rgba(13,18,33,0.4)",
-      }}
-    >
-      <p className="font-mono text-[10px] uppercase tracking-wider text-[var(--color-text-tertiary)]">
-        {label}
-      </p>
-      <p className="mt-1 text-3xl font-bold" style={{ color }}>
-        {value}
-      </p>
-      <p className="mt-1 text-xs text-[var(--color-text-tertiary)]">{hint}</p>
-    </div>
-  );
-}
-
-function ClientCard({ contact: c }: { contact: ContactWithActivity }) {
+function NavCard({ href, icon, label, hint }: { href: string; icon: string; label: string; hint: string }) {
   return (
     <Link
-      href={`/admin/clients/${c.id}`}
-      className="block rounded-md border border-[var(--color-border-default)] bg-black/30 p-3 transition-colors hover:border-[var(--color-accent-cyan)]"
+      href={href}
+      className="rounded-lg border border-[var(--color-border-default)] bg-[var(--color-bg-deep)]/40 p-4 transition-colors hover:border-[var(--color-accent-cyan)]/60"
     >
-      <p className="truncate text-sm font-medium text-[var(--color-text-primary)]">
-        {c.full_name || c.email || "—"}
-      </p>
-      {c.company && (
-        <p className="truncate text-[10px] text-[var(--color-text-tertiary)]">{c.company}</p>
-      )}
-      {c.last_activity_title && (
-        <p className="mt-1 line-clamp-2 text-[10px] leading-snug text-[var(--color-text-secondary)]">
-          {c.last_activity_title}
-        </p>
-      )}
-      <div className="mt-2 flex items-center gap-2 text-[10px] text-[var(--color-text-tertiary)]">
-        {(c.total_files ?? 0) > 0 && (
-          <span title={`${c.total_files} файла в архива`}>📎 {c.total_files}</span>
-        )}
-        {(c.total_activities ?? 0) > 0 && (
-          <span title={`${c.total_activities} активности`}>📊 {c.total_activities}</span>
-        )}
-        {c.last_activity_at && (
-          <span className="ml-auto truncate">
-            {formatRelative(c.last_activity_at)}
-          </span>
-        )}
-      </div>
+      <p className="text-2xl">{icon}</p>
+      <p className="mt-1 text-sm font-bold">{label}</p>
+      <p className="text-[10px] text-[var(--color-text-tertiary)]">{hint}</p>
     </Link>
   );
 }
 
-function formatRelative(iso: string): string {
-  const ms = Date.now() - new Date(iso).getTime();
-  const days = Math.floor(ms / (1000 * 60 * 60 * 24));
-  if (days === 0) {
-    const hours = Math.floor(ms / (1000 * 60 * 60));
-    if (hours === 0) return "току що";
-    return `${hours}ч`;
-  }
-  if (days === 1) return "вчера";
-  if (days < 7) return `${days} дни`;
-  if (days < 30) return `${Math.floor(days / 7)} седм.`;
-  return `${Math.floor(days / 30)} мес.`;
+function formatBookingTime(iso: string): string {
+  const d = new Date(iso);
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  const tgt = new Date(d);
+  tgt.setHours(0, 0, 0, 0);
+  const diff = Math.floor((tgt.getTime() - today.getTime()) / DAY_MS);
+  const time = d.toLocaleTimeString("bg-BG", { hour: "2-digit", minute: "2-digit" });
+  if (diff === 0) return `днес ${time}`;
+  if (diff === 1) return `утре ${time}`;
+  return `${d.toLocaleDateString("bg-BG", { day: "2-digit", month: "short" })} ${time}`;
 }
 
 function formatFollowup(iso: string): string {
   const d = new Date(iso);
   const today = new Date();
   today.setHours(0, 0, 0, 0);
-  const target = new Date(d);
-  target.setHours(0, 0, 0, 0);
-  const diff = Math.floor((target.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
+  const tgt = new Date(d);
+  tgt.setHours(0, 0, 0, 0);
+  const diff = Math.floor((tgt.getTime() - today.getTime()) / DAY_MS);
   const time = d.toLocaleTimeString("bg-BG", { hour: "2-digit", minute: "2-digit" });
-  if (diff === 0) return `Днес ${time}`;
-  if (diff === 1) return `Утре ${time}`;
-  if (diff === -1) return `Вчера ${time}`;
-  if (diff < 0) return `Преди ${Math.abs(diff)} дни`;
+  if (diff === 0) return `днес ${time}`;
+  if (diff === 1) return `утре ${time}`;
+  if (diff === -1) return `вчера ${time}`;
+  if (diff < 0) return `преди ${Math.abs(diff)} дни`;
   return d.toLocaleDateString("bg-BG", { day: "2-digit", month: "short" }) + " " + time;
-}
-
-function formatRelativeShort(iso: string): string {
-  const ms = Date.now() - new Date(iso).getTime();
-  const minutes = Math.floor(ms / (1000 * 60));
-  if (minutes < 60) return `преди ${minutes} мин`;
-  const hours = Math.floor(minutes / 60);
-  if (hours < 24) return `преди ${hours} ч`;
-  const days = Math.floor(hours / 24);
-  if (days === 1) return "вчера";
-  if (days < 7) return `преди ${days} дни`;
-  return new Date(iso).toLocaleDateString("bg-BG", { day: "2-digit", month: "short" });
-}
-
-function sourceLabel(source: string): string {
-  const map: Record<string, string> = {
-    meta_lead: "📥 Meta реклама",
-    website_form: "🌐 Уебсайт форма",
-    cal_booking: "📅 Cal.com",
-    email: "✉️ Имейл",
-    manual: "✋ Ръчно",
-  };
-  return map[source] ?? source;
 }

@@ -2,7 +2,9 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { createServiceClient } from "@/lib/supabase/service";
 import { ContactDetail } from "@/components/admin/clients/ContactDetail";
+import { ContactLedger } from "@/components/admin/clients/ContactLedger";
 import type { ActivityRow, ContactRow } from "@/lib/contacts/types";
+import type { InvoiceRow, PaymentRow, ManualReviewRow } from "@/lib/crm/types";
 
 export const dynamic = "force-dynamic";
 
@@ -11,7 +13,13 @@ export default async function ClientDetailPage({ params }: { params: Promise<{ i
   // Preview mode: bypass RLS via service client.
   const supabase = createServiceClient();
 
-  const [{ data: contact }, { data: activities }] = await Promise.all([
+  const [
+    { data: contact },
+    { data: activities },
+    { data: invoices },
+    { data: payments },
+    { data: reviews },
+  ] = await Promise.all([
     supabase.from("contacts").select("*").eq("id", id).maybeSingle(),
     supabase
       .from("contact_activities")
@@ -19,6 +27,14 @@ export default async function ClientDetailPage({ params }: { params: Promise<{ i
       .eq("contact_id", id)
       .order("occurred_at", { ascending: false })
       .limit(1000),
+    supabase.from("invoices").select("*").eq("contact_id", id).order("issue_date", { ascending: false }),
+    supabase.from("payments").select("*").eq("contact_id", id).order("paid_at", { ascending: false }),
+    supabase
+      .from("manual_review_items")
+      .select("*")
+      .eq("related_contact_id", id)
+      .eq("status", "open")
+      .order("created_at", { ascending: false }),
   ]);
 
   if (!contact) notFound();
@@ -35,6 +51,13 @@ export default async function ClientDetailPage({ params }: { params: Promise<{ i
         contact={contact as ContactRow}
         initialActivities={(activities ?? []) as ActivityRow[]}
       />
+      <div className="mt-8">
+        <ContactLedger
+          invoices={(invoices ?? []) as InvoiceRow[]}
+          payments={(payments ?? []) as PaymentRow[]}
+          reviews={(reviews ?? []) as ManualReviewRow[]}
+        />
+      </div>
     </div>
   );
 }

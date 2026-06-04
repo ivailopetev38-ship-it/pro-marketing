@@ -1,0 +1,320 @@
+import { z } from "zod";
+import {
+  CONTACT_STAGES,
+  FOLLOWUP_STATUSES,
+  FOLLOWUP_STATUS_LABEL,
+  type FollowupStatus,
+} from "@/lib/contacts/types";
+
+// Re-exported for callers that import follow-up constants from the CRM module.
+export { FOLLOWUP_STATUSES, FOLLOWUP_STATUS_LABEL };
+export type { FollowupStatus };
+
+// ─────────────────────────────────────────────────────────────────────────
+// Enums — kept in sync with the DB CHECK constraints in
+// supabase/migrations/20260604120000_crm_hermes_backend.sql
+// ─────────────────────────────────────────────────────────────────────────
+
+export const INVOICE_TYPES = [
+  "invoice",
+  "proforma",
+  "credit_note",
+  "gps_fee",
+  "demo_fee",
+  "service_fee",
+  "other",
+] as const;
+export type InvoiceType = (typeof INVOICE_TYPES)[number];
+
+export const INVOICE_STATUSES = [
+  "draft",
+  "sent",
+  "awaiting_payment",
+  "partially_paid",
+  "paid",
+  "overdue",
+  "cancelled",
+  "disputed",
+  "excluded",
+] as const;
+export type InvoiceStatus = (typeof INVOICE_STATUSES)[number];
+
+export const INVOICE_SOURCES = [
+  "manual",
+  "gmail_sent",
+  "accountant_email",
+  "hermes",
+  "uploaded_pdf",
+] as const;
+
+export const PAYMENT_SOURCES = ["bank_statement", "payment_email", "manual", "hermes"] as const;
+export const MATCH_STATUSES = ["matched", "unmatched", "ambiguous", "ignored"] as const;
+export const MATCH_CONFIDENCES = ["low", "medium", "high"] as const;
+
+export const RECURRING_SERVICE_TYPES = [
+  "gps",
+  "crm",
+  "automation",
+  "hosting",
+  "maintenance",
+  "ads",
+  "other",
+] as const;
+export const BILLING_PERIODS = ["monthly", "yearly", "one_time"] as const;
+
+export const MANUAL_REVIEW_TYPES = [
+  "invoice_match",
+  "payment_match",
+  "missing_contact",
+  "ambiguous_pdf",
+  "email_parse_error",
+  "bank_statement_error",
+  "duplicate_invoice",
+  "recurring_billing_issue",
+] as const;
+export const SEVERITIES = ["low", "medium", "high"] as const;
+
+// ─────────────────────────────────────────────────────────────────────────
+// Shared zod helpers
+// ─────────────────────────────────────────────────────────────────────────
+
+/** Accept number or numeric string ("123.45" / "123,45"); "" / null → absent. */
+const moneyOptional = z
+  .preprocess((v) => {
+    if (v === "" || v === null || v === undefined) return undefined;
+    if (typeof v === "string") return v.replace(",", ".");
+    return v;
+  }, z.coerce.number().finite())
+  .optional();
+
+const moneyRequired = z.preprocess((v) => {
+  if (typeof v === "string") return v.replace(",", ".");
+  return v;
+}, z.coerce.number().finite());
+
+const isoDate = z.string().trim().min(1).optional();
+const contactRef = z.string().uuid().optional();
+
+// ─────────────────────────────────────────────────────────────────────────
+// Activity (unified Gmail→CRM / manual write)
+// ─────────────────────────────────────────────────────────────────────────
+
+export const activityInputSchema = z
+  .object({
+    email: z.string().email().optional(),
+    phone: z.string().trim().min(3).optional(),
+    full_name: z.string().trim().optional(),
+    company: z.string().trim().optional(),
+    deal_value_eur: z.coerce.number().int().optional(),
+    // Activity to log (optional — you can call this just to patch a contact).
+    activity_type: z.string().trim().min(1).optional(),
+    title: z.string().trim().min(1).optional(),
+    body: z.string().optional(),
+    occurred_at: z.string().optional(),
+    metadata: z.record(z.string(), z.unknown()).optional(),
+    dedupe_key: z.string().trim().min(1).optional(),
+    // Sales follow-up patches.
+    stage: z.enum(CONTACT_STAGES).optional(),
+    followup_status: z.enum(FOLLOWUP_STATUSES).optional(),
+    next_followup_at: z.string().optional(),
+    /** Set last_heard_from_at = now() — used by "Mark called" etc. */
+    mark_heard: z.boolean().optional(),
+    notes: z.string().optional(),
+    created_by: z.string().optional(),
+  })
+  .refine((v) => v.email || v.phone, { message: "email or phone required" });
+export type ActivityInput = z.infer<typeof activityInputSchema>;
+
+// ─────────────────────────────────────────────────────────────────────────
+// Invoice
+// ─────────────────────────────────────────────────────────────────────────
+
+export const invoiceInputSchema = z.object({
+  contact_id: contactRef,
+  client_name: z.string().trim().optional(),
+  client_email: z.string().email().optional(),
+  invoice_number: z.string().trim().optional(),
+  invoice_type: z.enum(INVOICE_TYPES).default("invoice"),
+  issue_date: isoDate,
+  due_date: isoDate,
+  amount_net: moneyOptional,
+  amount_gross: moneyOptional,
+  vat_amount: moneyOptional,
+  currency: z.string().trim().default("BGN"),
+  service_type: z.string().trim().optional(),
+  status: z.enum(INVOICE_STATUSES).optional(),
+  source: z.enum(INVOICE_SOURCES).default("hermes"),
+  source_email_id: z.string().trim().optional(),
+  source_pdf_name: z.string().trim().optional(),
+  recurring_service_id: z.string().uuid().optional(),
+  notes: z.string().optional(),
+  dedupe_key: z.string().trim().optional(),
+});
+export type InvoiceInput = z.infer<typeof invoiceInputSchema>;
+
+// ─────────────────────────────────────────────────────────────────────────
+// Payment
+// ─────────────────────────────────────────────────────────────────────────
+
+export const paymentInputSchema = z.object({
+  contact_id: contactRef,
+  invoice_id: z.string().uuid().optional(),
+  amount: moneyRequired,
+  currency: z.string().trim().default("BGN"),
+  paid_at: z.string().optional(),
+  counterparty_name: z.string().trim().optional(),
+  payment_reference_redacted: z.string().trim().optional(),
+  bank_statement_file: z.string().trim().optional(),
+  match_confidence: z.enum(MATCH_CONFIDENCES).optional(),
+  match_status: z.enum(MATCH_STATUSES).default("unmatched"),
+  source: z.enum(PAYMENT_SOURCES).default("hermes"),
+  source_email_id: z.string().trim().optional(),
+  notes: z.string().optional(),
+  dedupe_key: z.string().trim().optional(),
+});
+export type PaymentInput = z.infer<typeof paymentInputSchema>;
+
+// ─────────────────────────────────────────────────────────────────────────
+// Manual review
+// ─────────────────────────────────────────────────────────────────────────
+
+export const manualReviewInputSchema = z.object({
+  type: z.enum(MANUAL_REVIEW_TYPES),
+  title: z.string().trim().min(1),
+  description: z.string().optional(),
+  related_contact_id: z.string().uuid().optional(),
+  related_invoice_id: z.string().uuid().optional(),
+  related_payment_id: z.string().uuid().optional(),
+  severity: z.enum(SEVERITIES).default("medium"),
+  dedupe_key: z.string().trim().optional(),
+});
+export type ManualReviewInput = z.infer<typeof manualReviewInputSchema>;
+
+// ─────────────────────────────────────────────────────────────────────────
+// Recurring service
+// ─────────────────────────────────────────────────────────────────────────
+
+export const recurringServiceInputSchema = z.object({
+  contact_id: z.string().uuid(),
+  service_type: z.enum(RECURRING_SERVICE_TYPES),
+  amount: moneyOptional,
+  currency: z.string().trim().optional(),
+  billing_period: z.enum(BILLING_PERIODS).optional(),
+  billing_day: z.coerce.number().int().min(1).max(31).optional(),
+  active: z.boolean().optional(),
+  excluded_from_auto_send: z.boolean().optional(),
+  excluded_reason: z.string().optional(),
+  started_at: isoDate,
+  ended_at: isoDate,
+  notes: z.string().optional(),
+});
+export type RecurringServiceInput = z.infer<typeof recurringServiceInputSchema>;
+
+// ─────────────────────────────────────────────────────────────────────────
+// Match payment
+// ─────────────────────────────────────────────────────────────────────────
+
+export const matchPaymentInputSchema = z.object({
+  payment_id: z.string().uuid(),
+  /** Candidate invoice to match against (when known). */
+  invoice_id: z.string().uuid().optional(),
+  signals: z
+    .object({
+      name_match: z.boolean().optional(),
+      invoice_number_match: z.boolean().optional(),
+      exact_amount_match: z.boolean().optional(),
+      description_match: z.boolean().optional(),
+      contact_match: z.boolean().optional(),
+    })
+    .default({}),
+  /** How many invoices plausibly match (1 = unambiguous). */
+  candidate_invoice_count: z.coerce.number().int().min(0).optional(),
+});
+export type MatchPaymentInput = z.infer<typeof matchPaymentInputSchema>;
+
+// ─────────────────────────────────────────────────────────────────────────
+// DB row shapes
+// ─────────────────────────────────────────────────────────────────────────
+
+export interface InvoiceRow {
+  id: string;
+  contact_id: string | null;
+  client_name: string | null;
+  client_email: string | null;
+  invoice_number: string | null;
+  invoice_type: InvoiceType;
+  issue_date: string | null;
+  due_date: string | null;
+  amount_net: number | null;
+  amount_gross: number | null;
+  vat_amount: number | null;
+  currency: string;
+  service_type: string | null;
+  status: InvoiceStatus;
+  source: string;
+  source_email_id: string | null;
+  source_pdf_name: string | null;
+  recurring_service_id: string | null;
+  notes: string | null;
+  dedupe_key: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface PaymentRow {
+  id: string;
+  contact_id: string | null;
+  invoice_id: string | null;
+  amount: number;
+  currency: string;
+  paid_at: string | null;
+  counterparty_name: string | null;
+  payment_reference_redacted: string | null;
+  bank_statement_file: string | null;
+  match_confidence: (typeof MATCH_CONFIDENCES)[number] | null;
+  match_status: (typeof MATCH_STATUSES)[number];
+  source: string;
+  source_email_id: string | null;
+  notes: string | null;
+  dedupe_key: string | null;
+  created_at: string;
+}
+
+export interface ManualReviewRow {
+  id: string;
+  type: (typeof MANUAL_REVIEW_TYPES)[number];
+  title: string;
+  description: string | null;
+  related_contact_id: string | null;
+  related_invoice_id: string | null;
+  related_payment_id: string | null;
+  severity: (typeof SEVERITIES)[number];
+  status: "open" | "resolved" | "ignored";
+  dedupe_key: string | null;
+  created_at: string;
+  resolved_at: string | null;
+}
+
+export interface RecurringServiceRow {
+  id: string;
+  contact_id: string;
+  service_type: (typeof RECURRING_SERVICE_TYPES)[number];
+  amount: number | null;
+  currency: string;
+  billing_period: (typeof BILLING_PERIODS)[number];
+  billing_day: number | null;
+  active: boolean;
+  excluded_from_auto_send: boolean;
+  excluded_reason: string | null;
+  started_at: string | null;
+  ended_at: string | null;
+  notes: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface UpsertResult {
+  id: string | null;
+  created: boolean;
+  error: string | null;
+}

@@ -4,6 +4,7 @@ import {
   extractPhone,
   extractString,
   extractStringArray,
+  extractMeetingUrl,
   statusFromTrigger,
   durationMinutes,
   isKnownTrigger,
@@ -80,6 +81,8 @@ export async function POST(request: Request) {
     automation_goal: extractString(payload, "automation_goal"),
     services_interested: extractStringArray(payload, "services_interested"),
     timeline: extractString(payload, "timeline"),
+    // Live video conferencing URL (Google Meet / Cal Video / Zoom...).
+    meeting_url: extractMeetingUrl(payload),
     raw_payload: parsed.data,
     updated_at: new Date().toISOString(),
   };
@@ -117,7 +120,11 @@ export async function POST(request: Request) {
       type: "booking",
       title: `Cal.com среща — ${new Date(row.scheduled_at).toLocaleString("bg-BG", { day: "2-digit", month: "short", hour: "2-digit", minute: "2-digit" })}`,
       occurred_at: row.scheduled_at,
-      body: [row.business && `Бизнес: ${row.business}`, row.automation_goal && `Цел: ${row.automation_goal}`]
+      body: [
+        row.business && `Бизнес: ${row.business}`,
+        row.automation_goal && `Цел: ${row.automation_goal}`,
+        row.meeting_url && `Линк за срещата: ${row.meeting_url}`,
+      ]
         .filter(Boolean)
         .join("\n") || null,
       metadata: {
@@ -125,6 +132,7 @@ export async function POST(request: Request) {
         status: row.status,
         duration_minutes: row.duration_minutes,
         scheduled_at: row.scheduled_at,
+        meeting_url: row.meeting_url,
         trigger: triggerEvent,
       },
       dedupe_key: `cal:${row.cal_booking_id}:${triggerEvent}`,
