@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
-import { Exo_2, Manrope, JetBrains_Mono } from "next/font/google";
+import { Unbounded, Manrope, JetBrains_Mono } from "next/font/google";
 
-const display = Exo_2({
+const display = Unbounded({
   subsets: ["latin", "latin-ext", "cyrillic"],
   weight: ["600", "700", "800"],
   display: "swap",
@@ -33,7 +33,7 @@ export default function PlanLayout({ children }: { children: React.ReactNode }) 
       className={`${display.variable} ${body.variable} ${mono.variable}`}
       style={
         {
-          background: "#05070d",
+          background: "#04060c",
           color: "#e8eef7",
           minHeight: "100vh",
         } as React.CSSProperties
