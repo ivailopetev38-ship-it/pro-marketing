@@ -136,7 +136,7 @@ export default function PlanPage() {
             <div className="pl-pkflag">★ най-изгодно</div>
             <div className="pl-pktop"><b>Пълна платформа</b><span className="pl-pkprice">€7 400</span></div>
             <p className="pl-pkdesc">И трите фази — система от край до край. <em>Спестяваш €1 300.</em></p>
-            <div className="pl-team">👥 <b>6</b> AI работника</div>
+            <div className="pl-team">🤖 <b>6</b> AI · 👤 <b>до 10</b> служителя</div>
             <ul className="pl-inc">
               <li>Всичките 9 модула (Фаза 1 + 2 + 3)</li>
               <li>Базови интеграции (имейл, Meta, Cal.com)</li>
@@ -149,7 +149,7 @@ export default function PlanPage() {
             <div className="pl-pkflag pl-pkflag--gold">✦ премиум</div>
             <div className="pl-pktop"><b>Премиум</b><span className="pl-pkprice pl-pkprice--gold">от €12 000</span></div>
             <p className="pl-pkdesc">За по-сериозен бизнес — изцяло по поръчка.</p>
-            <div className="pl-team">👥 <b>6+</b> AI работника (по поръчка)</div>
+            <div className="pl-team">🤖 <b>6+</b> AI · 👤 <b>до 20</b> служителя</div>
             <ul className="pl-inc">
               <li>Всичко от Пълната платформа</li>
               <li>Custom интеграции (ERP, счетоводство, телефония)</li>
@@ -162,7 +162,7 @@ export default function PlanPage() {
           <article className="pl-pkg pl-rise" style={{ animationDelay: "0.42s" }}>
             <div className="pl-pktop"><b>Къстъм</b><span className="pl-pkprice pl-pkprice--c">без таван</span></div>
             <p className="pl-pkdesc">За мащабни и сложни проекти.</p>
-            <div className="pl-team">👥 <b>∞</b> AI работника</div>
+            <div className="pl-team">🤖 <b>∞</b> AI · 👤 <b>30+</b> служителя</div>
             <ul className="pl-inc">
               <li>Мулти-екип / мулти-локация</li>
               <li>Интеграции по поръчка + миграция</li>
