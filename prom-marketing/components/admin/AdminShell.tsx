@@ -229,7 +229,9 @@ export function AdminShell({ children, email }: { children: React.ReactNode; ema
           </Button>
         </div>
       </aside>
-      <main className="md:pl-64">{children}</main>
+      <main className="md:pl-64">
+        <div className="cc-bg min-h-screen">{children}</div>
+      </main>
       <QuickAddContact />
       <CopilotWidget />
       <CommandPalette />

@@ -350,7 +350,7 @@ export default async function AdminDashboard() {
   ).length;
 
   return (
-    <div className="cc-bg min-h-screen">
+    <div className="min-h-screen">
       <div className="cc-content space-y-7 p-5 md:p-10">
         {/* ─── Command-center header ──────────────────────────────────── */}
         <header className="cc-panel cc-panel-accent overflow-hidden p-6 md:p-7">

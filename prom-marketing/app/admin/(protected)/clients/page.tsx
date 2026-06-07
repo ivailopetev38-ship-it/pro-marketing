@@ -48,7 +48,7 @@ export default async function ClientsPage({
   }
 
   return (
-    <div className="cc-bg min-h-screen">
+    <div className="min-h-screen">
       <div className="cc-content space-y-6 p-5 md:p-10">
         <header className="cc-panel cc-panel-accent overflow-hidden p-6">
           <div className="flex flex-wrap items-end justify-between gap-4">

@@ -46,7 +46,7 @@ export default async function FollowupPage() {
     }));
 
   return (
-    <div className="cc-bg min-h-screen">
+    <div className="min-h-screen">
       <div className="cc-content space-y-6 p-5 md:p-10">
         <header className="cc-panel cc-panel-accent overflow-hidden p-6">
           <p className="hud text-[var(--color-accent-cyan)]">ProMarketing · Продажби</p>
