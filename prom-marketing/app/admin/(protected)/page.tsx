@@ -14,9 +14,7 @@ import {
   type ContactStage,
 } from "@/lib/contacts/types";
 import { KpiCard } from "@/components/admin/KpiCard";
-import { TelemetryRail } from "@/components/admin/TelemetryRail";
 import { RadialGauge } from "@/components/admin/RadialGauge";
-import { LiveClock } from "@/components/admin/LiveClock";
 import { CommandCore } from "@/components/admin/CommandCore";
 import { formatMoney } from "@/lib/crm/labels";
 import { PipelineBars } from "@/components/admin/charts/PipelineBars";
@@ -369,10 +367,7 @@ export default async function AdminDashboard() {
               <p className="hud text-[var(--color-accent-cyan)]">ProMarketing · Команден център</p>
               <h1 className="cc-title mt-2 font-display text-4xl font-bold md:text-5xl">Преглед на CRM</h1>
               <div className="mt-3 flex flex-wrap items-center gap-2.5">
-                <span className="cc-livedot" />
-                <span className="hud text-emerald-300">SYSTEM ONLINE</span>
-                <span className="hud text-[var(--color-text-tertiary)]">·</span>
-                <LiveClock />
+                <span className="hud-tag" style={{ color: "#7dd3fc" }}>{"// MISSION CONTROL"}</span>
                 <span className="hud text-[var(--color-text-tertiary)]">·</span>
                 <span className="font-mono text-[11px] capitalize text-[var(--color-text-secondary)]">{todayLabel}</span>
               </div>
@@ -389,7 +384,6 @@ export default async function AdminDashboard() {
             <span className="cc-chip"><span style={{ color: overdueFollowups.length > 0 ? "#ef4444" : "#22c55e" }}>●</span> Просрочени <b>{overdueFollowups.length}</b></span>
             <span className="cc-chip"><span style={{ color: "#22c55e" }}>●</span> Получени YTD <b>{formatMoney(receivedYtd)}</b></span>
           </div>
-          <TelemetryRail nodes={active.length} />
           </div>
         </header>
 

@@ -239,7 +239,7 @@ export function AdminShell({ children, email }: { children: React.ReactNode; ema
         <div className="cc-bg min-h-screen">
           <div className="cc-scan" aria-hidden />
           <div className="cc-grain" aria-hidden />
-          {path !== "/admin" && <CommandBar section={sectionLabel} />}
+          <CommandBar section={sectionLabel} />
           {children}
         </div>
       </main>
