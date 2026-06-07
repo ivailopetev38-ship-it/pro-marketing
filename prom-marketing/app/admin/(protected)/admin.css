@@ -13,8 +13,8 @@
   z-index: -1;
   pointer-events: none;
   background-image:
-    linear-gradient(rgba(124, 58, 237, 0.05) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(124, 58, 237, 0.05) 1px, transparent 1px);
+    linear-gradient(rgba(124, 58, 237, 0.09) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(124, 58, 237, 0.09) 1px, transparent 1px);
   background-size: 60px 60px;
   -webkit-mask-image: radial-gradient(ellipse 90% 55% at 50% -5%, #000 35%, transparent 80%);
           mask-image: radial-gradient(ellipse 90% 55% at 50% -5%, #000 35%, transparent 80%);
@@ -22,16 +22,17 @@
 .cc-bg::after {
   content: "";
   position: absolute;
-  top: -160px; left: 0; right: 0;
-  height: 520px;
+  top: -180px; left: -5%; right: -5%;
+  height: 660px;
   z-index: -1;
   pointer-events: none;
-  filter: blur(120px);
-  opacity: 0.5;
+  filter: blur(110px);
+  opacity: 0.92;
   background:
-    radial-gradient(40% 60% at 25% 40%, rgba(6, 182, 212, 0.30), transparent 70%),
-    radial-gradient(45% 60% at 75% 45%, rgba(124, 58, 237, 0.28), transparent 70%);
-  animation: cc-aurora 22s ease-in-out infinite;
+    radial-gradient(38% 62% at 20% 32%, rgba(6, 182, 212, 0.50), transparent 68%),
+    radial-gradient(44% 60% at 80% 42%, rgba(124, 58, 237, 0.46), transparent 70%),
+    radial-gradient(34% 50% at 52% 0%, rgba(236, 72, 153, 0.26), transparent 70%);
+  animation: cc-aurora 20s ease-in-out infinite;
 }
 .cc-content { position: relative; z-index: 1; }
 
@@ -39,15 +40,16 @@
 .cc-panel {
   position: relative;
   border-radius: 16px;
-  background: linear-gradient(180deg, rgba(255, 255, 255, 0.04), rgba(255, 255, 255, 0.012));
-  border: 1px solid rgba(124, 58, 237, 0.16);
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.055), rgba(255, 255, 255, 0.016));
+  border: 1px solid rgba(120, 160, 220, 0.22);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.06);
   backdrop-filter: blur(16px);
   -webkit-backdrop-filter: blur(16px);
   transition: border-color 0.3s ease, transform 0.3s ease, box-shadow 0.3s ease;
 }
 .cc-panel:hover {
-  border-color: rgba(6, 182, 212, 0.40);
-  box-shadow: 0 16px 50px -28px rgba(6, 182, 212, 0.55);
+  border-color: rgba(6, 182, 212, 0.50);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.09), 0 18px 55px -26px rgba(6, 182, 212, 0.6);
 }
 .cc-panel-accent::before {
   content: "";
@@ -64,8 +66,9 @@
   overflow: hidden;
   height: 100%;
   border-radius: 14px;
-  background: linear-gradient(180deg, rgba(255, 255, 255, 0.045), rgba(255, 255, 255, 0.012));
-  border: 1px solid rgba(124, 58, 237, 0.16);
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.06), rgba(255, 255, 255, 0.016));
+  border: 1px solid rgba(120, 160, 220, 0.22);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.06);
   transition: transform 0.25s ease, border-color 0.25s ease, box-shadow 0.25s ease;
 }
 .cc-kpi::before {
@@ -80,21 +83,21 @@
 .cc-kpi::after {
   content: "";
   position: absolute;
-  top: -38px; right: -38px;
-  width: 90px; height: 90px;
+  top: -42px; right: -42px;
+  width: 112px; height: 112px;
   border-radius: 50%;
   background: var(--kpi, #06b6d4);
-  opacity: 0.10;
-  filter: blur(22px);
+  opacity: 0.20;
+  filter: blur(26px);
   transition: opacity 0.25s ease;
   pointer-events: none;
 }
 .cc-kpi:hover {
   transform: translateY(-3px);
-  border-color: color-mix(in srgb, var(--kpi, #06b6d4) 55%, transparent);
-  box-shadow: 0 14px 38px -20px var(--kpi, #06b6d4);
+  border-color: color-mix(in srgb, var(--kpi, #06b6d4) 60%, transparent);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.1), 0 16px 42px -18px var(--kpi, #06b6d4);
 }
-.cc-kpi:hover::after { opacity: 0.22; }
+.cc-kpi:hover::after { opacity: 0.34; }
 
 /* ---- Nav card ---- */
 .cc-navcard {

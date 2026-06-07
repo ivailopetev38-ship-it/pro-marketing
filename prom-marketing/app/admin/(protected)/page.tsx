@@ -15,6 +15,7 @@ import {
 } from "@/lib/contacts/types";
 import { KpiCard } from "@/components/admin/KpiCard";
 import { LiveClock } from "@/components/admin/LiveClock";
+import { CommandCore } from "@/components/admin/CommandCore";
 import { formatMoney } from "@/lib/crm/labels";
 import { PipelineBars } from "@/components/admin/charts/PipelineBars";
 import { DonutChart } from "@/components/admin/charts/DonutChart";
@@ -353,7 +354,9 @@ export default async function AdminDashboard() {
     <div className="min-h-screen">
       <div className="cc-content space-y-7 p-5 md:p-10">
         {/* ─── Command-center header ──────────────────────────────────── */}
-        <header className="cc-panel cc-panel-accent overflow-hidden p-6 md:p-7">
+        <header className="cc-panel cc-panel-accent relative overflow-hidden p-6 md:p-7">
+          <CommandCore />
+          <div className="relative z-[1]">
           <div className="flex flex-wrap items-start justify-between gap-5">
             <div>
               <p className="hud text-[var(--color-accent-cyan)]">ProMarketing · Команден център</p>
@@ -378,6 +381,7 @@ export default async function AdminDashboard() {
             <span className="cc-chip"><span style={{ color: needToHearToday > 0 ? "#ef4444" : "#22c55e" }}>●</span> За чуване днес <b>{needToHearToday}</b></span>
             <span className="cc-chip"><span style={{ color: overdueFollowups.length > 0 ? "#ef4444" : "#22c55e" }}>●</span> Просрочени <b>{overdueFollowups.length}</b></span>
             <span className="cc-chip"><span style={{ color: "#22c55e" }}>●</span> Получени YTD <b>{formatMoney(receivedYtd)}</b></span>
+          </div>
           </div>
         </header>
 
