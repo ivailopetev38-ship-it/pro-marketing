@@ -1,3 +1,4 @@
+import "./admin.css";
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import { AdminShell } from "@/components/admin/AdminShell";

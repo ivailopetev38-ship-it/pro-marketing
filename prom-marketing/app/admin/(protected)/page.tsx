@@ -316,460 +316,269 @@ export default async function AdminDashboard() {
     year: "numeric",
   });
 
+  const newLeads72h = active.filter(
+    (c) => c.created_at >= new Date(nowMs - 72 * 3600 * 1000).toISOString()
+  ).length;
+
   return (
-    <div className="space-y-8 p-6 md:p-10">
-      {/* ─── Header ──────────────────────────────────────────────────── */}
-      <header className="flex flex-wrap items-end justify-between gap-4">
-        <div>
-          <p className="font-mono text-[10px] uppercase tracking-[0.3em] text-[var(--color-accent-cyan)]">
-            ProMarketing · Команден център
-          </p>
-          <h1 className="mt-1 font-display text-4xl font-bold">Преглед на CRM</h1>
-          <p className="mt-1 text-sm capitalize text-[var(--color-text-secondary)]">{todayLabel}</p>
-        </div>
-        <div className="flex flex-wrap gap-2">
-          <Link
-            href="/admin/clients"
-            className="rounded-lg border border-[var(--color-accent-cyan)]/40 bg-[var(--color-accent-cyan)]/10 px-4 py-2 text-sm font-medium text-[var(--color-accent-cyan)] transition hover:bg-[var(--color-accent-cyan)]/20"
-          >
-            📋 Всички клиенти
-          </Link>
-          <Link
-            href="/admin/bookings"
-            className="rounded-lg border border-[var(--color-border-default)] bg-[var(--color-bg-deep)]/40 px-4 py-2 text-sm font-medium text-[var(--color-text-primary)] transition hover:border-[var(--color-accent-cyan)]/60"
-          >
-            📅 Срещи · {upcomingBookings.length}
-          </Link>
-        </div>
-      </header>
-
-      {/* ─── Daily focus ─────────────────────────────────────────────── */}
-      <section>
-        <h2 className="mb-3 font-mono text-[10px] uppercase tracking-[0.3em] text-[var(--color-text-tertiary)]">
-          Днес
-        </h2>
-        <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
-          <KpiCard
-            label="Днес ги чуй"
-            value={needToHearToday}
-            hint="просрочени + днешни, още не чути"
-            color={needToHearToday > 0 ? "#ef4444" : "#22c55e"}
-            href="/admin/follow-up"
-          />
-          <KpiCard
-            label="Оферта изпратена"
-            value={offerSentCount}
-            hint="чакат решение"
-            color="#facc15"
-            href="/admin/follow-up"
-          />
-          <KpiCard
-            label="Презентация изпратена"
-            value={presentationSentCount}
-            hint="чакат фийдбек"
-            color="#ec4899"
-            href="/admin/follow-up"
-          />
-          <KpiCard
-            label="Чакаме плащане"
-            value={awaitingPaymentCount}
-            hint="неплатени фактури"
-            color="#06b6d4"
-            href="/admin/invoices"
-          />
-        </div>
-      </section>
-
-      {/* ─── Счетоводство този месец + Meta днес ─────────────────────── */}
-      <section>
-        <h2 className="mb-3 font-mono text-[10px] uppercase tracking-[0.3em] text-[var(--color-text-tertiary)]">
-          Счетоводство · от началото на годината
-        </h2>
-        <div className="grid grid-cols-2 gap-3 md:grid-cols-4 xl:grid-cols-8">
-          <KpiCard label="Приход" value={formatMoney(revenueYtd)} hint={`от ${startOfYearDate}`} color="#facc15" href="/admin/accounting" />
-          <KpiCard label="Получени" value={formatMoney(receivedYtd)} hint="YTD плащания" color="#22c55e" href="/admin/payments" />
-          <KpiCard
-            label="Повтарящ се / мес"
-            value={formatMoney(totalMrr)}
-            hint={`GPS ${formatMoney(gpsMrr)} · абонаменти ${formatMoney(subsMrr)}`}
-            color="#14b8a6"
-            href="/admin/recurring"
-          />
-          <KpiCard label="Разходи" value={formatMoney(expensesYtd)} hint="YTD разходи" color="#fb923c" href="/admin/expenses" />
-          <KpiCard
-            label="Печалба"
-            value={formatMoney(profitYtd)}
-            hint="YTD получени − разходи"
-            color={profitYtd >= 0 ? "#22c55e" : "#ef4444"}
-            href="/admin/accounting"
-          />
-          <KpiCard label="Неплатени" value={formatMoney(unpaidInvoicesTotal)} hint="чакащи фактури" color="#fb923c" href="/admin/invoices" />
-          <KpiCard
-            label="GPS YTD"
-            value={formatMoney(gpsRevenueYtd)}
-            hint={`${gpsInvoicesYtd.length} фактури · ${gpsOpenYtd} чакат`}
-            color="#06b6d4"
-            href="/admin/gps"
-          />
-          <KpiCard
-            label="Meta лидове YTD"
-            value={metaLeadsYtd || "—"}
-            hint={`Разход: ${metaSpendHint} · отделни валути`}
-            color="#1877F2"
-            href="/admin/meta-ads"
-          />
-        </div>
-      </section>
-
-      {/* ─── KPI strip (6 cards) ─────────────────────────────────────── */}
-      <section>
-        <h2 className="mb-3 font-mono text-[10px] uppercase tracking-[0.3em] text-[var(--color-text-tertiary)]">
-          Ключови метрики
-        </h2>
-        <div className="grid grid-cols-2 gap-3 md:grid-cols-3 xl:grid-cols-6">
-          <KpiCard
-            label="Активни клиенти"
-            value={active.length}
-            hint={`нови 7д · общо ${allContacts.length}`}
-            delta={activeDelta}
-            color="#06b6d4"
-            href="/admin/clients"
-          />
-          <KpiCard
-            label="Превърнати в сделка"
-            value={`${conversionPct}%`}
-            hint={`${wonCount} спечелени от ${reachedContacted}`}
-            color="#22c55e"
-          />
-          <KpiCard
-            label="Pipeline стойност"
-            value={`€${pipelineEur.toLocaleString("bg-BG")}`}
-            hint={`оферти + преговори · спечелени €${wonEur.toLocaleString("bg-BG")}`}
-            color="#facc15"
-          />
-          <KpiCard
-            label="Срещи този месец"
-            value={completedThisMonth}
-            hint={`предстоящи ${upcomingBookings.length}`}
-            delta={bookingsDelta}
-            color="#a78bfa"
-            href="/admin/bookings"
-          />
-          <KpiCard
-            label="Имейли 7 дни"
-            value={emailsLast7}
-            hint="пратени към клиенти"
-            delta={emailsDelta}
-            color="#ec4899"
-            href="/admin/email"
-          />
-          <KpiCard
-            label="Просрочени"
-            value={overdueFollowups.length}
-            hint={overdueFollowups.length > 0 ? "нужно действие" : "всичко чисто"}
-            color={overdueFollowups.length > 0 ? "#ef4444" : "#22c55e"}
-          />
-        </div>
-      </section>
-
-      {/* ─── Visualization row ───────────────────────────────────────── */}
-      <section className="grid gap-4 lg:grid-cols-3">
-        {/* Pipeline bars */}
-        <div className="rounded-xl border border-[var(--color-border-default)] bg-[var(--color-bg-deep)]/40 p-5">
-          <div className="mb-4 flex items-center justify-between">
-            <h3 className="font-display text-base font-semibold">📊 Етапи на сделките</h3>
-            <span className="font-mono text-xs text-[var(--color-text-tertiary)]">{active.length} активни</span>
-          </div>
-          <PipelineBars segments={pipelineSegments} />
-        </div>
-
-        {/* Lead sources donut */}
-        <div className="rounded-xl border border-[var(--color-border-default)] bg-[var(--color-bg-deep)]/40 p-5">
-          <div className="mb-4 flex items-center justify-between">
-            <h3 className="font-display text-base font-semibold">📥 Източници на лидове</h3>
-            <span className="font-mono text-xs text-[var(--color-text-tertiary)]">всичко</span>
-          </div>
-          {sourceSlices.length > 0 ? (
-            <DonutChart slices={sourceSlices} centerValue={String(active.length)} centerLabel="лидове" />
-          ) : (
-            <p className="text-sm text-[var(--color-text-tertiary)]">Няма данни още</p>
-          )}
-        </div>
-
-        {/* Activity sparkline */}
-        <div className="rounded-xl border border-[var(--color-border-default)] bg-[var(--color-bg-deep)]/40 p-5">
-          <div className="mb-2 flex items-center justify-between">
-            <h3 className="font-display text-base font-semibold">📈 Активност · 30 дни</h3>
-            <span className="font-mono text-xs text-[var(--color-text-tertiary)]">
-              {last30.length} действия
-            </span>
-          </div>
-          <p className="mb-3 text-[11px] text-[var(--color-text-tertiary)]">
-            Имейли, разговори, бележки, срещи — всичко по дни
-          </p>
-          <Sparkline points={activitySparkline} color="#06b6d4" height={80} showAxis />
-          <div className="mt-3 flex items-center justify-between text-[10px] font-mono uppercase tracking-wider text-[var(--color-text-tertiary)]">
-            <span>{new Date(nowMs - 30 * DAY_MS).toLocaleDateString("bg-BG", { day: "2-digit", month: "short" })}</span>
-            <span>днес</span>
-          </div>
-        </div>
-      </section>
-
-      {/* ─── Today / Tomorrow + Overdue ──────────────────────────────── */}
-      <section className="grid gap-4 lg:grid-cols-2">
-        {/* Днес / Утре */}
-        <div className="rounded-xl border border-[var(--color-border-default)] bg-[var(--color-bg-deep)]/40 p-5">
-          <div className="mb-4 flex items-center justify-between">
-            <h3 className="font-display text-base font-semibold">🔔 Днес и утре</h3>
-            <span className="font-mono text-xs text-[var(--color-text-tertiary)]">
-              {todayTomorrowBookings.length + todayTomorrowFollowups.length} ангажимента
-            </span>
-          </div>
-          {todayTomorrowBookings.length === 0 && todayTomorrowFollowups.length === 0 ? (
-            <p className="text-sm text-[var(--color-text-tertiary)]">
-              Свободен график — добра възможност за outreach.
-            </p>
-          ) : (
-            <div className="space-y-2">
-              {todayTomorrowBookings.map((b) => (
-                <div
-                  key={b.id}
-                  className="flex items-center gap-3 rounded-lg border border-emerald-500/20 bg-emerald-500/5 p-3"
-                >
-                  <span className="text-lg">📅</span>
-                  <div className="flex-1 min-w-0">
-                    <p className="text-sm font-medium text-[var(--color-text-primary)] truncate">
-                      {b.attendee_name}
-                    </p>
-                    <p className="text-[11px] text-[var(--color-text-tertiary)] truncate">
-                      {b.business ?? b.attendee_email}
-                    </p>
-                  </div>
-                  <div className="text-right">
-                    <p className="text-xs font-mono text-emerald-300">{formatBookingTime(b.scheduled_at)}</p>
-                    {b.meeting_url && (
-                      <a
-                        href={b.meeting_url}
-                        target="_blank"
-                        rel="noreferrer"
-                        className="text-[10px] text-[var(--color-accent-cyan)] hover:underline"
-                      >
-                        отвори линк →
-                      </a>
-                    )}
-                  </div>
-                </div>
-              ))}
-              {todayTomorrowFollowups.map((c) => (
-                <Link
-                  key={c.id}
-                  href={`/admin/clients/${c.id}`}
-                  className="flex items-center gap-3 rounded-lg border border-[var(--color-border-default)] bg-[var(--color-bg-deep)]/60 p-3 transition hover:border-[var(--color-accent-cyan)]/40"
-                >
-                  <span className="text-lg">📞</span>
-                  <div className="flex-1 min-w-0">
-                    <p className="text-sm font-medium text-[var(--color-text-primary)] truncate">
-                      {c.full_name || c.email || "—"}
-                    </p>
-                    <p className="text-[11px] text-[var(--color-text-tertiary)] truncate">
-                      {c.company ?? STAGE_LABEL[c.stage]}
-                    </p>
-                  </div>
-                  <p className="text-xs font-mono text-[var(--color-accent-cyan)]">
-                    {formatFollowup(c.next_followup_at!)}
-                  </p>
-                </Link>
-              ))}
+    <div className="cc-bg min-h-screen">
+      <div className="cc-content space-y-7 p-5 md:p-10">
+        {/* ─── Command-center header ──────────────────────────────────── */}
+        <header className="cc-panel cc-panel-accent overflow-hidden p-6 md:p-7">
+          <div className="flex flex-wrap items-start justify-between gap-5">
+            <div>
+              <p className="hud text-[var(--color-accent-cyan)]">ProMarketing · Команден център</p>
+              <h1 className="cc-title mt-2 font-display text-4xl font-bold md:text-5xl">Преглед на CRM</h1>
+              <div className="mt-3 flex flex-wrap items-center gap-2.5">
+                <span className="cc-livedot" />
+                <span className="hud text-emerald-300">SYSTEM ONLINE</span>
+                <span className="hud text-[var(--color-text-tertiary)]">·</span>
+                <span className="font-mono text-[11px] capitalize text-[var(--color-text-secondary)]">{todayLabel}</span>
+              </div>
             </div>
-          )}
-        </div>
-
-        {/* Просрочени */}
-        <div
-          className={`rounded-xl border p-5 ${
-            overdueFollowups.length > 0
-              ? "border-red-500/30 bg-red-500/5"
-              : "border-[var(--color-border-default)] bg-[var(--color-bg-deep)]/40"
-          }`}
-        >
-          <div className="mb-4 flex items-center justify-between">
-            <h3 className="font-display text-base font-semibold">
-              {overdueFollowups.length > 0 ? "⚠️ Просрочени" : "✅ Всичко чисто"}
-            </h3>
-            <span className="font-mono text-xs text-[var(--color-text-tertiary)]">
-              {overdueFollowups.length} клиента
-            </span>
-          </div>
-          {overdueFollowups.length === 0 ? (
-            <p className="text-sm text-[var(--color-text-tertiary)]">
-              Няма просрочени follow-up. Продължавай в същия дух.
-            </p>
-          ) : (
-            <div className="space-y-2">
-              {overdueFollowups.slice(0, 5).map((c) => (
-                <Link
-                  key={c.id}
-                  href={`/admin/clients/${c.id}`}
-                  className="flex items-center gap-3 rounded-lg border border-red-500/20 bg-red-500/10 p-3 transition hover:bg-red-500/20"
-                >
-                  <span className="text-lg">⏰</span>
-                  <div className="flex-1 min-w-0">
-                    <p className="text-sm font-medium text-[var(--color-text-primary)] truncate">
-                      {c.full_name || c.email || "—"}
-                    </p>
-                    <p className="text-[11px] text-[var(--color-text-tertiary)] truncate">
-                      {STAGE_LABEL[c.stage]} · {c.company ?? "—"}
-                    </p>
-                  </div>
-                  <p className="text-xs font-mono text-red-300">
-                    {formatFollowup(c.next_followup_at!)}
-                  </p>
-                </Link>
-              ))}
-              {overdueFollowups.length > 5 && (
-                <Link
-                  href="/admin/clients"
-                  className="block py-2 text-center text-xs text-[var(--color-text-tertiary)] hover:text-[var(--color-accent-cyan)]"
-                >
-                  Виж всички {overdueFollowups.length} →
-                </Link>
-              )}
+            <div className="flex flex-wrap gap-2">
+              <Link href="/admin/clients" className="cc-btn cc-btn-primary">📋 Всички клиенти</Link>
+              <Link href="/admin/bookings" className="cc-btn">📅 Срещи · {upcomingBookings.length}</Link>
             </div>
-          )}
-        </div>
-      </section>
-
-      {/* ─── Top opportunities ───────────────────────────────────────── */}
-      {topOpportunities.length > 0 && (
-        <section className="rounded-xl border border-[var(--color-border-default)] bg-[var(--color-bg-deep)]/40 p-5">
-          <div className="mb-4 flex items-center justify-between">
-            <h3 className="font-display text-base font-semibold">⭐ Топ възможности</h3>
-            <span className="font-mono text-xs text-[var(--color-text-tertiary)]">
-              най-близо до сделка
-            </span>
           </div>
-          <div className="grid gap-3 md:grid-cols-2 lg:grid-cols-5">
-            {topOpportunities.map((c) => (
-              <Link
-                key={c.id}
-                href={`/admin/clients/${c.id}`}
-                className="block rounded-lg border border-[var(--color-border-default)] bg-black/30 p-3 transition hover:border-[var(--color-accent-cyan)]"
-              >
-                <p
-                  className="mb-1 font-mono text-[9px] uppercase tracking-wider"
-                  style={{ color: STAGE_COLOR[c.stage] }}
-                >
-                  {STAGE_LABEL[c.stage]}
-                </p>
-                <p className="truncate text-sm font-medium text-[var(--color-text-primary)]">
-                  {c.full_name || c.email || "—"}
-                </p>
-                {c.company && (
-                  <p className="truncate text-[11px] text-[var(--color-text-tertiary)]">{c.company}</p>
-                )}
-                {c.deal_value_eur != null && Number(c.deal_value_eur) > 0 && (
-                  <p className="mt-2 text-sm font-bold text-emerald-300">
-                    €{Number(c.deal_value_eur).toLocaleString("bg-BG")}
-                  </p>
-                )}
-              </Link>
-            ))}
+          <div className="mt-5 flex flex-wrap gap-2">
+            <span className="cc-chip"><span style={{ color: "#06b6d4" }}>●</span> Активни <b>{active.length}</b></span>
+            <span className="cc-chip"><span style={{ color: "#facc15" }}>●</span> Pipeline <b>€{pipelineEur.toLocaleString("bg-BG")}</b></span>
+            <span className="cc-chip"><span style={{ color: needToHearToday > 0 ? "#ef4444" : "#22c55e" }}>●</span> За чуване днес <b>{needToHearToday}</b></span>
+            <span className="cc-chip"><span style={{ color: overdueFollowups.length > 0 ? "#ef4444" : "#22c55e" }}>●</span> Просрочени <b>{overdueFollowups.length}</b></span>
+            <span className="cc-chip"><span style={{ color: "#22c55e" }}>●</span> Получени YTD <b>{formatMoney(receivedYtd)}</b></span>
+          </div>
+        </header>
+
+        {/* ─── Daily focus ─────────────────────────────────────────────── */}
+        <section>
+          <h2 className="hud mb-3">Днес</h2>
+          <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
+            <KpiCard label="Днес ги чуй" value={needToHearToday} hint="просрочени + днешни, още не чути" color={needToHearToday > 0 ? "#ef4444" : "#22c55e"} href="/admin/follow-up" />
+            <KpiCard label="Оферта изпратена" value={offerSentCount} hint="чакат решение" color="#facc15" href="/admin/follow-up" />
+            <KpiCard label="Презентация изпратена" value={presentationSentCount} hint="чакат фийдбек" color="#ec4899" href="/admin/follow-up" />
+            <KpiCard label="Чакаме плащане" value={awaitingPaymentCount} hint="неплатени фактури" color="#06b6d4" href="/admin/invoices" />
           </div>
         </section>
-      )}
 
-      {/* ─── Quick navigation cards ──────────────────────────────────── */}
-      <section className="space-y-6">
-        <div>
-          <h2 className="mb-3 font-mono text-[10px] uppercase tracking-[0.3em] text-[var(--color-text-tertiary)]">
-            CRM ядро
-          </h2>
-          <div className="grid gap-3 md:grid-cols-3 lg:grid-cols-6">
-            <NavCard href="/admin/clients" icon="📋" label="Клиенти" hint="всички контакти" />
-            <NavCard
-              href="/admin/new-leads"
-              icon="🆕"
-              label="Нови лидове"
-              hint={`72ч · ${active.filter((c) => c.created_at >= new Date(nowMs - 72 * 3600 * 1000).toISOString()).length}`}
-            />
-            <NavCard href="/admin/bookings" icon="📅" label="Срещи" hint={`${upcomingBookings.length} предстоящи`} />
-            <NavCard
-              href="/admin/leads"
-              icon="📥"
-              label="Meta лидове"
-              hint={unprocessedMetaLeads > 0 ? `${unprocessedMetaLeads} необработени` : "обработени"}
-            />
-            <NavCard href="/admin/email" icon="✉️" label="Имейли" hint="прати към клиент" />
-            <NavCard href="/admin/ads" icon="📣" label="Реклами" hint="Meta кампании" />
+        {/* ─── Счетоводство YTD ────────────────────────────────────────── */}
+        <section>
+          <h2 className="hud mb-3">Счетоводство · от началото на годината</h2>
+          <div className="grid grid-cols-2 gap-3 md:grid-cols-4 xl:grid-cols-8">
+            <KpiCard label="Приход" value={formatMoney(revenueYtd)} hint={`от ${startOfYearDate}`} color="#facc15" href="/admin/accounting" />
+            <KpiCard label="Получени" value={formatMoney(receivedYtd)} hint="YTD плащания" color="#22c55e" href="/admin/payments" />
+            <KpiCard label="Повтарящ се / мес" value={formatMoney(totalMrr)} hint={`GPS ${formatMoney(gpsMrr)} · абонаменти ${formatMoney(subsMrr)}`} color="#14b8a6" href="/admin/recurring" />
+            <KpiCard label="Разходи" value={formatMoney(expensesYtd)} hint="YTD разходи" color="#fb923c" href="/admin/expenses" />
+            <KpiCard label="Печалба" value={formatMoney(profitYtd)} hint="YTD получени − разходи" color={profitYtd >= 0 ? "#22c55e" : "#ef4444"} href="/admin/accounting" />
+            <KpiCard label="Неплатени" value={formatMoney(unpaidInvoicesTotal)} hint="чакащи фактури" color="#fb923c" href="/admin/invoices" />
+            <KpiCard label="GPS YTD" value={formatMoney(gpsRevenueYtd)} hint={`${gpsInvoicesYtd.length} фактури · ${gpsOpenYtd} чакат`} color="#06b6d4" href="/admin/gps" />
+            <KpiCard label="Meta лидове YTD" value={metaLeadsYtd || "—"} hint={`Разход: ${metaSpendHint} · отделни валути`} color="#1877F2" href="/admin/meta-ads" />
           </div>
-        </div>
+        </section>
 
-        <div>
-          <h2 className="mb-3 font-mono text-[10px] uppercase tracking-[0.3em] text-[var(--color-text-tertiary)]">
-            Продажби и счетоводство
-          </h2>
-          <div className="grid gap-3 md:grid-cols-2 lg:grid-cols-4">
-            <NavCard
-              href="/admin/follow-up"
-              icon="🎯"
-              label="Sales follow-up"
-              hint={needToHearToday > 0 ? `${needToHearToday} за чуване днес` : "всичко чисто"}
-            />
-            <NavCard href="/admin/accounting" icon="📊" label="Счетоводно табло" hint="приходи и плащания" />
-            <NavCard
-              href="/admin/invoices"
-              icon="🧾"
-              label="Фактури"
-              hint={awaitingPaymentCount > 0 ? `${awaitingPaymentCount} чакат плащане` : "всичко платено"}
-            />
-            <NavCard
-              href="/admin/manual-review"
-              icon="🔍"
-              label="Ръчна проверка"
-              hint={manualReviewOpen > 0 ? `${manualReviewOpen} отворени` : "чисто"}
-            />
-            <NavCard href="/admin/expenses" icon="🧮" label="Разходи" hint="към доставчици" />
-            <NavCard
-              href="/admin/recurring"
-              icon="🔁"
-              label="Абонаменти"
-              hint={subsActive.length > 0 ? `${subsActive.length} активни · ${formatMoney(subsMrr)}/мес` : "месечни услуги"}
-            />
-            <NavCard
-              href="/admin/gps"
-              icon="🛰️"
-              label="GPS устройства"
-              hint={gpsActive.length > 0 ? `${gpsActive.length} активни · ${formatMoney(gpsMrr)}/мес` : "монтажи, история"}
-            />
-            <NavCard href="/admin/documents" icon="📁" label="Документи" hint="фактури, OCR" />
-            <NavCard href="/admin/meta-ads" icon="📈" label="Meta анализ" hint="реклами днес" />
+        {/* ─── Ключови метрики ─────────────────────────────────────────── */}
+        <section>
+          <h2 className="hud mb-3">Ключови метрики</h2>
+          <div className="grid grid-cols-2 gap-3 md:grid-cols-3 xl:grid-cols-6">
+            <KpiCard label="Активни клиенти" value={active.length} hint={`нови 7д · общо ${allContacts.length}`} delta={activeDelta} color="#06b6d4" href="/admin/clients" />
+            <KpiCard label="Превърнати в сделка" value={`${conversionPct}%`} hint={`${wonCount} спечелени от ${reachedContacted}`} color="#22c55e" />
+            <KpiCard label="Pipeline стойност" value={`€${pipelineEur.toLocaleString("bg-BG")}`} hint={`оферти + преговори · спечелени €${wonEur.toLocaleString("bg-BG")}`} color="#facc15" />
+            <KpiCard label="Срещи този месец" value={completedThisMonth} hint={`предстоящи ${upcomingBookings.length}`} delta={bookingsDelta} color="#a78bfa" href="/admin/bookings" />
+            <KpiCard label="Имейли 7 дни" value={emailsLast7} hint="пратени към клиенти" delta={emailsDelta} color="#ec4899" href="/admin/email" />
+            <KpiCard label="Просрочени" value={overdueFollowups.length} hint={overdueFollowups.length > 0 ? "нужно действие" : "всичко чисто"} color={overdueFollowups.length > 0 ? "#ef4444" : "#22c55e"} />
           </div>
-        </div>
+        </section>
 
-        <div>
-          <h2 className="mb-3 font-mono text-[10px] uppercase tracking-[0.3em] text-[var(--color-text-tertiary)]">
-            Канали и автоматизация
-          </h2>
-          <div className="grid gap-3 md:grid-cols-2 lg:grid-cols-4">
-            <NavCard href="/admin/social" icon="📱" label="Социални мрежи" hint="скелет · готов за свързване" />
-            <NavCard href="/admin/chatbots" icon="💬" label="Чатботове" hint="база знания + сесии" />
-            <NavCard href="/admin/whatsapp" icon="💚" label="WhatsApp" hint="inbox · очаква верификация" />
-            <NavCard href="/admin/demo" icon="🎬" label="Demo за клиенти" hint="публични мостри" />
+        {/* ─── Визуализации ────────────────────────────────────────────── */}
+        <section className="grid gap-4 lg:grid-cols-3">
+          <div className="cc-panel p-5">
+            <div className="mb-4 flex items-center justify-between">
+              <h3 className="font-display text-base font-semibold">📊 Етапи на сделките</h3>
+              <span className="hud">{active.length} активни</span>
+            </div>
+            <PipelineBars segments={pipelineSegments} />
           </div>
-        </div>
-      </section>
+
+          <div className="cc-panel p-5">
+            <div className="mb-4 flex items-center justify-between">
+              <h3 className="font-display text-base font-semibold">📥 Източници на лидове</h3>
+              <span className="hud">всичко</span>
+            </div>
+            {sourceSlices.length > 0 ? (
+              <DonutChart slices={sourceSlices} centerValue={String(active.length)} centerLabel="лидове" />
+            ) : (
+              <p className="text-sm text-[var(--color-text-tertiary)]">Няма данни още</p>
+            )}
+          </div>
+
+          <div className="cc-panel p-5">
+            <div className="mb-2 flex items-center justify-between">
+              <h3 className="font-display text-base font-semibold">📈 Активност · 30 дни</h3>
+              <span className="hud">{last30.length} действия</span>
+            </div>
+            <p className="mb-3 text-[11px] text-[var(--color-text-tertiary)]">
+              Имейли, разговори, бележки, срещи — всичко по дни
+            </p>
+            <Sparkline points={activitySparkline} color="#06b6d4" height={80} showAxis />
+            <div className="mt-3 flex items-center justify-between text-[10px] font-mono uppercase tracking-wider text-[var(--color-text-tertiary)]">
+              <span>{new Date(nowMs - 30 * DAY_MS).toLocaleDateString("bg-BG", { day: "2-digit", month: "short" })}</span>
+              <span>днес</span>
+            </div>
+          </div>
+        </section>
+
+        {/* ─── Днес / Утре + Просрочени ────────────────────────────────── */}
+        <section className="grid gap-4 lg:grid-cols-2">
+          <div className="cc-panel p-5">
+            <div className="mb-4 flex items-center justify-between">
+              <h3 className="font-display text-base font-semibold">🔔 Днес и утре</h3>
+              <span className="hud">{todayTomorrowBookings.length + todayTomorrowFollowups.length} ангажимента</span>
+            </div>
+            {todayTomorrowBookings.length === 0 && todayTomorrowFollowups.length === 0 ? (
+              <p className="text-sm text-[var(--color-text-tertiary)]">
+                Свободен график — добра възможност за outreach.
+              </p>
+            ) : (
+              <div className="space-y-2">
+                {todayTomorrowBookings.map((b) => (
+                  <div key={b.id} className="flex items-center gap-3 rounded-lg border border-emerald-500/20 bg-emerald-500/5 p-3">
+                    <span className="text-lg">📅</span>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-medium text-[var(--color-text-primary)] truncate">{b.attendee_name}</p>
+                      <p className="text-[11px] text-[var(--color-text-tertiary)] truncate">{b.business ?? b.attendee_email}</p>
+                    </div>
+                    <div className="text-right">
+                      <p className="text-xs font-mono text-emerald-300">{formatBookingTime(b.scheduled_at)}</p>
+                      {b.meeting_url && (
+                        <a href={b.meeting_url} target="_blank" rel="noreferrer" className="text-[10px] text-[var(--color-accent-cyan)] hover:underline">
+                          отвори линк →
+                        </a>
+                      )}
+                    </div>
+                  </div>
+                ))}
+                {todayTomorrowFollowups.map((c) => (
+                  <Link key={c.id} href={`/admin/clients/${c.id}`} className="flex items-center gap-3 rounded-lg border border-[var(--color-border-default)] bg-black/20 p-3 transition hover:border-[var(--color-accent-cyan)]/40">
+                    <span className="text-lg">📞</span>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-medium text-[var(--color-text-primary)] truncate">{c.full_name || c.email || "—"}</p>
+                      <p className="text-[11px] text-[var(--color-text-tertiary)] truncate">{c.company ?? STAGE_LABEL[c.stage]}</p>
+                    </div>
+                    <p className="text-xs font-mono text-[var(--color-accent-cyan)]">{formatFollowup(c.next_followup_at!)}</p>
+                  </Link>
+                ))}
+              </div>
+            )}
+          </div>
+
+          <div className={`cc-panel p-5 ${overdueFollowups.length > 0 ? "!border-red-500/35" : ""}`}>
+            <div className="mb-4 flex items-center justify-between">
+              <h3 className="font-display text-base font-semibold">
+                {overdueFollowups.length > 0 ? "⚠️ Просрочени" : "✅ Всичко чисто"}
+              </h3>
+              <span className="hud">{overdueFollowups.length} клиента</span>
+            </div>
+            {overdueFollowups.length === 0 ? (
+              <p className="text-sm text-[var(--color-text-tertiary)]">
+                Няма просрочени follow-up. Продължавай в същия дух.
+              </p>
+            ) : (
+              <div className="space-y-2">
+                {overdueFollowups.slice(0, 5).map((c) => (
+                  <Link key={c.id} href={`/admin/clients/${c.id}`} className="flex items-center gap-3 rounded-lg border border-red-500/20 bg-red-500/10 p-3 transition hover:bg-red-500/20">
+                    <span className="text-lg">⏰</span>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-medium text-[var(--color-text-primary)] truncate">{c.full_name || c.email || "—"}</p>
+                      <p className="text-[11px] text-[var(--color-text-tertiary)] truncate">{STAGE_LABEL[c.stage]} · {c.company ?? "—"}</p>
+                    </div>
+                    <p className="text-xs font-mono text-red-300">{formatFollowup(c.next_followup_at!)}</p>
+                  </Link>
+                ))}
+                {overdueFollowups.length > 5 && (
+                  <Link href="/admin/clients" className="block py-2 text-center text-xs text-[var(--color-text-tertiary)] hover:text-[var(--color-accent-cyan)]">
+                    Виж всички {overdueFollowups.length} →
+                  </Link>
+                )}
+              </div>
+            )}
+          </div>
+        </section>
+
+        {/* ─── Топ възможности ─────────────────────────────────────────── */}
+        {topOpportunities.length > 0 && (
+          <section className="cc-panel p-5">
+            <div className="mb-4 flex items-center justify-between">
+              <h3 className="font-display text-base font-semibold">⭐ Топ възможности</h3>
+              <span className="hud">най-близо до сделка</span>
+            </div>
+            <div className="grid gap-3 md:grid-cols-2 lg:grid-cols-5">
+              {topOpportunities.map((c) => (
+                <Link key={c.id} href={`/admin/clients/${c.id}`} className="cc-navcard block p-3">
+                  <p className="mb-1 font-mono text-[9px] uppercase tracking-wider" style={{ color: STAGE_COLOR[c.stage] }}>
+                    {STAGE_LABEL[c.stage]}
+                  </p>
+                  <p className="truncate text-sm font-medium text-[var(--color-text-primary)]">{c.full_name || c.email || "—"}</p>
+                  {c.company && <p className="truncate text-[11px] text-[var(--color-text-tertiary)]">{c.company}</p>}
+                  {c.deal_value_eur != null && Number(c.deal_value_eur) > 0 && (
+                    <p className="mt-2 font-mono text-sm font-bold text-emerald-300">
+                      €{Number(c.deal_value_eur).toLocaleString("bg-BG")}
+                    </p>
+                  )}
+                </Link>
+              ))}
+            </div>
+          </section>
+        )}
+
+        {/* ─── Бърза навигация ─────────────────────────────────────────── */}
+        <section className="space-y-6">
+          <div>
+            <h2 className="hud mb-3">CRM ядро</h2>
+            <div className="grid gap-3 md:grid-cols-3 lg:grid-cols-6">
+              <NavCard href="/admin/clients" icon="📋" label="Клиенти" hint="всички контакти" />
+              <NavCard href="/admin/new-leads" icon="🆕" label="Нови лидове" hint={`72ч · ${newLeads72h}`} />
+              <NavCard href="/admin/bookings" icon="📅" label="Срещи" hint={`${upcomingBookings.length} предстоящи`} />
+              <NavCard href="/admin/leads" icon="📥" label="Meta лидове" hint={unprocessedMetaLeads > 0 ? `${unprocessedMetaLeads} необработени` : "обработени"} />
+              <NavCard href="/admin/email" icon="✉️" label="Имейли" hint="прати към клиент" />
+              <NavCard href="/admin/ads" icon="📣" label="Реклами" hint="Meta кампании" />
+            </div>
+          </div>
+
+          <div>
+            <h2 className="hud mb-3">Продажби и счетоводство</h2>
+            <div className="grid gap-3 md:grid-cols-2 lg:grid-cols-4">
+              <NavCard href="/admin/follow-up" icon="🎯" label="Sales follow-up" hint={needToHearToday > 0 ? `${needToHearToday} за чуване днес` : "всичко чисто"} />
+              <NavCard href="/admin/accounting" icon="📊" label="Счетоводно табло" hint="приходи и плащания" />
+              <NavCard href="/admin/invoices" icon="🧾" label="Фактури" hint={awaitingPaymentCount > 0 ? `${awaitingPaymentCount} чакат плащане` : "всичко платено"} />
+              <NavCard href="/admin/manual-review" icon="🔍" label="Ръчна проверка" hint={manualReviewOpen > 0 ? `${manualReviewOpen} отворени` : "чисто"} />
+              <NavCard href="/admin/expenses" icon="🧮" label="Разходи" hint="към доставчици" />
+              <NavCard href="/admin/recurring" icon="🔁" label="Абонаменти" hint={subsActive.length > 0 ? `${subsActive.length} активни · ${formatMoney(subsMrr)}/мес` : "месечни услуги"} />
+              <NavCard href="/admin/gps" icon="🛰️" label="GPS устройства" hint={gpsActive.length > 0 ? `${gpsActive.length} активни · ${formatMoney(gpsMrr)}/мес` : "монтажи, история"} />
+              <NavCard href="/admin/documents" icon="📁" label="Документи" hint="фактури, OCR" />
+              <NavCard href="/admin/meta-ads" icon="📈" label="Meta анализ" hint="реклами днес" />
+            </div>
+          </div>
+
+          <div>
+            <h2 className="hud mb-3">Канали и автоматизация</h2>
+            <div className="grid gap-3 md:grid-cols-2 lg:grid-cols-4">
+              <NavCard href="/admin/social" icon="📱" label="Социални мрежи" hint="скелет · готов за свързване" />
+              <NavCard href="/admin/chatbots" icon="💬" label="Чатботове" hint="база знания + сесии" />
+              <NavCard href="/admin/whatsapp" icon="💚" label="WhatsApp" hint="inbox · очаква верификация" />
+              <NavCard href="/admin/demo" icon="🎬" label="Demo за клиенти" hint="публични мостри" />
+            </div>
+          </div>
+        </section>
+      </div>
     </div>
   );
 }
 
 function NavCard({ href, icon, label, hint }: { href: string; icon: string; label: string; hint: string }) {
   return (
-    <Link
-      href={href}
-      className="rounded-lg border border-[var(--color-border-default)] bg-[var(--color-bg-deep)]/40 p-4 transition-colors hover:border-[var(--color-accent-cyan)]/60"
-    >
+    <Link href={href} className="cc-navcard block p-4">
       <p className="text-2xl">{icon}</p>
-      <p className="mt-1 text-sm font-bold">{label}</p>
+      <p className="mt-1 text-sm font-bold text-[var(--color-text-primary)]">{label}</p>
       <p className="text-[10px] text-[var(--color-text-tertiary)]">{hint}</p>
     </Link>
   );

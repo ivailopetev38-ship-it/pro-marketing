@@ -1,0 +1,184 @@
+/* =====================================================================
+   Command-Center design layer — scoped to /admin (CRM) only.
+   Additive utility classes; does NOT affect the public marketing site.
+   Builds on the brand tokens defined in app/globals.css.
+   ===================================================================== */
+
+/* ---- Atmospheric background (behind dashboard content) ---- */
+.cc-bg { position: relative; isolation: isolate; }
+.cc-bg::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  background-image:
+    linear-gradient(rgba(124, 58, 237, 0.05) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(124, 58, 237, 0.05) 1px, transparent 1px);
+  background-size: 60px 60px;
+  -webkit-mask-image: radial-gradient(ellipse 90% 55% at 50% -5%, #000 35%, transparent 80%);
+          mask-image: radial-gradient(ellipse 90% 55% at 50% -5%, #000 35%, transparent 80%);
+}
+.cc-bg::after {
+  content: "";
+  position: absolute;
+  top: -160px; left: 0; right: 0;
+  height: 520px;
+  z-index: 0;
+  pointer-events: none;
+  filter: blur(120px);
+  opacity: 0.5;
+  background:
+    radial-gradient(40% 60% at 25% 40%, rgba(6, 182, 212, 0.30), transparent 70%),
+    radial-gradient(45% 60% at 75% 45%, rgba(124, 58, 237, 0.28), transparent 70%);
+  animation: cc-aurora 22s ease-in-out infinite;
+}
+.cc-content { position: relative; z-index: 1; }
+
+/* ---- Glass panel ---- */
+.cc-panel {
+  position: relative;
+  border-radius: 16px;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.04), rgba(255, 255, 255, 0.012));
+  border: 1px solid rgba(124, 58, 237, 0.16);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  transition: border-color 0.3s ease, transform 0.3s ease, box-shadow 0.3s ease;
+}
+.cc-panel:hover {
+  border-color: rgba(6, 182, 212, 0.40);
+  box-shadow: 0 16px 50px -28px rgba(6, 182, 212, 0.55);
+}
+.cc-panel-accent::before {
+  content: "";
+  position: absolute;
+  top: 0; left: 18px; right: 18px;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, var(--cc, #06b6d4), transparent);
+  opacity: 0.75;
+}
+
+/* ---- KPI tile ---- */
+.cc-kpi {
+  position: relative;
+  overflow: hidden;
+  height: 100%;
+  border-radius: 14px;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.045), rgba(255, 255, 255, 0.012));
+  border: 1px solid rgba(124, 58, 237, 0.16);
+  transition: transform 0.25s ease, border-color 0.25s ease, box-shadow 0.25s ease;
+}
+.cc-kpi::before {
+  content: "";
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 2px;
+  background: var(--kpi, #06b6d4);
+  box-shadow: 0 0 12px var(--kpi, #06b6d4);
+  opacity: 0.85;
+}
+.cc-kpi::after {
+  content: "";
+  position: absolute;
+  top: -38px; right: -38px;
+  width: 90px; height: 90px;
+  border-radius: 50%;
+  background: var(--kpi, #06b6d4);
+  opacity: 0.10;
+  filter: blur(22px);
+  transition: opacity 0.25s ease;
+  pointer-events: none;
+}
+.cc-kpi:hover {
+  transform: translateY(-3px);
+  border-color: color-mix(in srgb, var(--kpi, #06b6d4) 55%, transparent);
+  box-shadow: 0 14px 38px -20px var(--kpi, #06b6d4);
+}
+.cc-kpi:hover::after { opacity: 0.22; }
+
+/* ---- Nav card ---- */
+.cc-navcard {
+  position: relative;
+  border-radius: 14px;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.035), rgba(255, 255, 255, 0.01));
+  border: 1px solid rgba(124, 58, 237, 0.16);
+  transition: transform 0.25s ease, border-color 0.25s ease, box-shadow 0.25s ease;
+}
+.cc-navcard:hover {
+  transform: translateY(-3px);
+  border-color: rgba(6, 182, 212, 0.45);
+  box-shadow: 0 14px 38px -22px rgba(6, 182, 212, 0.5);
+}
+
+/* ---- HUD label ---- */
+.hud {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.24em;
+  text-transform: uppercase;
+  color: var(--color-text-tertiary);
+}
+
+/* ---- Chip ---- */
+.cc-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  border-radius: 100px;
+  padding: 6px 13px;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(124, 58, 237, 0.18);
+  color: var(--color-text-secondary);
+}
+.cc-chip b { color: var(--color-text-primary); font-weight: 600; }
+
+/* ---- Buttons ---- */
+.cc-btn {
+  display: inline-flex; align-items: center; gap: 8px;
+  border-radius: 12px; padding: 10px 18px;
+  font-size: 14px; font-weight: 600;
+  border: 1px solid rgba(124, 58, 237, 0.2);
+  background: rgba(255, 255, 255, 0.03);
+  color: var(--color-text-primary);
+  transition: border-color 0.25s ease, background 0.25s ease, transform 0.2s ease;
+}
+.cc-btn:hover { border-color: rgba(6, 182, 212, 0.5); transform: translateY(-1px); }
+.cc-btn-primary {
+  border-color: transparent;
+  background: linear-gradient(120deg, #06b6d4, #22d3ee 55%, #7dd3fc);
+  color: #02121a;
+  box-shadow: 0 8px 26px -12px rgba(6, 182, 212, 0.6);
+}
+.cc-btn-primary:hover { box-shadow: 0 10px 30px -10px rgba(6, 182, 212, 0.75); }
+
+/* ---- Holographic title ---- */
+.cc-title {
+  background: linear-gradient(110deg, #f5f7ff 0%, #7dd3fc 42%, #c4b5fd 72%, #f5f7ff 100%);
+  background-size: 220% 220%;
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  animation: cc-titleshift 8s ease-in-out infinite;
+}
+
+/* ---- Live dot ---- */
+.cc-livedot {
+  display: inline-block;
+  width: 7px; height: 7px;
+  border-radius: 50%;
+  background: #22c55e;
+  box-shadow: 0 0 10px #22c55e;
+  animation: cc-blink 1.7s ease-in-out infinite;
+}
+
+@keyframes cc-blink { 0%, 100% { opacity: 1; } 50% { opacity: 0.35; } }
+@keyframes cc-aurora {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  50% { transform: translate(-3%, 4%) scale(1.08); }
+}
+@keyframes cc-titleshift {
+  0%, 100% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+}
