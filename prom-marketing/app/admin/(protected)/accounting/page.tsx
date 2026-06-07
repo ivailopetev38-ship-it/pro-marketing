@@ -99,21 +99,21 @@ export default async function AccountingPage() {
 
   return (
     <div className="space-y-8 p-6 md:p-10">
-      <header className="flex flex-wrap items-end justify-between gap-4">
-        <div>
-          <p className="font-mono text-[10px] uppercase tracking-[0.3em] text-[var(--color-accent-cyan)]">
-            ProMarketing · Счетоводство
-          </p>
-          <h1 className="mt-1 font-display text-4xl font-bold">Счетоводно табло</h1>
-          <p className="mt-1 text-sm capitalize text-[var(--color-text-secondary)]">
-            {`от 01.01.${now.getFullYear()} до днес`}
-          </p>
-        </div>
-        <div className="flex flex-wrap gap-2">
-          <NavPill href="/admin/invoices" label="🧾 Фактури" />
-          <NavPill href="/admin/payments" label="💰 Плащания" />
-          <NavPill href="/admin/recurring" label="🔁 Абонаменти" />
-          <NavPill href="/admin/manual-review" label={`🔍 Проверка · ${manualOpen}`} />
+      <header className="cc-panel cc-panel-accent overflow-hidden p-6">
+        <div className="flex flex-wrap items-end justify-between gap-4">
+          <div>
+            <p className="hud text-[var(--color-accent-cyan)]">ProMarketing · Счетоводство</p>
+            <h1 className="cc-title mt-2 font-display text-4xl font-bold">Счетоводно табло</h1>
+            <p className="mt-1 text-sm capitalize text-[var(--color-text-secondary)]">
+              {`от 01.01.${now.getFullYear()} до днес`}
+            </p>
+          </div>
+          <div className="flex flex-wrap gap-2">
+            <NavPill href="/admin/invoices" label="🧾 Фактури" />
+            <NavPill href="/admin/payments" label="💰 Плащания" />
+            <NavPill href="/admin/recurring" label="🔁 Абонаменти" />
+            <NavPill href="/admin/manual-review" label={`🔍 Проверка · ${manualOpen}`} />
+          </div>
         </div>
       </header>
 
@@ -158,7 +158,7 @@ export default async function AccountingPage() {
 
       <div className="grid gap-4 lg:grid-cols-2">
         {/* Revenue trend */}
-        <section className="rounded-xl border border-[var(--color-border-default)] bg-[var(--color-bg-deep)]/40 p-5">
+        <section className="cc-panel p-5">
           <h3 className="mb-4 font-display text-base font-semibold">📈 Плащания · от януари до сега</h3>
           <div className="space-y-2">
             {trend.map((t) => (
@@ -179,7 +179,7 @@ export default async function AccountingPage() {
         </section>
 
         {/* Unpaid invoices */}
-        <section className="rounded-xl border border-[var(--color-border-default)] bg-[var(--color-bg-deep)]/40 p-5">
+        <section className="cc-panel p-5">
           <div className="mb-4 flex items-center justify-between">
             <h3 className="font-display text-base font-semibold">⏳ Неплатени фактури</h3>
             <Link href="/admin/invoices" className="text-xs text-[var(--color-accent-cyan)] hover:underline">
@@ -224,7 +224,7 @@ export default async function AccountingPage() {
       </div>
 
       {/* How it works */}
-      <section className="rounded-xl border border-[var(--color-border-default)] bg-[var(--color-bg-deep)]/40 p-5">
+      <section className="cc-panel p-5">
         <h3 className="mb-3 font-display text-base font-semibold">🤖 Как работи (Hermes + ти)</h3>
         <ul className="grid gap-2 text-sm text-[var(--color-text-secondary)] md:grid-cols-2">
           <li>• Hermes чете Gmail на всеки 15 мин и пълни фактури/плащания тук автоматично.</li>
@@ -243,7 +243,7 @@ function NavPill({ href, label }: { href: string; label: string }) {
   return (
     <Link
       href={href}
-      className="rounded-lg border border-[var(--color-border-default)] bg-[var(--color-bg-deep)]/40 px-4 py-2 text-sm font-medium text-[var(--color-text-primary)] transition hover:border-[var(--color-accent-cyan)]/60"
+      className="cc-btn"
     >
       {label}
     </Link>

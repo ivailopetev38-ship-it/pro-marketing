@@ -1,8 +1,8 @@
-// Shared placeholder shell for modules that exist as schema + UI scaffold but
-// don't yet have a live integration. Lists the planned features, the connected
-// API surface, and a clear "next step" button.
+// Shared shell for modules that exist as schema + UI scaffold but don't yet
+// have a live integration. Command-center styled (glass header, KPI tiles).
 
 import Link from "next/link";
+import type { CSSProperties } from "react";
 
 export interface PlaceholderFeature {
   title: string;
@@ -19,7 +19,7 @@ export interface PlaceholderProps {
   features: PlaceholderFeature[];
   primaryAction?: { label: string; href: string };
   secondaryAction?: { label: string; href: string };
-  /** Optional live count widgets — render whatever — shown as a stat strip. */
+  /** Optional live count widgets — shown as a stat strip. */
   stats?: Array<{ label: string; value: string | number; color?: string; hint?: string }>;
   children?: React.ReactNode;
 }
@@ -35,62 +35,48 @@ export function ModulePlaceholder({
   stats,
   children,
 }: PlaceholderProps) {
-  const toneClass =
-    status.tone === "ready"
-      ? "bg-emerald-500/15 text-emerald-300 border-emerald-500/30"
-      : status.tone === "wip"
-        ? "bg-amber-500/15 text-amber-300 border-amber-500/30"
-        : "bg-slate-500/15 text-slate-300 border-slate-500/30";
+  const tone =
+    status.tone === "ready" ? "#22c55e" : status.tone === "wip" ? "#facc15" : "#94a3b8";
 
   return (
-    <div className="space-y-6 p-6 md:p-10">
-      <header className="flex flex-wrap items-start justify-between gap-4">
-        <div>
-          <span
-            className={`inline-flex items-center gap-2 rounded-full border px-3 py-1 font-mono text-[10px] uppercase tracking-[0.2em] ${toneClass}`}
-          >
-            <span className="h-1.5 w-1.5 rounded-full bg-current" />
-            {status.label}
-          </span>
-          <h1 className="mt-3 font-display text-3xl font-bold">
-            <span className="mr-2">{icon}</span>
-            {title}
-          </h1>
-          <p className="mt-1 max-w-2xl text-sm text-[var(--color-text-secondary)]">
-            {description}
-          </p>
-        </div>
-        <div className="flex flex-wrap gap-2">
-          {primaryAction && (
-            <Link
-              href={primaryAction.href}
-              className="rounded-lg border border-[var(--color-accent-cyan)]/40 bg-[var(--color-accent-cyan)]/10 px-4 py-2 text-sm font-medium text-[var(--color-accent-cyan)] transition hover:bg-[var(--color-accent-cyan)]/20"
+    <div className="space-y-6 p-5 md:p-10">
+      <header className="cc-panel cc-panel-accent overflow-hidden p-6">
+        <div className="flex flex-wrap items-start justify-between gap-4">
+          <div>
+            <span
+              className="inline-flex items-center gap-2 rounded-full border px-3 py-1 font-mono text-[10px] uppercase tracking-[0.2em]"
+              style={{ color: tone, borderColor: tone, background: `${tone}1a` }}
             >
-              {primaryAction.label}
-            </Link>
-          )}
-          {secondaryAction && (
-            <Link
-              href={secondaryAction.href}
-              className="rounded-lg border border-[var(--color-border-default)] bg-[var(--color-bg-deep)]/40 px-4 py-2 text-sm text-[var(--color-text-secondary)] transition hover:border-[var(--color-accent-cyan)]/60 hover:text-[var(--color-text-primary)]"
-            >
-              {secondaryAction.label}
-            </Link>
-          )}
+              <span className="h-1.5 w-1.5 rounded-full" style={{ background: tone, boxShadow: `0 0 8px ${tone}` }} />
+              {status.label}
+            </span>
+            <h1 className="cc-title mt-3 font-display text-3xl font-bold">
+              <span className="mr-2">{icon}</span>
+              {title}
+            </h1>
+            <p className="mt-2 max-w-2xl text-sm text-[var(--color-text-secondary)]">{description}</p>
+          </div>
+          <div className="flex flex-wrap gap-2">
+            {primaryAction && (
+              <Link href={primaryAction.href} className="cc-btn cc-btn-primary">
+                {primaryAction.label}
+              </Link>
+            )}
+            {secondaryAction && (
+              <Link href={secondaryAction.href} className="cc-btn">
+                {secondaryAction.label}
+              </Link>
+            )}
+          </div>
         </div>
       </header>
 
       {stats && stats.length > 0 && (
         <section className="grid grid-cols-2 gap-3 md:grid-cols-4">
           {stats.map((s) => (
-            <div
-              key={s.label}
-              className="rounded-lg border border-[var(--color-border-default)] bg-[var(--color-bg-deep)]/40 p-4"
-            >
-              <p className="font-mono text-[10px] uppercase tracking-wider text-[var(--color-text-tertiary)]">
-                {s.label}
-              </p>
-              <p className="mt-1 text-2xl font-bold" style={{ color: s.color ?? "var(--color-text-primary)" }}>
+            <div key={s.label} className="cc-kpi p-4" style={{ "--kpi": s.color ?? "#06b6d4" } as CSSProperties}>
+              <p className="hud">{s.label}</p>
+              <p className="mt-2 font-mono text-2xl font-bold" style={{ color: s.color ?? "var(--color-text-primary)" }}>
                 {s.value}
               </p>
               {s.hint && <p className="text-[11px] text-[var(--color-text-tertiary)]">{s.hint}</p>}
@@ -101,10 +87,7 @@ export function ModulePlaceholder({
 
       <section className="grid gap-3 md:grid-cols-2">
         {features.map((f) => (
-          <div
-            key={f.title}
-            className="flex gap-3 rounded-lg border border-[var(--color-border-default)] bg-[var(--color-bg-deep)]/40 p-4 transition-colors hover:border-[var(--color-accent-cyan)]/40"
-          >
+          <div key={f.title} className="cc-panel flex gap-3 p-4">
             <span className="text-2xl">{f.icon ?? "•"}</span>
             <div className="flex-1">
               <div className="flex items-center justify-between gap-2">
