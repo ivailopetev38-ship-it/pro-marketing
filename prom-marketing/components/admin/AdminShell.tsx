@@ -2,68 +2,138 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { Menu, X } from "lucide-react";
+import {
+  Menu,
+  X,
+  LayoutDashboard,
+  Sparkles,
+  Users,
+  Target,
+  Calendar,
+  Inbox,
+  Mail,
+  BarChart3,
+  Receipt,
+  Wallet,
+  Calculator,
+  Repeat,
+  Satellite,
+  FolderOpen,
+  SearchCheck,
+  Bot,
+  MessageCircle,
+  Share2,
+  Megaphone,
+  LineChart,
+  Clapperboard,
+  Settings,
+  LogOut,
+  type LucideIcon,
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Logo } from "@/components/landing/Logo";
 import { cn } from "@/lib/utils";
 import { CopilotWidget } from "@/components/admin/CopilotWidget";
 import { QuickAddContact } from "@/components/admin/QuickAddContact";
 
-type LinkGroup = {
-  label: string;
-  items: Array<{ href: string; label: string }>;
-};
+type LinkItem = { href: string; label: string; icon: LucideIcon };
+type LinkGroup = { label: string; items: LinkItem[] };
 
 const LINK_GROUPS: LinkGroup[] = [
   {
     label: "Команден център",
     items: [
-      { href: "/admin", label: "📊 Преглед" },
-      { href: "/admin/new-leads", label: "🆕 Нови лидове" },
+      { href: "/admin", label: "Преглед", icon: LayoutDashboard },
+      { href: "/admin/new-leads", label: "Нови лидове", icon: Sparkles },
     ],
   },
   {
     label: "CRM",
     items: [
-      { href: "/admin/clients", label: "📋 Клиенти" },
-      { href: "/admin/follow-up", label: "🎯 Follow-up" },
-      { href: "/admin/bookings", label: "📅 Срещи" },
-      { href: "/admin/leads", label: "📥 Meta лидове" },
-      { href: "/admin/email", label: "✉️ Имейл" },
+      { href: "/admin/clients", label: "Клиенти", icon: Users },
+      { href: "/admin/follow-up", label: "Follow-up", icon: Target },
+      { href: "/admin/bookings", label: "Срещи", icon: Calendar },
+      { href: "/admin/leads", label: "Meta лидове", icon: Inbox },
+      { href: "/admin/email", label: "Имейл", icon: Mail },
     ],
   },
   {
     label: "Счетоводство",
     items: [
-      { href: "/admin/accounting", label: "📊 Счетоводно табло" },
-      { href: "/admin/invoices", label: "🧾 Фактури" },
-      { href: "/admin/payments", label: "💰 Плащания" },
-      { href: "/admin/expenses", label: "🧮 Разходи" },
-      { href: "/admin/recurring", label: "🔁 Абонаменти" },
-      { href: "/admin/gps", label: "🛰️ GPS устройства" },
-      { href: "/admin/documents", label: "📁 Документи" },
-      { href: "/admin/manual-review", label: "🔍 Ръчна проверка" },
+      { href: "/admin/accounting", label: "Счетоводно табло", icon: BarChart3 },
+      { href: "/admin/invoices", label: "Фактури", icon: Receipt },
+      { href: "/admin/payments", label: "Плащания", icon: Wallet },
+      { href: "/admin/expenses", label: "Разходи", icon: Calculator },
+      { href: "/admin/recurring", label: "Абонаменти", icon: Repeat },
+      { href: "/admin/gps", label: "GPS устройства", icon: Satellite },
+      { href: "/admin/documents", label: "Документи", icon: FolderOpen },
+      { href: "/admin/manual-review", label: "Ръчна проверка", icon: SearchCheck },
     ],
   },
   {
     label: "Канали и AI",
     items: [
-      { href: "/admin/chatbots", label: "💬 Чатботове" },
-      { href: "/admin/messenger", label: "📘 Messenger" },
-      { href: "/admin/whatsapp", label: "💚 WhatsApp" },
-      { href: "/admin/social", label: "📱 Соц. мрежи" },
-      { href: "/admin/ads", label: "📣 Реклами" },
-      { href: "/admin/meta-ads", label: "📈 Meta анализ" },
-      { href: "/admin/demo", label: "🎬 Demo" },
+      { href: "/admin/chatbots", label: "Чатботове", icon: Bot },
+      { href: "/admin/messenger", label: "Messenger", icon: MessageCircle },
+      { href: "/admin/whatsapp", label: "WhatsApp", icon: MessageCircle },
+      { href: "/admin/social", label: "Соц. мрежи", icon: Share2 },
+      { href: "/admin/ads", label: "Реклами", icon: Megaphone },
+      { href: "/admin/meta-ads", label: "Meta анализ", icon: LineChart },
+      { href: "/admin/demo", label: "Demo", icon: Clapperboard },
     ],
   },
   {
     label: "Система",
-    items: [{ href: "/admin/settings", label: "⚙️ Настройки" }],
+    items: [{ href: "/admin/settings", label: "Настройки", icon: Settings }],
   },
 ];
 
 const ALL_LINKS = LINK_GROUPS.flatMap((g) => g.items);
+
+function NavList({ path, onNav }: { path: string; onNav?: () => void }) {
+  return (
+    <nav className="mt-6 flex flex-col gap-4 overflow-y-auto pr-1">
+      {LINK_GROUPS.map((g) => (
+        <div key={g.label}>
+          <p className="mb-1.5 px-3 font-mono text-[9px] uppercase tracking-[0.2em] text-[var(--color-text-tertiary)]">
+            {g.label}
+          </p>
+          {g.items.map((l) => {
+            const active = path === l.href;
+            const Icon = l.icon;
+            return (
+              <Link
+                key={l.href}
+                href={l.href}
+                onClick={onNav}
+                className={cn(
+                  "group relative flex items-center gap-2.5 rounded-lg px-3 py-2 text-sm transition-colors",
+                  active
+                    ? "bg-[var(--color-accent-cyan)]/10 text-[var(--color-accent-cyan)]"
+                    : "text-[var(--color-text-secondary)] hover:bg-white/5 hover:text-[var(--color-text-primary)]"
+                )}
+              >
+                {active && (
+                  <span className="absolute left-0 top-1/2 h-5 w-[2px] -translate-y-1/2 rounded-full bg-[var(--color-accent-cyan)] shadow-[0_0_8px_var(--color-accent-cyan)]" />
+                )}
+                <Icon
+                  className={cn(
+                    "h-[18px] w-[18px] shrink-0 transition-colors",
+                    active
+                      ? "text-[var(--color-accent-cyan)]"
+                      : "text-[var(--color-text-tertiary)] group-hover:text-[var(--color-accent-cyan)]"
+                  )}
+                  strokeWidth={1.75}
+                />
+                <span>{l.label}</span>
+              </Link>
+            );
+          })}
+        </div>
+      ))}
+    </nav>
+  );
+}
 
 export function AdminShell({ children, email }: { children: React.ReactNode; email: string }) {
   const path = usePathname();
@@ -136,68 +206,25 @@ export function AdminShell({ children, email }: { children: React.ReactNode; ema
             <X className="h-5 w-5" />
           </button>
         </div>
-        <nav className="mt-6 flex flex-col gap-4 overflow-y-auto">
-          {LINK_GROUPS.map((g) => (
-            <div key={g.label}>
-              <p className="mb-1 px-3 font-mono text-[9px] uppercase tracking-[0.2em] text-[var(--color-text-tertiary)]">
-                {g.label}
-              </p>
-              {g.items.map((l) => (
-                <Link
-                  key={l.href}
-                  href={l.href}
-                  onClick={() => setOpen(false)}
-                  className={cn(
-                    "block rounded-lg px-3 py-2 text-sm transition-colors",
-                    path === l.href
-                      ? "bg-[var(--color-accent-cyan)]/10 text-[var(--color-accent-cyan)]"
-                      : "text-[var(--color-text-secondary)] hover:bg-white/5 hover:text-[var(--color-text-primary)]"
-                  )}
-                >
-                  {l.label}
-                </Link>
-              ))}
-            </div>
-          ))}
-        </nav>
+        <NavList path={path} onNav={() => setOpen(false)} />
         <div className="mt-auto">
           <p className="mb-2 text-xs text-[var(--color-text-tertiary)]">{email}</p>
-          <Button variant="ghost" onClick={signOut} className="w-full justify-start">
-            Изход
+          <Button variant="ghost" onClick={signOut} className="w-full justify-start gap-2">
+            <LogOut className="h-4 w-4" /> Изход
           </Button>
         </div>
       </aside>
 
       {/* Desktop sidebar */}
       <aside className="fixed inset-y-0 left-0 hidden w-64 flex-col gap-2 border-r border-[var(--color-border-default)] bg-[var(--color-bg-deep)]/60 p-6 md:flex">
-        <Link href="/admin"><Logo /></Link>
-        <nav className="mt-6 flex flex-col gap-4 overflow-y-auto pr-1">
-          {LINK_GROUPS.map((g) => (
-            <div key={g.label}>
-              <p className="mb-1 px-3 font-mono text-[9px] uppercase tracking-[0.2em] text-[var(--color-text-tertiary)]">
-                {g.label}
-              </p>
-              {g.items.map((l) => (
-                <Link
-                  key={l.href}
-                  href={l.href}
-                  className={cn(
-                    "block rounded-lg px-3 py-2 text-sm transition-colors",
-                    path === l.href
-                      ? "bg-[var(--color-accent-cyan)]/10 text-[var(--color-accent-cyan)]"
-                      : "text-[var(--color-text-secondary)] hover:bg-white/5 hover:text-[var(--color-text-primary)]"
-                  )}
-                >
-                  {l.label}
-                </Link>
-              ))}
-            </div>
-          ))}
-        </nav>
+        <Link href="/admin">
+          <Logo />
+        </Link>
+        <NavList path={path} />
         <div className="mt-auto">
           <p className="mb-2 text-xs text-[var(--color-text-tertiary)]">{email}</p>
-          <Button variant="ghost" onClick={signOut} className="w-full justify-start">
-            Изход
+          <Button variant="ghost" onClick={signOut} className="w-full justify-start gap-2">
+            <LogOut className="h-4 w-4" /> Изход
           </Button>
         </div>
       </aside>

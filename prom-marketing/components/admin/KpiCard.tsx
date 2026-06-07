@@ -1,6 +1,7 @@
 // KPI tile — command-center style (glass, color accent bar, hover glow).
 import type { CSSProperties } from "react";
 import { Sparkline, type SparklinePoint } from "./charts/Sparkline";
+import { AnimatedNumber } from "./AnimatedNumber";
 
 export interface KpiCardProps {
   label: string;
@@ -43,7 +44,7 @@ export function KpiCard({ label, value, hint, delta, color, trend, trendColor, h
         className="mt-2.5 font-mono text-[27px] font-bold leading-none tabular-nums"
         style={{ color: kpiColor }}
       >
-        {value}
+        {typeof value === "number" ? <AnimatedNumber value={value} /> : value}
       </p>
       {hint && (
         <p className="mt-1.5 text-[11px] leading-tight text-[var(--color-text-tertiary)]">{hint}</p>

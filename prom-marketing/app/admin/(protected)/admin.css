@@ -182,3 +182,19 @@
   0%, 100% { background-position: 0% 50%; }
   50% { background-position: 100% 50%; }
 }
+
+/* ---- Entrance (staggered fade-up on load) ---- */
+@keyframes cc-fadeup {
+  from { opacity: 0; transform: translateY(14px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.cc-kpi, .cc-panel, .cc-navcard {
+  animation: cc-fadeup 0.55s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+.cc-kpi:nth-child(2), .cc-navcard:nth-child(2) { animation-delay: 0.04s; }
+.cc-kpi:nth-child(3), .cc-navcard:nth-child(3) { animation-delay: 0.08s; }
+.cc-kpi:nth-child(4), .cc-navcard:nth-child(4) { animation-delay: 0.12s; }
+.cc-kpi:nth-child(5), .cc-navcard:nth-child(5) { animation-delay: 0.16s; }
+.cc-kpi:nth-child(6), .cc-navcard:nth-child(6) { animation-delay: 0.20s; }
+.cc-kpi:nth-child(7) { animation-delay: 0.24s; }
+.cc-kpi:nth-child(8) { animation-delay: 0.28s; }
