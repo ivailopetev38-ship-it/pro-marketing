@@ -1,4 +1,10 @@
 import Link from "next/link";
+import {
+  LayoutDashboard, Users, Sparkles, Calendar, Inbox, Mail, Megaphone, Target,
+  BarChart3, Receipt, SearchCheck, Calculator, Repeat, Satellite, FolderOpen,
+  LineChart, Share2, Bot, MessageCircle, Clapperboard, PieChart, Activity, Bell,
+  AlertTriangle, CheckCircle2, Star, Phone, Clock, ExternalLink, type LucideIcon,
+} from "lucide-react";
 import { createServiceClient } from "@/lib/supabase/service";
 import {
   CONTACT_STAGES,
@@ -8,6 +14,7 @@ import {
   type ContactStage,
 } from "@/lib/contacts/types";
 import { KpiCard } from "@/components/admin/KpiCard";
+import { LiveClock } from "@/components/admin/LiveClock";
 import { formatMoney } from "@/lib/crm/labels";
 import { PipelineBars } from "@/components/admin/charts/PipelineBars";
 import { DonutChart } from "@/components/admin/charts/DonutChart";
@@ -35,6 +42,28 @@ const SOURCE_PALETTE: Record<string, { label: string; color: string }> = {
 function sourceMeta(source: string) {
   return SOURCE_PALETTE[source] ?? { label: source, color: "#64748b" };
 }
+
+const NAV_ICON: Record<string, LucideIcon> = {
+  "/admin/clients": Users,
+  "/admin/new-leads": Sparkles,
+  "/admin/bookings": Calendar,
+  "/admin/leads": Inbox,
+  "/admin/email": Mail,
+  "/admin/ads": Megaphone,
+  "/admin/follow-up": Target,
+  "/admin/accounting": BarChart3,
+  "/admin/invoices": Receipt,
+  "/admin/manual-review": SearchCheck,
+  "/admin/expenses": Calculator,
+  "/admin/recurring": Repeat,
+  "/admin/gps": Satellite,
+  "/admin/documents": FolderOpen,
+  "/admin/meta-ads": LineChart,
+  "/admin/social": Share2,
+  "/admin/chatbots": Bot,
+  "/admin/whatsapp": MessageCircle,
+  "/admin/demo": Clapperboard,
+};
 
 // Build a YYYY-MM-DD bucket key in local time (Sofia). Avoids the "midnight
 // UTC shifts to 02:00 local" off-by-one for activity timestamps near midnight.
@@ -333,12 +362,14 @@ export default async function AdminDashboard() {
                 <span className="cc-livedot" />
                 <span className="hud text-emerald-300">SYSTEM ONLINE</span>
                 <span className="hud text-[var(--color-text-tertiary)]">·</span>
+                <LiveClock />
+                <span className="hud text-[var(--color-text-tertiary)]">·</span>
                 <span className="font-mono text-[11px] capitalize text-[var(--color-text-secondary)]">{todayLabel}</span>
               </div>
             </div>
             <div className="flex flex-wrap gap-2">
-              <Link href="/admin/clients" className="cc-btn cc-btn-primary">📋 Всички клиенти</Link>
-              <Link href="/admin/bookings" className="cc-btn">📅 Срещи · {upcomingBookings.length}</Link>
+              <Link href="/admin/clients" className="cc-btn cc-btn-primary"><Users className="h-4 w-4" strokeWidth={2} /> Всички клиенти</Link>
+              <Link href="/admin/bookings" className="cc-btn"><Calendar className="h-4 w-4" strokeWidth={1.75} /> Срещи · {upcomingBookings.length}</Link>
             </div>
           </div>
           <div className="mt-5 flex flex-wrap gap-2">
@@ -393,7 +424,7 @@ export default async function AdminDashboard() {
         <section className="grid gap-4 lg:grid-cols-3">
           <div className="cc-panel p-5">
             <div className="mb-4 flex items-center justify-between">
-              <h3 className="font-display text-base font-semibold">📊 Етапи на сделките</h3>
+              <h3 className="flex items-center gap-2 font-display text-base font-semibold"><BarChart3 className="h-4 w-4 text-[var(--color-accent-cyan)]" strokeWidth={1.75} /> Етапи на сделките</h3>
               <span className="hud">{active.length} активни</span>
             </div>
             <PipelineBars segments={pipelineSegments} />
@@ -401,7 +432,7 @@ export default async function AdminDashboard() {
 
           <div className="cc-panel p-5">
             <div className="mb-4 flex items-center justify-between">
-              <h3 className="font-display text-base font-semibold">📥 Източници на лидове</h3>
+              <h3 className="flex items-center gap-2 font-display text-base font-semibold"><PieChart className="h-4 w-4 text-[var(--color-accent-cyan)]" strokeWidth={1.75} /> Източници на лидове</h3>
               <span className="hud">всичко</span>
             </div>
             {sourceSlices.length > 0 ? (
@@ -413,7 +444,7 @@ export default async function AdminDashboard() {
 
           <div className="cc-panel p-5">
             <div className="mb-2 flex items-center justify-between">
-              <h3 className="font-display text-base font-semibold">📈 Активност · 30 дни</h3>
+              <h3 className="flex items-center gap-2 font-display text-base font-semibold"><Activity className="h-4 w-4 text-[var(--color-accent-cyan)]" strokeWidth={1.75} /> Активност · 30 дни</h3>
               <span className="hud">{last30.length} действия</span>
             </div>
             <p className="mb-3 text-[11px] text-[var(--color-text-tertiary)]">
@@ -431,7 +462,7 @@ export default async function AdminDashboard() {
         <section className="grid gap-4 lg:grid-cols-2">
           <div className="cc-panel p-5">
             <div className="mb-4 flex items-center justify-between">
-              <h3 className="font-display text-base font-semibold">🔔 Днес и утре</h3>
+              <h3 className="flex items-center gap-2 font-display text-base font-semibold"><Bell className="h-4 w-4 text-[var(--color-accent-cyan)]" strokeWidth={1.75} /> Днес и утре</h3>
               <span className="hud">{todayTomorrowBookings.length + todayTomorrowFollowups.length} ангажимента</span>
             </div>
             {todayTomorrowBookings.length === 0 && todayTomorrowFollowups.length === 0 ? (
@@ -442,7 +473,7 @@ export default async function AdminDashboard() {
               <div className="space-y-2">
                 {todayTomorrowBookings.map((b) => (
                   <div key={b.id} className="flex items-center gap-3 rounded-lg border border-emerald-500/20 bg-emerald-500/5 p-3">
-                    <span className="text-lg">📅</span>
+                    <Calendar className="h-4 w-4 shrink-0 text-emerald-300" strokeWidth={1.75} />
                     <div className="flex-1 min-w-0">
                       <p className="text-sm font-medium text-[var(--color-text-primary)] truncate">{b.attendee_name}</p>
                       <p className="text-[11px] text-[var(--color-text-tertiary)] truncate">{b.business ?? b.attendee_email}</p>
@@ -450,8 +481,8 @@ export default async function AdminDashboard() {
                     <div className="text-right">
                       <p className="text-xs font-mono text-emerald-300">{formatBookingTime(b.scheduled_at)}</p>
                       {b.meeting_url && (
-                        <a href={b.meeting_url} target="_blank" rel="noreferrer" className="text-[10px] text-[var(--color-accent-cyan)] hover:underline">
-                          отвори линк →
+                        <a href={b.meeting_url} target="_blank" rel="noreferrer" className="inline-flex items-center gap-1 text-[10px] text-[var(--color-accent-cyan)] hover:underline">
+                          отвори <ExternalLink className="h-3 w-3" />
                         </a>
                       )}
                     </div>
@@ -459,7 +490,7 @@ export default async function AdminDashboard() {
                 ))}
                 {todayTomorrowFollowups.map((c) => (
                   <Link key={c.id} href={`/admin/clients/${c.id}`} className="flex items-center gap-3 rounded-lg border border-[var(--color-border-default)] bg-black/20 p-3 transition hover:border-[var(--color-accent-cyan)]/40">
-                    <span className="text-lg">📞</span>
+                    <Phone className="h-4 w-4 shrink-0 text-[var(--color-accent-cyan)]" strokeWidth={1.75} />
                     <div className="flex-1 min-w-0">
                       <p className="text-sm font-medium text-[var(--color-text-primary)] truncate">{c.full_name || c.email || "—"}</p>
                       <p className="text-[11px] text-[var(--color-text-tertiary)] truncate">{c.company ?? STAGE_LABEL[c.stage]}</p>
@@ -473,8 +504,12 @@ export default async function AdminDashboard() {
 
           <div className={`cc-panel p-5 ${overdueFollowups.length > 0 ? "!border-red-500/35" : ""}`}>
             <div className="mb-4 flex items-center justify-between">
-              <h3 className="font-display text-base font-semibold">
-                {overdueFollowups.length > 0 ? "⚠️ Просрочени" : "✅ Всичко чисто"}
+              <h3 className="flex items-center gap-2 font-display text-base font-semibold">
+                {overdueFollowups.length > 0 ? (
+                  <><AlertTriangle className="h-4 w-4 text-red-400" strokeWidth={1.75} /> Просрочени</>
+                ) : (
+                  <><CheckCircle2 className="h-4 w-4 text-emerald-400" strokeWidth={1.75} /> Всичко чисто</>
+                )}
               </h3>
               <span className="hud">{overdueFollowups.length} клиента</span>
             </div>
@@ -486,7 +521,7 @@ export default async function AdminDashboard() {
               <div className="space-y-2">
                 {overdueFollowups.slice(0, 5).map((c) => (
                   <Link key={c.id} href={`/admin/clients/${c.id}`} className="flex items-center gap-3 rounded-lg border border-red-500/20 bg-red-500/10 p-3 transition hover:bg-red-500/20">
-                    <span className="text-lg">⏰</span>
+                    <Clock className="h-4 w-4 shrink-0 text-red-300" strokeWidth={1.75} />
                     <div className="flex-1 min-w-0">
                       <p className="text-sm font-medium text-[var(--color-text-primary)] truncate">{c.full_name || c.email || "—"}</p>
                       <p className="text-[11px] text-[var(--color-text-tertiary)] truncate">{STAGE_LABEL[c.stage]} · {c.company ?? "—"}</p>
@@ -508,7 +543,7 @@ export default async function AdminDashboard() {
         {topOpportunities.length > 0 && (
           <section className="cc-panel p-5">
             <div className="mb-4 flex items-center justify-between">
-              <h3 className="font-display text-base font-semibold">⭐ Топ възможности</h3>
+              <h3 className="flex items-center gap-2 font-display text-base font-semibold"><Star className="h-4 w-4 text-[var(--color-accent-cyan)]" strokeWidth={1.75} /> Топ възможности</h3>
               <span className="hud">най-близо до сделка</span>
             </div>
             <div className="grid gap-3 md:grid-cols-2 lg:grid-cols-5">
@@ -535,37 +570,37 @@ export default async function AdminDashboard() {
           <div>
             <h2 className="hud mb-3">CRM ядро</h2>
             <div className="grid gap-3 md:grid-cols-3 lg:grid-cols-6">
-              <NavCard href="/admin/clients" icon="📋" label="Клиенти" hint="всички контакти" />
-              <NavCard href="/admin/new-leads" icon="🆕" label="Нови лидове" hint={`72ч · ${newLeads72h}`} />
-              <NavCard href="/admin/bookings" icon="📅" label="Срещи" hint={`${upcomingBookings.length} предстоящи`} />
-              <NavCard href="/admin/leads" icon="📥" label="Meta лидове" hint={unprocessedMetaLeads > 0 ? `${unprocessedMetaLeads} необработени` : "обработени"} />
-              <NavCard href="/admin/email" icon="✉️" label="Имейли" hint="прати към клиент" />
-              <NavCard href="/admin/ads" icon="📣" label="Реклами" hint="Meta кампании" />
+              <NavCard href="/admin/clients" label="Клиенти" hint="всички контакти" />
+              <NavCard href="/admin/new-leads" label="Нови лидове" hint={`72ч · ${newLeads72h}`} />
+              <NavCard href="/admin/bookings" label="Срещи" hint={`${upcomingBookings.length} предстоящи`} />
+              <NavCard href="/admin/leads" label="Meta лидове" hint={unprocessedMetaLeads > 0 ? `${unprocessedMetaLeads} необработени` : "обработени"} />
+              <NavCard href="/admin/email" label="Имейли" hint="прати към клиент" />
+              <NavCard href="/admin/ads" label="Реклами" hint="Meta кампании" />
             </div>
           </div>
 
           <div>
             <h2 className="hud mb-3">Продажби и счетоводство</h2>
             <div className="grid gap-3 md:grid-cols-2 lg:grid-cols-4">
-              <NavCard href="/admin/follow-up" icon="🎯" label="Sales follow-up" hint={needToHearToday > 0 ? `${needToHearToday} за чуване днес` : "всичко чисто"} />
-              <NavCard href="/admin/accounting" icon="📊" label="Счетоводно табло" hint="приходи и плащания" />
-              <NavCard href="/admin/invoices" icon="🧾" label="Фактури" hint={awaitingPaymentCount > 0 ? `${awaitingPaymentCount} чакат плащане` : "всичко платено"} />
-              <NavCard href="/admin/manual-review" icon="🔍" label="Ръчна проверка" hint={manualReviewOpen > 0 ? `${manualReviewOpen} отворени` : "чисто"} />
-              <NavCard href="/admin/expenses" icon="🧮" label="Разходи" hint="към доставчици" />
-              <NavCard href="/admin/recurring" icon="🔁" label="Абонаменти" hint={subsActive.length > 0 ? `${subsActive.length} активни · ${formatMoney(subsMrr)}/мес` : "месечни услуги"} />
-              <NavCard href="/admin/gps" icon="🛰️" label="GPS устройства" hint={gpsActive.length > 0 ? `${gpsActive.length} активни · ${formatMoney(gpsMrr)}/мес` : "монтажи, история"} />
-              <NavCard href="/admin/documents" icon="📁" label="Документи" hint="фактури, OCR" />
-              <NavCard href="/admin/meta-ads" icon="📈" label="Meta анализ" hint="реклами днес" />
+              <NavCard href="/admin/follow-up" label="Sales follow-up" hint={needToHearToday > 0 ? `${needToHearToday} за чуване днес` : "всичко чисто"} />
+              <NavCard href="/admin/accounting" label="Счетоводно табло" hint="приходи и плащания" />
+              <NavCard href="/admin/invoices" label="Фактури" hint={awaitingPaymentCount > 0 ? `${awaitingPaymentCount} чакат плащане` : "всичко платено"} />
+              <NavCard href="/admin/manual-review" label="Ръчна проверка" hint={manualReviewOpen > 0 ? `${manualReviewOpen} отворени` : "чисто"} />
+              <NavCard href="/admin/expenses" label="Разходи" hint="към доставчици" />
+              <NavCard href="/admin/recurring" label="Абонаменти" hint={subsActive.length > 0 ? `${subsActive.length} активни · ${formatMoney(subsMrr)}/мес` : "месечни услуги"} />
+              <NavCard href="/admin/gps" label="GPS устройства" hint={gpsActive.length > 0 ? `${gpsActive.length} активни · ${formatMoney(gpsMrr)}/мес` : "монтажи, история"} />
+              <NavCard href="/admin/documents" label="Документи" hint="фактури, OCR" />
+              <NavCard href="/admin/meta-ads" label="Meta анализ" hint="реклами днес" />
             </div>
           </div>
 
           <div>
             <h2 className="hud mb-3">Канали и автоматизация</h2>
             <div className="grid gap-3 md:grid-cols-2 lg:grid-cols-4">
-              <NavCard href="/admin/social" icon="📱" label="Социални мрежи" hint="скелет · готов за свързване" />
-              <NavCard href="/admin/chatbots" icon="💬" label="Чатботове" hint="база знания + сесии" />
-              <NavCard href="/admin/whatsapp" icon="💚" label="WhatsApp" hint="inbox · очаква верификация" />
-              <NavCard href="/admin/demo" icon="🎬" label="Demo за клиенти" hint="публични мостри" />
+              <NavCard href="/admin/social" label="Социални мрежи" hint="скелет · готов за свързване" />
+              <NavCard href="/admin/chatbots" label="Чатботове" hint="база знания + сесии" />
+              <NavCard href="/admin/whatsapp" label="WhatsApp" hint="inbox · очаква верификация" />
+              <NavCard href="/admin/demo" label="Demo за клиенти" hint="публични мостри" />
             </div>
           </div>
         </section>
@@ -574,11 +609,14 @@ export default async function AdminDashboard() {
   );
 }
 
-function NavCard({ href, icon, label, hint }: { href: string; icon: string; label: string; hint: string }) {
+function NavCard({ href, label, hint }: { href: string; label: string; hint: string }) {
+  const Icon = NAV_ICON[href] ?? LayoutDashboard;
   return (
     <Link href={href} className="cc-navcard block p-4">
-      <p className="text-2xl">{icon}</p>
-      <p className="mt-1 text-sm font-bold text-[var(--color-text-primary)]">{label}</p>
+      <span className="inline-flex h-10 w-10 items-center justify-center rounded-lg border border-[var(--color-border-default)] bg-white/[0.03] text-[var(--color-accent-cyan)]">
+        <Icon className="h-5 w-5" strokeWidth={1.75} />
+      </span>
+      <p className="mt-3 text-sm font-bold text-[var(--color-text-primary)]">{label}</p>
       <p className="text-[10px] text-[var(--color-text-tertiary)]">{hint}</p>
     </Link>
   );
