@@ -13,7 +13,9 @@ import { Star, Phone } from "lucide-react";
 export function HeroV2() {
   return (
     <section id="top" className="relative min-h-[100svh] overflow-hidden">
-      <AuroraBackground intensity="intense" />
+      <div className="hidden sm:block">
+        <AuroraBackground intensity="intense" />
+      </div>
       <ParticleField className="z-[1] hidden sm:block" />
       <div className="absolute inset-0 z-[1] hidden opacity-40 lg:block">
         <div className="absolute left-[-12%] top-1/2 h-[78vh] w-[78vh] -translate-y-1/2">

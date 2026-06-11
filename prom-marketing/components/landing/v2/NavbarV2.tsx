@@ -140,7 +140,7 @@ export function NavbarV2() {
               track("cta_clicked", { location: "navbar", target: "booking" });
               void openBookingPopup();
             }}
-            className="v2-btn v2-btn-primary !px-4 !py-2 !text-sm"
+            className="v2-btn v2-btn-primary hidden !px-4 !py-2 !text-sm md:inline-flex"
           >
             Запази среща
             <span aria-hidden className="v2-arrow">→</span>
