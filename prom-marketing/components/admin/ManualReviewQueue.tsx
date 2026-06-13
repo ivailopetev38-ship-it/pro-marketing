@@ -1,6 +1,7 @@
 "use client";
+import { useState } from "react";
 import Link from "next/link";
-import type { ManualReviewRow, ManualReviewStatus } from "@/lib/crm/types";
+import type { ManualReviewRow, ManualReviewStatus, AgentRuleScope } from "@/lib/crm/types";
 import {
   MANUAL_REVIEW_TYPE_LABEL,
   SEVERITY_COLOR,
@@ -11,11 +12,55 @@ import {
   resolveManualReview,
   matchToContactByEmail,
   createFollowupFromItem,
+  teachAndResolveAction,
 } from "@/app/admin/(protected)/manual-review/actions";
 
 export interface ReviewItem extends ManualReviewRow {
   contact_name?: string | null;
   invoice_number?: string | null;
+}
+
+const SCOPE_LABEL: Record<AgentRuleScope, string> = {
+  postalion: "Пощальон",
+  accountant: "Счетоводител",
+  sales: "Продавач",
+  ads: "Рекламен",
+  auditor: "Одитор",
+  all: "Всички",
+};
+
+/**
+ * Препоръка по тип на проверката: какъв урок да получи кой работник.
+ * Това е „препоръката с бутон" — отваря готова форма, която Ивайло потвърждава.
+ */
+type Suggestion = { scope: AgentRuleScope; title: string; lesson: string; cta: string };
+function suggestFor(type: string): Suggestion {
+  switch (type) {
+    case "email_parse_error":
+      return { scope: "postalion", title: "Спам/промо имейл", cta: "💡 Научи: това е спам → IGNORE",
+        lesson: "Имейли от този подател/тема са спам или промо — IGNORE, не създавай лийд и не ескалирай." };
+    case "ambiguous_pdf":
+      return { scope: "accountant", title: "Неясен документ", cta: "💡 Научи: това не е фактура",
+        lesson: "Документ като този не е фактура (напр. shipping/нотификация) — не записвай разход; ескалирай само при реална сума + доставчик." };
+    case "missing_contact":
+      return { scope: "postalion", title: "Липсващ контакт", cta: "💡 Научи: създай контакт",
+        lesson: "За подател като този създавай контакт автоматично и записвай активност, вместо да ескалираш." };
+    case "duplicate_invoice":
+      return { scope: "accountant", title: "Дублирана фактура", cta: "💡 Научи: анулирай дубликата",
+        lesson: "Фактура с дублиран номер/сума/клиент — не добавяй втора; анулирай дубликата (PATCH status=cancelled)." };
+    case "payment_match":
+    case "invoice_match":
+      return { scope: "accountant", title: "Правило за засичане", cta: "💡 Научи: как се засича",
+        lesson: "Плащане/фактура като това се свързва по: <впиши признака> (помни правилото за ≥2 сигнала)." };
+    case "bank_statement_error":
+      return { scope: "accountant", title: "Парс на извлечение", cta: "💡 Научи: как се чете",
+        lesson: "Банково извлечение като това се парсва така: <впиши как се чете точно>." };
+    case "recurring_billing_issue":
+      return { scope: "accountant", title: "Правило за абонамент", cta: "💡 Научи: как се таксува",
+        lesson: "Абонамент като този се таксува така: <впиши кога/колко/на кого>." };
+    default:
+      return { scope: "all", title: "Урок от ръчна проверка", cta: "🎓 Научи Хермес", lesson: "" };
+  }
 }
 
 function relative(iso: string): string {
@@ -122,8 +167,69 @@ export function ManualReviewQueue({ items }: { items: ReviewItem[] }) {
               ✕ Игнорирай
             </ResolveButton>
           </div>
+
+          {/* Учебен цикъл: препоръка по тип + „Научи Хермес" */}
+          <TeachSection item={it} />
         </div>
       ))}
+    </div>
+  );
+}
+
+function TeachSection({ item }: { item: ReviewItem }) {
+  const sug = suggestFor(item.type);
+  const [open, setOpen] = useState(false);
+
+  return (
+    <div className="mt-2.5 border-t border-white/5 pt-2.5">
+      {!open ? (
+        <button
+          type="button"
+          onClick={() => setOpen(true)}
+          className="inline-flex items-center gap-1.5 rounded-md border border-amber-500/40 bg-amber-500/[0.06] px-2.5 py-1 text-xs font-medium text-amber-200 transition hover:bg-amber-500/15"
+          title="Реши проверката и остави урок, който работникът чете всеки цикъл"
+        >
+          {sug.cta}
+        </button>
+      ) : (
+        <form action={teachAndResolveAction} className="rounded-lg border border-amber-500/25 bg-amber-500/[0.04] p-3">
+          <input type="hidden" name="item_id" value={item.id} />
+          <input type="hidden" name="status" value="resolved" />
+          <p className="mb-2 text-[11px] text-amber-200/90">
+            🎓 Урокът се записва като правило и работникът го прилага от следващия цикъл — повече няма да пита за това.
+          </p>
+          <div className="grid gap-2 sm:grid-cols-[150px_1fr]">
+            <label className="block">
+              <span className="mb-1 block font-mono text-[9px] uppercase tracking-wider text-[var(--color-text-tertiary)]">Кой работник</span>
+              <select name="scope" defaultValue={sug.scope} className="w-full rounded-md border border-white/10 bg-black/30 px-2 py-1.5 text-xs text-[var(--color-text-primary)] outline-none focus:border-[var(--color-accent-cyan)]/60">
+                {(Object.keys(SCOPE_LABEL) as AgentRuleScope[]).map((s) => (
+                  <option key={s} value={s}>{SCOPE_LABEL[s]}</option>
+                ))}
+              </select>
+            </label>
+            <label className="block">
+              <span className="mb-1 block font-mono text-[9px] uppercase tracking-wider text-[var(--color-text-tertiary)]">Заглавие на урока</span>
+              <input name="title" defaultValue={sug.title} className="w-full rounded-md border border-white/10 bg-black/30 px-2 py-1.5 text-xs text-[var(--color-text-primary)] outline-none focus:border-[var(--color-accent-cyan)]/60" />
+            </label>
+            <label className="block sm:col-span-2">
+              <span className="mb-1 block font-mono text-[9px] uppercase tracking-wider text-[var(--color-text-tertiary)]">Шаблон/тригер (по желание — подател, ключова дума)</span>
+              <input name="trigger_pattern" placeholder="напр. @insights.veed.io" className="w-full rounded-md border border-white/10 bg-black/30 px-2 py-1.5 text-xs text-[var(--color-text-primary)] outline-none focus:border-[var(--color-accent-cyan)]/60" />
+            </label>
+            <label className="block sm:col-span-2">
+              <span className="mb-1 block font-mono text-[9px] uppercase tracking-wider text-[var(--color-text-tertiary)]">Урок (какво да прави работникът)</span>
+              <textarea name="lesson" required rows={2} defaultValue={sug.lesson} className="w-full rounded-md border border-white/10 bg-black/30 px-2 py-1.5 text-xs text-[var(--color-text-primary)] outline-none focus:border-[var(--color-accent-cyan)]/60" />
+            </label>
+          </div>
+          <div className="mt-2 flex items-center gap-2">
+            <button type="submit" className="rounded-md border border-amber-500/50 bg-amber-500/15 px-3 py-1.5 text-xs font-semibold text-amber-200 transition hover:bg-amber-500/25">
+              🎓 Научи + реши
+            </button>
+            <button type="button" onClick={() => setOpen(false)} className="rounded-md border border-white/10 px-3 py-1.5 text-xs text-[var(--color-text-tertiary)] transition hover:text-[var(--color-text-primary)]">
+              Отказ
+            </button>
+          </div>
+        </form>
+      )}
     </div>
   );
 }

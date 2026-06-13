@@ -682,6 +682,37 @@ export interface InsightRow {
 }
 
 // ─────────────────────────────────────────────────────────────────────────
+// Agent rules — „уроци" за AI работниците (учебният цикъл от UI)
+// ─────────────────────────────────────────────────────────────────────────
+export const AGENT_RULE_SCOPES = ["postalion", "accountant", "sales", "ads", "auditor", "all"] as const;
+export type AgentRuleScope = (typeof AGENT_RULE_SCOPES)[number];
+
+export const agentRuleInputSchema = z.object({
+  scope: z.enum(AGENT_RULE_SCOPES).default("all"),
+  title: z.string().trim().min(1),
+  rule: z.string().trim().min(1),
+  trigger_pattern: z.string().trim().optional(),
+  source_review_type: z.string().trim().optional(),
+  source_review_id: z.string().uuid().optional(),
+  created_by: z.string().trim().optional(),
+});
+export type AgentRuleInput = z.input<typeof agentRuleInputSchema>;
+
+export interface AgentRuleRow {
+  id: string;
+  scope: AgentRuleScope;
+  title: string;
+  rule: string;
+  trigger_pattern: string | null;
+  source_review_type: string | null;
+  source_review_id: string | null;
+  active: boolean;
+  created_by: string;
+  created_at: string;
+  updated_at: string;
+}
+
+// ─────────────────────────────────────────────────────────────────────────
 // GPS module (operations)
 // ─────────────────────────────────────────────────────────────────────────
 export const GPS_DEVICE_STATUSES = ["active", "paused", "removed", "moved"] as const;

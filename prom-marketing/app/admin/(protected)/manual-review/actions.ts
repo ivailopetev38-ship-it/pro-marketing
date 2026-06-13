@@ -2,9 +2,56 @@
 import { revalidatePath } from "next/cache";
 import { createServiceClient } from "@/lib/supabase/service";
 import { requireAdmin } from "@/lib/admin/require-admin";
-import { MANUAL_REVIEW_STATUSES } from "@/lib/crm/types";
+import { MANUAL_REVIEW_STATUSES, AGENT_RULE_SCOPES, type AgentRuleScope } from "@/lib/crm/types";
+import { createAgentRule } from "@/lib/crm/repository";
 
 const CLOSED = new Set(["resolved", "ignored"]);
+
+/**
+ * Реши + Научи: затваря ръчната проверка И записва урок за работника, който
+ * той чете всеки цикъл — така не ескалира пак същото. Това е учебният цикъл
+ * на ИРП-то, изведен с един бутон в UI-то.
+ */
+export async function teachAndResolveAction(formData: FormData) {
+  const adminEmail = await requireAdmin();
+  const id = String(formData.get("item_id") ?? "");
+  const lesson = String(formData.get("lesson") ?? "").trim();
+  const scopeRaw = String(formData.get("scope") ?? "all");
+  const scope = (AGENT_RULE_SCOPES as readonly string[]).includes(scopeRaw) ? (scopeRaw as AgentRuleScope) : "all";
+  const title = String(formData.get("title") ?? "").trim() || "Урок от ръчна проверка";
+  const status = String(formData.get("status") ?? "resolved");
+  if (!id || !lesson) throw new Error("Урокът е задължителен");
+
+  const svc = createServiceClient();
+  const { data: item } = await svc.from("manual_review_items").select("type, description").eq("id", id).maybeSingle();
+
+  // 1) Запиши урока като машинно правило.
+  await createAgentRule({
+    scope,
+    title,
+    rule: lesson,
+    trigger_pattern: String(formData.get("trigger_pattern") ?? "").trim() || undefined,
+    source_review_type: (item?.type as string | undefined) ?? undefined,
+    source_review_id: id,
+    created_by: adminEmail,
+  });
+
+  // 2) Затвори проверката + остави следа защо.
+  const stamp = new Date().toISOString();
+  const closed = CLOSED.has(status) ? status : "resolved";
+  await svc
+    .from("manual_review_items")
+    .update({
+      status: closed,
+      resolved_at: stamp,
+      description: `${item?.description ? item.description + "\n\n" : ""}Урок към ${scope} (${stamp.slice(0, 10)}): ${lesson}`,
+    })
+    .eq("id", id);
+
+  revalidatePath("/admin/manual-review");
+  revalidatePath("/admin/agent-rules");
+  revalidatePath("/admin");
+}
 
 /** Set the lifecycle status of a manual-review item (open/needs_user/blocked/resolved/ignored). */
 export async function resolveManualReview(formData: FormData) {

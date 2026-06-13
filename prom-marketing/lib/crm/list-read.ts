@@ -347,6 +347,26 @@ export async function listInsights(
   return { ...paginate(sorted, opts.limit, opts.offset), error: null };
 }
 
+// ── agent rules (уроци за работниците) ──────────────────────────────────────
+
+/**
+ * Правила за работниците. Когато подадеш scope, връща правилата за този
+ * работник ПЛЮС глобалните ('all') — точно каквото Hermes чете за цикъла си.
+ * Без scope → всички (за управление в UI).
+ */
+export async function listAgentRules(
+  opts: PageOpts & { scope?: string; active?: boolean }
+): Promise<ListResult> {
+  const { rows, error } = await fetchAll("agent_rules");
+  if (error) return { items: [], total: 0, error };
+  const filtered = rows.filter((r) => {
+    if (opts.scope && r.scope !== opts.scope && r.scope !== "all") return false;
+    if (opts.active !== undefined && Boolean(r.active) !== opts.active) return false;
+    return true;
+  });
+  return { ...paginate(sortByDateDesc(filtered, (r) => r.created_at), opts.limit, opts.offset), error: null };
+}
+
 // ── resolve на ръчна проверка ──────────────────────────────────────────────
 
 /**

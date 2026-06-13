@@ -23,6 +23,7 @@ import {
   Satellite,
   FolderOpen,
   SearchCheck,
+  GraduationCap,
   Bot,
   MessageCircle,
   Share2,
@@ -76,6 +77,7 @@ const LINK_GROUPS: LinkGroup[] = [
       { href: "/admin/gps", label: "GPS устройства", icon: Satellite },
       { href: "/admin/documents", label: "Документи", icon: FolderOpen },
       { href: "/admin/manual-review", label: "Ръчна проверка", icon: SearchCheck },
+      { href: "/admin/agent-rules", label: "Правила за работниците", icon: GraduationCap },
     ],
   },
   {

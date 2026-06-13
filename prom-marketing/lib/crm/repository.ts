@@ -28,6 +28,7 @@ import type {
   ProjectTaskStatus,
   InsightInput,
   InsightStatus,
+  AgentRuleInput,
 } from "./types";
 
 type Sb = ReturnType<typeof createServiceClient>;
@@ -936,6 +937,44 @@ export async function setInsightStatus(args: {
     .from("insights")
     .update({ status: args.status, resolved_at: terminal ? new Date().toISOString() : null })
     .eq("id", args.id);
+  if (error) return { error: error.message ?? "update failed" };
+  return { error: null };
+}
+
+// ── agent rules: „уроци" за работниците (учебният цикъл) ────────────────────
+
+/** Записва урок/правило, което работниците четат всеки цикъл. */
+export async function createAgentRule(input: AgentRuleInput): Promise<UpsertResult> {
+  const sb = createServiceClient();
+  const { data, error } = await sb
+    .from("agent_rules")
+    .insert({
+      scope: input.scope ?? "all",
+      title: input.title,
+      rule: input.rule,
+      trigger_pattern: input.trigger_pattern ?? null,
+      source_review_type: input.source_review_type ?? null,
+      source_review_id: input.source_review_id ?? null,
+      active: true,
+      created_by: input.created_by ?? "owner",
+    })
+    .select("id")
+    .single();
+  if (error || !data) return { id: null, created: false, error: error?.message ?? "insert failed" };
+  await recordAutomationEvent({
+    event_type: "agent_rule_created",
+    summary: `Урок за ${input.scope ?? "all"}: ${input.title}`,
+    idempotency_key: `agent-rule:${data.id}`,
+  }).catch(() => {});
+  return { id: data.id as string, created: true, error: null };
+}
+
+/** Вкл./изкл. на правило (без да го трие — пази историята). */
+export async function setAgentRuleActive(args: { id: string; active: boolean }): Promise<{ error: string | null }> {
+  const sb = createServiceClient();
+  const { data: row } = await sb.from("agent_rules").select("id").eq("id", args.id).maybeSingle();
+  if (!row) return { error: "rule not found" };
+  const { error } = await sb.from("agent_rules").update({ active: args.active }).eq("id", args.id);
   if (error) return { error: error.message ?? "update failed" };
   return { error: null };
 }
