@@ -631,6 +631,57 @@ export interface ProjectTaskRow {
 }
 
 // ─────────────────────────────────────────────────────────────────────────
+// Insights — табло „Оптимизация / Препоръки" (ревизии + насоки за ИРП-то)
+// ─────────────────────────────────────────────────────────────────────────
+export const INSIGHT_CATEGORIES = [
+  "sales",
+  "accounting",
+  "data_quality",
+  "delivery",
+  "workers",
+  "performance",
+  "marketing",
+  "other",
+] as const;
+export type InsightCategory = (typeof INSIGHT_CATEGORIES)[number];
+
+export const INSIGHT_STATUSES = ["new", "in_progress", "done", "dismissed"] as const;
+export type InsightStatus = (typeof INSIGHT_STATUSES)[number];
+
+export const INSIGHT_SOURCES = ["hermes_auditor", "claude_weekly", "manual"] as const;
+export type InsightSource = (typeof INSIGHT_SOURCES)[number];
+
+export const insightInputSchema = z.object({
+  title: z.string().trim().min(1),
+  detail: z.string().optional(),
+  category: z.enum(INSIGHT_CATEGORIES).default("other"),
+  severity: z.enum(SEVERITIES).default("medium"),
+  source: z.enum(INSIGHT_SOURCES).default("manual"),
+  impact: z.string().trim().optional(),
+  related_contact_id: z.string().uuid().optional(),
+  dedupe_key: z.string().trim().optional(),
+});
+// z.input (не infer): defaulted полетата (category/severity/source) са
+// по желание на входа — repository.upsertInsight прилага default-ите.
+export type InsightInput = z.input<typeof insightInputSchema>;
+
+export interface InsightRow {
+  id: string;
+  title: string;
+  detail: string | null;
+  category: InsightCategory;
+  severity: (typeof SEVERITIES)[number];
+  status: InsightStatus;
+  source: InsightSource;
+  impact: string | null;
+  related_contact_id: string | null;
+  dedupe_key: string | null;
+  created_at: string;
+  updated_at: string;
+  resolved_at: string | null;
+}
+
+// ─────────────────────────────────────────────────────────────────────────
 // GPS module (operations)
 // ─────────────────────────────────────────────────────────────────────────
 export const GPS_DEVICE_STATUSES = ["active", "paused", "removed", "moved"] as const;

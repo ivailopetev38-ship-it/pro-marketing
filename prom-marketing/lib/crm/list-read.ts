@@ -323,6 +323,30 @@ export async function listProjectTasks(projectId: string): Promise<ListResult> {
   return { items, total: items.length, error: null };
 }
 
+// ── insights (табло „Оптимизация") ─────────────────────────────────────────
+
+const SEVERITY_RANK: Record<string, number> = { high: 3, medium: 2, low: 1 };
+
+export async function listInsights(
+  opts: PageOpts & { status?: string[]; category?: string[]; source?: string[] }
+): Promise<ListResult> {
+  const { rows, error } = await fetchAll("insights");
+  if (error) return { items: [], total: 0, error };
+  const filtered = rows.filter((r) => {
+    if (opts.status && !opts.status.includes(String(r.status))) return false;
+    if (opts.category && !opts.category.includes(String(r.category))) return false;
+    if (opts.source && !opts.source.includes(String(r.source))) return false;
+    return true;
+  });
+  // Подреждане: първо по тежест (high→low), после най-новите.
+  const sorted = [...filtered].sort((a, b) => {
+    const sev = (SEVERITY_RANK[String(b.severity)] ?? 0) - (SEVERITY_RANK[String(a.severity)] ?? 0);
+    if (sev !== 0) return sev;
+    return (ts(b.created_at) ?? 0) - (ts(a.created_at) ?? 0);
+  });
+  return { ...paginate(sorted, opts.limit, opts.offset), error: null };
+}
+
 // ── resolve на ръчна проверка ──────────────────────────────────────────────
 
 /**

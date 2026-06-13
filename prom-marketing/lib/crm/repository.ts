@@ -26,6 +26,8 @@ import type {
   OfferStatus,
   ProjectStatus,
   ProjectTaskStatus,
+  InsightInput,
+  InsightStatus,
 } from "./types";
 
 type Sb = ReturnType<typeof createServiceClient>;
@@ -864,6 +866,76 @@ export async function updateRecurringService(args: {
   if (Object.keys(patch).length === 0) return { error: null };
 
   const { error } = await sb.from("recurring_services").update(patch).eq("id", args.id);
+  if (error) return { error: error.message ?? "update failed" };
+  return { error: null };
+}
+
+// ── insights: табло „Оптимизация / Препоръки" ───────────────────────────────
+
+/**
+ * Записва препоръка в таблото. Идемпотентна по dedupe_key за ОТВОРЕНИ
+ * (new/in_progress) — повторният одит не дублира една и съща находка.
+ */
+export async function upsertInsight(input: InsightInput): Promise<UpsertResult> {
+  const sb = createServiceClient();
+  if (input.dedupe_key) {
+    const { data: existing } = await sb
+      .from("insights")
+      .select("id")
+      .eq("dedupe_key", input.dedupe_key)
+      .in("status", ["new", "in_progress"])
+      .maybeSingle();
+    if (existing) return { id: existing.id as string, created: false, error: null };
+  }
+
+  const { data, error } = await sb
+    .from("insights")
+    .insert({
+      title: input.title,
+      detail: input.detail ?? null,
+      category: input.category ?? "other",
+      severity: input.severity ?? "medium",
+      status: "new",
+      source: input.source ?? "manual",
+      impact: input.impact ?? null,
+      related_contact_id: input.related_contact_id ?? null,
+      dedupe_key: input.dedupe_key ?? null,
+    })
+    .select("id")
+    .single();
+  if (error || !data) {
+    if (input.dedupe_key) {
+      const { data: again } = await sb
+        .from("insights")
+        .select("id")
+        .eq("dedupe_key", input.dedupe_key)
+        .in("status", ["new", "in_progress"])
+        .maybeSingle();
+      if (again) return { id: again.id as string, created: false, error: null };
+    }
+    return { id: null, created: false, error: error?.message ?? "insert failed" };
+  }
+  await recordAutomationEvent({
+    event_type: "insight_created",
+    related_contact_id: input.related_contact_id ?? null,
+    summary: `Препоръка [${input.category ?? "other"}]: ${input.title}`,
+    idempotency_key: `insight:${data.id}`,
+  }).catch(() => {});
+  return { id: data.id as string, created: true, error: null };
+}
+
+export async function setInsightStatus(args: {
+  id: string;
+  status: InsightStatus;
+}): Promise<{ error: string | null }> {
+  const sb = createServiceClient();
+  const { data: row } = await sb.from("insights").select("id").eq("id", args.id).maybeSingle();
+  if (!row) return { error: "insight not found" };
+  const terminal = args.status === "done" || args.status === "dismissed";
+  const { error } = await sb
+    .from("insights")
+    .update({ status: args.status, resolved_at: terminal ? new Date().toISOString() : null })
+    .eq("id", args.id);
   if (error) return { error: error.message ?? "update failed" };
   return { error: null };
 }

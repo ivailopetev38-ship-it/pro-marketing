@@ -7,6 +7,7 @@ import {
   X,
   LayoutDashboard,
   Sparkles,
+  Lightbulb,
   Users,
   Target,
   Calendar,
@@ -49,6 +50,7 @@ const LINK_GROUPS: LinkGroup[] = [
     items: [
       { href: "/admin", label: "Преглед", icon: LayoutDashboard },
       { href: "/admin/new-leads", label: "Нови лидове", icon: Sparkles },
+      { href: "/admin/insights", label: "Оптимизация", icon: Lightbulb },
     ],
   },
   {

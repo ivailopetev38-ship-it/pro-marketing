@@ -195,6 +195,43 @@ export const PROJECT_TASK_STATUS_LABEL: Record<string, string> = {
   done: "Готова",
 };
 
+export const INSIGHT_CATEGORY_LABEL: Record<string, string> = {
+  sales: "Продажби",
+  accounting: "Счетоводство",
+  data_quality: "Качество на данните",
+  delivery: "Доставка",
+  workers: "Работници (AI)",
+  performance: "Резултати",
+  marketing: "Маркетинг",
+  other: "Друго",
+};
+
+export const INSIGHT_STATUS_LABEL: Record<string, string> = {
+  new: "Нова",
+  in_progress: "В ход",
+  done: "Готова",
+  dismissed: "Отхвърлена",
+};
+
+export const INSIGHT_STATUS_COLOR: Record<string, string> = {
+  new: "#facc15",
+  in_progress: "#06b6d4",
+  done: "#22c55e",
+  dismissed: "#9ca3af",
+};
+
+export const INSIGHT_SOURCE_LABEL: Record<string, string> = {
+  hermes_auditor: "Хермес · Одитор",
+  claude_weekly: "Claude · седмичен одит",
+  manual: "Ръчно",
+};
+
+export const SEVERITY_LABEL: Record<string, string> = {
+  low: "Нисък",
+  medium: "Среден",
+  high: "Висок",
+};
+
 /** Format an amount with its currency, Bulgarian locale. */
 export function formatMoney(amount: number | null | undefined, currency = "EUR"): string {
   if (amount == null) return "—";
