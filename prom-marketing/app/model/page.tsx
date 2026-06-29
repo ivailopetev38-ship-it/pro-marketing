@@ -11,7 +11,7 @@ import { motion, useReducedMotion } from "motion/react";
 
 type Zone = {
   n: string; fam: "b2c" | "b2b"; tag: string; color: string; icon: string;
-  name: string; who: string; base: string[]; subs: string[];
+  name: string; who: string; base: string[]; subs: string[]; demo: string;
 };
 
 const ZONES: Zone[] = [
@@ -20,18 +20,21 @@ const ZONES: Zone[] = [
     name: "Инфлуенсър / Личен бранд", who: "Създатели на съдържание и лични брандове",
     base: ["Instagram + Facebook свързване", "Meta реклами + Lead форми", "Личен AI асистент 24/7", "Авто-съдържание: постове + Reels", "DM + имейл автоматизация", "Лийдове на едно място"],
     subs: ["Мода", "Фитнес", "Храна", "Пътувания", "Красота"],
+    demo: "/demo/influencer",
   },
   {
     n: "02", fam: "b2c", tag: "B2C", color: "var(--m-pink)", icon: "▣",
     name: "Онлайн магазин / Solo", who: "Сам или с 1 служител, продава онлайн",
     base: ["Meta реклами + ретаргет", "Соц. присъствие + публикации", "Интеграция на магазина (поръчки)", "Справки, статистика, обратна връзка", "AI асистент за клиенти", "Авто-съдържание за продукти"],
     subs: ["Дрехи", "Козметика", "Добавки", "Хендмейд", "Аксесоари"],
+    demo: "/demo/shop",
   },
   {
     n: "03", fam: "b2b", tag: "B2B · ТЕЖЪК", color: "var(--m-gold)", icon: "◆",
     name: "B2B / Фирми", who: "Компании с екипи и по-сложни процеси",
     base: ["CRM: лийд → оферта → сделка", "Reporting + живи дашборди", "ERP: фактури, проекти, доставка", "Сайт + лийд форми", "Follow-up машина", "Документи + е-подпис", "IT / интеграции по мярка"],
     subs: ["Дистрибутори", "Услуги", "Производство", "Агенции", "Логистика"],
+    demo: "/demo/b2b",
   },
 ];
 
@@ -148,6 +151,7 @@ export default function ModelPage() {
                       {z.subs.map((s) => <span className="m-chip" key={s}>{s}</span>)}
                     </div>
                   </div>
+                  <a className="m-zone-demo" href={z.demo} style={{ borderColor: z.color, color: z.color }}>Виж демо на живо →</a>
                 </motion.div>
               </Reveal>
             );
@@ -251,6 +255,8 @@ const CSS = `
 .m-subs-label{font-size:11px;color:var(--m-faint);margin-bottom:8px;}
 .m-subs-chips{display:flex;flex-wrap:wrap;gap:6px;}
 .m-chip{font-size:11.5px;padding:4px 10px;border-radius:20px;border:1px solid var(--m-line);color:var(--m-dim);background:rgba(125,160,220,.04);}
+.m-zone-demo{display:block;text-align:center;margin-top:16px;padding:12px;border-radius:11px;border:1px solid;background:rgba(255,255,255,.02);font-weight:700;font-size:13.5px;text-decoration:none;transition:.18s;}
+.m-zone-demo:hover{background:color-mix(in srgb,var(--zc) 12%,transparent);box-shadow:0 0 22px color-mix(in srgb,var(--zc) 28%,transparent);transform:translateY(-1px);}
 .m-zones-foot{text-align:center;color:var(--m-faint);font-size:13px;margin-top:20px;max-width:640px;margin-left:auto;margin-right:auto;line-height:1.5;}
 
 /* sell */
